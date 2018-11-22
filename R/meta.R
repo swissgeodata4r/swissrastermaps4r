@@ -1,11 +1,9 @@
 
-
-# rootdir <- "C:/Users/rata/Geodata/01_Switzerland/"
+packageEnv <- new.env()
 
 init_fdir <- function(rootdir,maxfiles = Inf,scales = c(10,25,50,100,500,1000)){
-  require(dplyr)
-  require(raster)
-  require(purrr)
+  # needs: dplyr, raster and purrr
+
 
   # maxfiles: maximum number of files per maptype
   # scales: what scales should be looked for?
@@ -33,40 +31,22 @@ init_fdir <- function(rootdir,maxfiles = Inf,scales = c(10,25,50,100,500,1000)){
 
   # Creates a data_frame by going through all the maptypes and their
   # corresponding folders, reading in all raster files (only "tifs" at the )
-  fdir <<- folderpaths %>%
+  fdir <- folderpaths %>%
     pmap_dfr(function(name,folder,scale){
       folderpath <- file.path(rootdir,folder)
       list.files(folderpath,".tif$",full.names = T) %>%
         head(maxfiles) %>% # this can be used to test and debug the function
         map_dfr(function(x){
-          raster::brick(x) %>%
+          raster_i <- raster::brick(x)
+          raster_i %>%
             extent() %>%
             matrix(nrow = 1) %>%
             as.data.frame() %>%
             magrittr::set_colnames(c("xmin","xmax","ymin","ymax")) %>%
-            mutate(scale = scale,file = x)
+            mutate(scale = scale,file = x,nlayers = nlayers(raster_i))
         })
     })
+  assign("fdir",fdir,envir = packageEnv)
+  fdir
 }
 
-
-
-
-
-
-
-
-# pmap(function(filepath){
-#   raster <- brick(filepath)
-#   crs(raster) <- CRS('+init=EPSG:2056')
-#   raster
-# }) %>%
-#   map_dfr(function(x){
-#     fname <- raster::filename(x)
-#     x %>%
-#       extent() %>%
-#       matrix(nrow = 1) %>%
-#       as.data.frame() %>%
-#       magrittr::set_colnames(c("xmin","xmax","ymin","ymax")) %>%
-#       mutate(file = fname)
-#   })
