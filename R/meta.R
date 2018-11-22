@@ -1,5 +1,6 @@
 
 
+# rootdir <- "C:/Users/rata/Geodata/01_Switzerland/"
 
 init_fdir <- function(rootdir,maxfiles = Inf,scales = c(10,25,50,100,500,1000)){
   require(dplyr)
