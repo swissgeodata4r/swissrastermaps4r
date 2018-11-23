@@ -12,6 +12,7 @@ LazyData: true
 Imports: 
   dplyr,
   purrr,
-  raster
+  raster,
+  sf
 Suggests: 
     testthat

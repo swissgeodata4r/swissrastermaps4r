@@ -1,7 +1,23 @@
 
 packageEnv <- new.env()
 
-init_fdir <- function(rootdir,maxfiles = Inf,scales = c(10,25,50,100,500,1000)){
+
+fdir_add_geometry <- function(fdir){
+  fdir %>%
+    dplyr::select(xmin,ymin,xmax,ymax) %>%
+    pmap(function(xmin,ymin,xmax,ymax){
+      c(xmin,ymin,xmax,ymin,xmax,ymax,xmin,ymax,xmin,ymin) %>%
+        matrix(ncol = 2,byrow = T) %>%
+        list() %>%
+        sf::st_polygon()
+    }) %>%
+    do.call(sf::st_sfc,.) %>%
+    mutate(fdir, geometry = .) %>%
+    sf::st_as_sf()
+}
+
+
+init_fdir <- function(rootdir,maxfiles = Inf,scales = c(10,25,50,100,500,1000),add_geometry = T){
   # needs: dplyr, raster and purrr
 
 
@@ -38,14 +54,25 @@ init_fdir <- function(rootdir,maxfiles = Inf,scales = c(10,25,50,100,500,1000)){
         head(maxfiles) %>% # this can be used to test and debug the function
         map_dfr(function(x){
           raster_i <- raster::brick(x)
+          n_layers <- nlayers(raster_i)
+          reso <- res(raster_i)
           raster_i %>%
             extent() %>%
             matrix(nrow = 1) %>%
             as.data.frame() %>%
             magrittr::set_colnames(c("xmin","xmax","ymin","ymax")) %>%
-            mutate(scale = scale,file = x,nlayers = nlayers(raster_i))
+            mutate(scale = scale,
+                   file = x,
+                   nlayers = n_layers,
+                   res1 = reso[1],
+                   res2 = reso[2]
+                   )
         })
     })
+  if(add_geometry){
+    fdir <- fdir_add_geometry(fdir)
+  }
+
   assign("fdir",fdir,envir = packageEnv)
   fdir
 }
