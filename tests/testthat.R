@@ -20,3 +20,14 @@ test_check("swissmapraster")
 #   filter(scale == 25) %>%
 #   filter(res1 == 3.75) %>%
 #   sf::write_sf("C:/Users/rata/Temp/res375.shp")
+
+
+
+# If I  want to do some tests with a constructed brick:
+# Here is how to construct a brick
+
+# d <- brick(nrows=100, ncols=100, xmn=-180, xmx=180, ymn=-90, ymx=90, nl=3)
+#
+# d[[1]] <- matrix((1:100*100),ncol = 100,nrow = 100)
+# d[[2]] <- matrix((100:1*100),ncol = 100,nrow = 100)
+# d[[3]] <- matrix((1:100*100),ncol = 100,nrow = 100)
