@@ -40,7 +40,6 @@ ysrgb <- function(val){ifelse(val <= 0.0031308,val,1.055*val^(1/2.4)-0.055)}
 
 rgb_grey_ysrgb <- function(raster_in,weights = c(0.2126,0.7152,0.0722)){
   raster_in %>%
-    as.list() %>%
     purrr::map2(.,weights,~(.x/255)*.y) %>%
     purrr::reduce(`+`) %>%
     purrr::when(
@@ -77,6 +76,8 @@ rgb_grey_mean <- function(raster_in){
 raster_greyscale <- function(raster_in, method = "ysrgb"){
 
   stopifnot(raster::nlayers(raster_in) == 3)
+
+  raster_in <- list(raster_in[[1]],raster_in[[2]],raster_in[[3]])
 
   if(method == "ysrgb"){
     converted <- rgb_grey_ysrgb(raster_in)
@@ -138,7 +139,7 @@ rgb_brick_count <- function(brick,maxColorValue = 255){
     magrittr::set_colnames(c("r","g","b")) %>%
     group_by_all() %>%
     count() %>%
-    mutate(hex = rgb(r,g,b,maxColorValue = maxColorValue))
+    dplyr::mutate(hex = rgb(r,g,b,maxColorValue = maxColorValue))
 }
 
 
@@ -163,13 +164,13 @@ get_extent <- function(features,method,per_feature = T,x_add,y_add){
       sf::st_centroid() %>%
       sf::st_coordinates() %>%
       as.data.frame() %>%
-      mutate(
+      dplyr::mutate(
         xmin = X-x_add,
         xmax = X+x_add,
         ymin = Y-y_add,
         ymax = Y+y_add
       ) %>%
-      select(-c(X,Y))
+      dplyr::select(-c(X,Y))
   } else if(method == "bbox"){
     features %>%
       sf::st_geometry() %>%
@@ -177,8 +178,8 @@ get_extent <- function(features,method,per_feature = T,x_add,y_add){
                    as.matrix() %>%
                    t() %>%
                    as.data.frame()) %>%
-      select(xmin,xmax,ymin,ymax) %>%
-      mutate(
+      dplyr::select(xmin,xmax,ymin,ymax) %>%
+      dplyr::mutate(
         xmin = xmin-x_add,
         xmax = xmax+x_add,
         ymin = ymin-y_add,
@@ -188,11 +189,11 @@ get_extent <- function(features,method,per_feature = T,x_add,y_add){
       stop(paste("This method is not defined:",method))
     )
   ext %>%
-    rowwise() %>%
-    mutate(
+    dplyr::rowwise() %>%
+    dplyr::mutate(
       extent = list(raster::extent(matrix(c(xmin,xmax,ymin,ymax),nrow = 2,byrow = T)))
     ) %>%
-    ungroup() %>%
+    dplyr::ungroup() %>%
     geom_from_boundary(add = T,2056)
 }
 
@@ -257,7 +258,7 @@ get_raster <- function(features,
           if(!is.null(epsg)){raster::crs(raster) <- sp::CRS(paste0("+init=EPSG:",epsg))}
           # raster
           raster::crop(raster,extent_i)
-          res_rast <- res(raster)
+          res_rast <- raster::res(raster)
           if(res_rast[1] > res_min[1] | res_rast[2] > res_min[2]){
             warning("Rasters in Extent do not have matching resolutions. Using disaggregate in order to enable merging")
             fac1 <- res_rast[1]/res_min[1]
