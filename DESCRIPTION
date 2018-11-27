@@ -21,3 +21,4 @@ Imports:
   raster,
   sf
 Suggests: 
+RoxygenNote: 6.1.1

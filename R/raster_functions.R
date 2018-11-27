@@ -44,7 +44,7 @@ rgb_grey_ysrgb <- function(raster_in,weights = c(0.2126,0.7152,0.0722)){
     purrr::reduce(`+`) %>%
     purrr::when(
       class(.) == "RasterLayer" ~raster::calc(.,ysrgb)*255,
-      class(.) == "numeric"~ysrgb(add)*255
+      class(.) == "numeric"~ysrgb(.)*255
       )
 }
 
@@ -104,7 +104,7 @@ raster_greyscale <- function(raster_in, method = "ysrgb"){
 #' @param method The method to use when turning RGB to greyscale.
 colortable_greyscale <- function(colortable, method = "ysrgb"){
 
-  colortable <- col2rgb(coltab)
+  colortable <- col2rgb(colortable)
   toconvert <- list(colortable[1,],colortable[2,],colortable[2,])
 
   if(method == "ysrgb"){
