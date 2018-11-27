@@ -1,12 +1,18 @@
 Package: swissmapraster
 Type: Package
-Title: What the Package Does (Title Case)
+Title: Helps Import, Extract and Plot Swissmapraster Data  
 Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
-License: What license is it under?
+Author: Nils Ratnaweera
+Maintainer: Nils Ratnaweera <rata@zhaw.ch>
+Description: This Package is meant as a Bridge between Swissmapraster
+    Data (SMR) and R. It is the hope of the package developer(s) that this
+    Package will prove to be necessary for a short time period, just so long
+    till SwissMapRaster Data is freely and openly available to the public, 
+    along with an appropriate R-interface. Unfortunately, since the SMR
+    Data is still behind a paywall, this package does not provide access to 
+    this data. It simply provides an interface for cases where the data is
+    already available to the user.
+License: GPL-2 (arbitrarily chosen)
 Encoding: UTF-8
 LazyData: true
 Imports: 
@@ -15,4 +21,3 @@ Imports:
   raster,
   sf
 Suggests: 
-    testthat

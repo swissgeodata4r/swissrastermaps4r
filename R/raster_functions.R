@@ -1,34 +1,126 @@
 
-raster_greyscale <- function(raster_in, method = "CIELAB"){
-  # needs raster
-  stopifnot(nlayers(raster_in) == 3)
+#' Threeband RGB to singleband raster
+#'
+#' \code{rgb_raster2singleband} turns a threeband RGB Raster (\code{\link{brick}})
+#' into a singleband \code{\link{raster}} with a \code{\link{colortable}}
+#'
+#' This function turns a three band RGB Raster Brick (from the Package \code{\link{raster}})
+#' into a singleband raster with an included \code{\link{colortable}}. The function
+#' requires the packages:  \code{\link{raster}}, \code{\link{rgdal}}
+#'
+#' @param rgb_raster A character string pointing to a raster brick object or
+#' an object of class RasterBrick. RBG values are assumed to range from 0-255
+rgb_raster2singleband <- function(rgb_raster){
+  if(class(rgb_raster) == "character"){
+    rgb_raster <- raster::brick(rgb_raster)
+  }
+  stopifnot(class(rgb_raster) == "RasterBrick")
+  stopifnot(raster::nbands(rgb_raster) == 3)
 
-  # I'm not really sure if CIELAB is the correct name for this method
-  if(method == "CIELAB"){
-    raster_out <- 0.2126*(raster_in[[1]]/255) + 0.7152*(raster_in[[2]]/255) + 0.0722*(raster_in[[3]]/255)
-    raster_out <- calc(raster_out,function(val){ifelse(val <= 0.0031308,val,1.055*val^(1/2.4))})
-  } else if(method == "avarage"){
-    raster_out <- raster_in[[1]]+raster_in[[2]]+raster_in[[3]]/3
+  pct <- rgdal::SGDF2PCT(as(rgb_raster, "SpatialGridDataFrame"))
+
+  r <- setValues(raster::raster(rgb_raster), pct$idx-1)
+
+  colortable(r) <- pct$ct
+  r
+
+}
+
+
+#' Y_linear to Y_srgb
+#'
+#' Helperfunction to turn Y_linear values to Y_srgb as described in
+#' \link{https://en.wikipedia.org/wiki/Grayscale}
+#'
+#'@param val The Y_linear Value to be turned into Y_srgb
+#'
+ysrgb <- function(val){ifelse(val <= 0.0031308,val,1.055*val^(1/2.4)-0.055)}
+
+
+
+rgb_grey_ysrgb <- function(raster_in,weights = c(0.2126,0.7152,0.0722)){
+  raster_in %>%
+    as.list() %>%
+    purrr::map2(.,weights,~(.x/255)*.y) %>%
+    purrr::reduce(`+`) %>%
+    purrr::when(
+      class(.) == "RasterLayer" ~raster::calc(.,ysrgb)*255,
+      class(.) == "numeric"~ysrgb(add)*255
+      )
+}
+
+rgb_grey_weighted <- function(raster_in,weights = c(0.30,0.59,0.11)){
+  raster_in %>%
+    as.list() %>%
+    map2(.,weights,~(.x/255)*.y) %>%
+    reduce(`+`) %>%
+    (function(x){x*255})
+
+}
+
+rgb_grey_mean <- function(raster_in){
+  raster_in %>%
+    as.list() %>%
+    map(~.x/255) %>%
+    reduce(`+`)/3 %>%
+    (function(x){x*255})
+}
+
+
+#' Threeband RGB to singleband GREYSCALE raster
+#'
+#' \code{rgb_raster2singleband} turns a threeband RGB Raster (\code{\link{brick}})
+#' into a singleband GREYSCALE \code{\link{raster}} with a \code{\link{colortable}}
+#'
+#' @param raster_in An object of class RasterBrick.
+#' @param method The method to use when turning RGB to greyscale.
+raster_greyscale <- function(raster_in, method = "ysrgb"){
+
+  stopifnot(raster::nlayers(raster_in) == 3)
+
+  if(method == "ysrgb"){
+    converted <- rgb_grey_ysrgb(raster_in)
+  } else if(method == "mean"){
+    converted <- rgb_grey_mean(raster_in)
   } else if(method == "weighted"){
-    raster_out <- raster_in[[1]]*0.30+raster_in[[2]]*0.59+raster_in[[3]]*0.11
+    converted <- rgb_grey_weighted(raster_in)
   } else{
     stop(paste0("This method is not defined: ",method))
   }
-  brick(raster_out)
+
+  vals <- 0:255
+  coltab <- rgb(vals,vals,vals,maxColorValue = 255)
+  raster::colortable(converted) <- coltab
+  converted
+}
+
+#' Colortable of singleband Raster into Greyscale
+#'
+#' \code{rgb_raster2singleband} turns a threeband RGB Raster (\code{\link{brick}})
+#' into a singleband GREYSCALE \code{\link{raster}} with a \code{\link{colortable}}
+#'
+#' @param raster_in An object of class RasterBrick.
+#' @param method The method to use when turning RGB to greyscale.
+colortable_greyscale <- function(colortable, method = "ysrgb"){
+
+  colortable <- col2rgb(coltab)
+  toconvert <- list(colortable[1,],colortable[2,],colortable[2,])
+
+  if(method == "ysrgb"){
+    converted <- rgb_grey_ysrgb(toconvert)
+  } else if(method == "mean"){
+    converted <- rgb_grey_mean(toconvert)
+  } else if(method == "weighted"){
+    converted <- rgb_grey_weighted(toconvert)
+  } else{
+    stop(paste0("This method is not defined: ",method))
+  }
+  rgb(converted,converted,converted,maxColorValue =255)
+
 }
 
 
 
-colourtable_to_grey <- function(colourtable){
-  # turns a hex colourtable
-  # requires grdevices
-  # code copied from Desctools
-  rgb <- col2rgb(colortable)
-  g <- rbind( c(0.3, 0.59, 0.11) ) %*% rgb
-  rgb(g, g, g, maxColorValue=255)
-}
-
-scales::show_col(rgb(100,100,50,maxColorValue = 255))
 
 
 
@@ -51,7 +143,7 @@ rgb_brick_count <- function(brick,maxColorValue = 255){
 
 
 
-get_extent_centroid <- function(features,per_feature = T,x_add,y_add){
+get_extent <- function(features,method,per_feature = T,x_add,y_add){
   # gets the centeroid of feature(s), adds the x, and y distances and returns a
   # matrix with x/y min/max plus and extent-object.
 
@@ -65,33 +157,53 @@ get_extent_centroid <- function(features,per_feature = T,x_add,y_add){
       summarise()
   }
 
-  features %>%
-    st_geometry() %>%
-    st_centroid() %>%
-    st_coordinates() %>%
-    as.data.frame() %>%
-    mutate(
-      xmin = X-x_add,
-      xmax = X+x_add,
-      ymin = Y-y_add,
-      ymax = Y+y_add
-    ) %>%
-    select(-c(X,Y)) %>%
+  ext <- if(method == "centroid"){
+    features %>%
+      sf::st_geometry() %>%
+      sf::st_centroid() %>%
+      sf::st_coordinates() %>%
+      as.data.frame() %>%
+      mutate(
+        xmin = X-x_add,
+        xmax = X+x_add,
+        ymin = Y-y_add,
+        ymax = Y+y_add
+      ) %>%
+      select(-c(X,Y))
+  } else if(method == "bbox"){
+    features %>%
+      sf::st_geometry() %>%
+      purrr::map_dfr(~sf::st_bbox(.x) %>%
+                   as.matrix() %>%
+                   t() %>%
+                   as.data.frame()) %>%
+      select(xmin,xmax,ymin,ymax) %>%
+      mutate(
+        xmin = xmin-x_add,
+        xmax = xmax+x_add,
+        ymin = ymin-y_add,
+        ymax = ymax+y_add
+      )
+    } else(
+      stop(paste("This method is not defined:",method))
+    )
+  ext %>%
     rowwise() %>%
     mutate(
-      extent = list(extent(matrix(c(xmin,xmax,ymin,ymax),nrow = 2,byrow = T)))
-    )
+      extent = list(raster::extent(matrix(c(xmin,xmax,ymin,ymax),nrow = 2,byrow = T)))
+    ) %>%
+    ungroup() %>%
+    geom_from_boundary(add = T,2056)
 }
 
 
 get_raster <- function(features,
                        file_direcory,
-                       scale,
-                       resolution,
-                       x_add,
-                       y_add,
+                       scale_level,
+                       x_add,      # add some default values. either 0 or 100..
+                       y_add,        # in case of 0, strange things will happen with method centroid
                        per_feature = T,
-                       method = "fixed_size_centroid",
+                       method = "centroid",
                        epsg = NULL,
                        limit = Inf,
                        turn_greyscale = F
@@ -115,40 +227,67 @@ get_raster <- function(features,
   #   - "x/y_add" should have a nicer name.. something with distance maybe?
   #   - implement other was to get the extent (bounding box w/ or w/o buffer)
   #   - add failsafes: e.g check if "features" is really an sf object
+  #   - make this a lazy function: at the moment, all raster files are downloaded into memory.
+                #Can this be avoided? see which function requires memory loading (probabbly crop or merge)
 
-  if(method == "fixed_size_centroid"){
-    ex <- get_extent_centroid(features = features,x_add = x_add, y_add = y_add,per_feature = per_feature)
-  } else{
-    stop(paste0("This method has not yet been implemented: ",method))
-  }
+  ex <- get_extent(features = features,
+                   method = method,
+                   per_feature = per_feature,
+                   x_add = x_add,
+                   y_add = y_add)
+
 
   ex %>%
+    sf::st_set_geometry(NULL) %>%
     head(limit) %>%
-    pmap(function(xmin_i,xmax_i,ymin_i,ymax_i,extent_i){
-      rast <- file_direcory %>%
+    purrr::pmap(function(xmin_i,xmax_i,ymin_i,ymax_i,extent_i){
+      rast_file <- file_direcory %>%
         data.frame(stringsAsFactors = F) %>%
-        filter(scale == scale) %>%
-        filter(res1 == resolution) %>%
-        filter(xmin <= xmax_i & xmax >= xmin_i) %>%
-        filter(ymin <= ymax_i & ymax >= ymin_i) %>%
-        select(file) %>%
-        pull() %>%
-        map(function(file){
-          raster <- brick(file)
-          if(!is.null(epsg)){crs(raster) <- CRS(paste0("+init=EPSG:",epsg))}
+        dplyr::filter(scale == scale_level) %>%
+        dplyr::filter(xmin <= xmax_i & xmax >= xmin_i) %>%
+        dplyr::filter(ymin <= ymax_i & ymax >= ymin_i) %>%
+        dplyr::select(file,res1,res2) #%>% dplyr::pull()
+
+      res_min <- c(min(rast_file$res1),min(rast_file$res2))
+
+      # colours <- raster::colortable(raster::brick(rast_file[1]))
+      rast <- rast_file %>%
+        purrr::pmap(function(file,res1,res2){
+          raster <- raster::brick(file)
+          if(!is.null(epsg)){raster::crs(raster) <- sp::CRS(paste0("+init=EPSG:",epsg))}
+          # raster
+          raster::crop(raster,extent_i)
+          res_rast <- res(raster)
+          if(res_rast[1] > res_min[1] | res_rast[2] > res_min[2]){
+            warning("Rasters in Extent do not have matching resolutions. Using disaggregate in order to enable merging")
+            fac1 <- res_rast[1]/res_min[1]
+            fac2 <- res_rast[2]/res_min[2]
+            raster <- raster::disaggregate(raster,fact = c(fac1,fac2))
+
+          }
           raster
         }) %>%
-        map(function(x){crop(x,extent_i)}) %>%
-        accumulate(function(x,y){raster::merge(x,y)}) %>%
+        purrr::map(function(x){raster::crop(x,extent_i)}) %>%
+        purrr::accumulate(function(x,y){raster::merge(x,y)}) %>%
         tail(1) %>%
         magrittr::extract2(1)
 
-      if(nlayers(rast == 3) & turn_greyscale){
-        rast <- raster_greyscale(rast)
-        rast
-        }else(
-          rast
-        )
+      if(turn_greyscale){
+        if(raster::nlayers(rast) == 3){
+          rast <- raster_greyscale(rast)
+        } else if(raster::nlayers(rast) == 1){
+          coltab <- colortable(raster::raster(rast_file)) # colortable_greyscle can probabbly be subsituted to something more generic
+          raster::colortable(rast) <- colortable_greyscale(coltab)
+        } else(warning("Unexpectend number of Layers"))
 
+      }else{ # if raster should not be turned greyscale
+        if(raster::nlayers(rast) == 3){
+          # maybe turn into singleband raster with rgb_raster2singleband??
+        } else if(raster::nlayers(rast) == 1){
+          # probabbly do nothing here
+        } else(warning("Unexpectend number of Layers"))
+
+      }
+      rast
     })
 }
