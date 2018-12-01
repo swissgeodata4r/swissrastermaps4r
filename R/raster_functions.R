@@ -1,4 +1,6 @@
 
+import::from(magrittr, "%>%")
+
 #' Threeband RGB to singleband raster
 #'
 #' \code{rgb_raster2singleband} turns a threeband RGB Raster (\code{\link{brick}})
@@ -144,7 +146,7 @@ rgb_brick_count <- function(brick,maxColorValue = 255){
 
 
 
-get_extent <- function(features,method,per_feature = T,x_add,y_add){
+get_extent <- function(features,x_add,y_add,method = "centroid",per_feature = T){
   # gets the centeroid of feature(s), adds the x, and y distances and returns a
   # matrix with x/y min/max plus and extent-object.
 
@@ -199,7 +201,6 @@ get_extent <- function(features,method,per_feature = T,x_add,y_add){
 
 
 get_raster <- function(features,
-                       file_direcory,
                        scale_level,
                        x_add,      # add some default values. either 0 or 100..
                        y_add,        # in case of 0, strange things will happen with method centroid
@@ -207,7 +208,8 @@ get_raster <- function(features,
                        method = "centroid",
                        epsg = NULL,
                        limit = Inf,
-                       turn_greyscale = F
+                       turn_greyscale = F,
+                       fdir = NULL
 ){
 
   # input features to get raster data of
@@ -231,18 +233,25 @@ get_raster <- function(features,
   #   - make this a lazy function: at the moment, all raster files are downloaded into memory.
                 #Can this be avoided? see which function requires memory loading (probabbly crop or merge)
 
+
+
+  if(is.null(filedirectory)){
+    fdir <- get("fdir",envir = packageEnv)
+  }
+
   ex <- get_extent(features = features,
-                   method = method,
-                   per_feature = per_feature,
                    x_add = x_add,
-                   y_add = y_add)
+                   y_add = y_add,
+                   method = method,
+                   per_feature = per_feature
+                   )
 
 
   ex %>%
     sf::st_set_geometry(NULL) %>%
     head(limit) %>%
     purrr::pmap(function(xmin_i,xmax_i,ymin_i,ymax_i,extent_i){
-      rast_file <- file_direcory %>%
+      rast_file <- fdir %>%
         data.frame(stringsAsFactors = F) %>%
         dplyr::filter(scale == scale_level) %>%
         dplyr::filter(xmin <= xmax_i & xmax >= xmin_i) %>%

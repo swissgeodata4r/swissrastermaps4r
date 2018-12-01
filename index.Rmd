@@ -12,54 +12,48 @@ knitr::opts_chunk$set(echo = TRUE)
 
 This Package is meant as a Bridge between Swissmapraster Data (SMR) and R. It is the hope of the package developer(s) that this Package will prove to be necessary for a short time period, just so long till SwissMapRaster Data is freely and openly available to the public,  along with an appropriate R-interface. Unfortunately, since the SMR Data is still behind a paywall, this package does not provide access to this data. It simply provides an interface for cases where the data is already available to the user.
 
-## Can I get access to Rastermaps?
+## Does this pakcage provide access to map data?
 
-NO! This package does not give access to any Raster Maps, by swisstopo or otherwise. Access to this data has to be acquire elsewhere: Either through [swisstopo](https://shop.swisstopo.admin.ch) directly or via third parties such as [geodata4edu](https://www.geodata4edu.ch). In fact, in the current version of the package the data has to be stored locally on your own hard drive (_urgh!_). Our hope is however, that this will change soon so that the data can be hosted on a network folder or on a GIS Server. 
+NO! This package does not give access to any raster maps, by swisstopo or otherwise. Access to this data has to be acquire elsewhere: Either through [swisstopo](https://shop.swisstopo.admin.ch) directly or via third parties such as [geodata4edu](https://www.geodata4edu.ch). In fact, in the current version of the package the data has to be stored locally on your own hard drive (_urgh!_). Our hope is however, that this will change soon so that the data can be hosted on a network folder or on a GIS Server. 
 
 ## How is the package used? 
 
+### Aquire raster data
+
 First of all, the raster maps need to be acquired and stored in a folder. The package is developed with a focus on [SwissMapRaster](https://shop.swisstopo.admin.ch/de/products/maps/national/digital/), but probably other raster maps will work as well. Currently only [CRS 2056](https://epsg.io/2056) is implemented. We might also include [CRS 21781](https://epsg.io/21781) at some point but that's probably it. 
 
-The raster maps should be sorted in one folder per scale. Currently, the names of the folders must be as follows: "SMR25" for 1:25'000 maps, "SMR50" for 1:50'000 maps and so on. Rasters should not overlap or have gaps.
+The raster maps should be sorted in a folder per scale. Currently, the names of the folders must be as follows: "SMR25" for 1:25'000 maps, "SMR50" for 1:50'000 maps and so on. Rasters should not overlap or have gaps.
 
 Next, the command `init_fdir()` pointing to the location (parent folder) of this maps initiates the "File Directory". This means all the folders are scanned recursively and the their content analyzed. All files ending with "tif" are checked for extent, number of layers and resolution. It returns an sf object with all mentioned attributes of each raster file, along with the file path and the extent as a geometry. 
 
 ```{r}
 
-library(sf)
 library(swissmapraster)
+library(dplyr)
 
-fdir <- init_fdir("C:/Users/rata/Geodata/01_Switzerland/01_Maps")
+init_fdir("C:/Users/rata/Geodata/01_Switzerland/01_Maps")
 ```
 
 
-In order to view the available extents, the function `show_extents()` can be called.
+In order to view the available extents, call the function `show_extents()`. The 
+default method is `ggplot2`.
 
 ```{r}
+
 library(ggplot2)
+show_extents()
 
-ggplot(fdir) +
-      geom_sf(aes(fill = factor(res1)),alpha = 0.4) +
-      facet_wrap(~scale) +
-      coord_sf(datum = 2056) +
-      labs(fill = "Resolution") +
-      scale_x_continuous(breaks = seq(25,29,2)*10^5) +
-      scale_y_continuous(breaks = seq(11,13,1)*10^5) +
-      theme(legend.position = "top",legend.direction = "horizontal")
 ```
 
 
-In order to get a background map, use method "tmap".
+Use `method = "tmap"` to show the extents in combination with other spatial data. For example, the boundary of switzerland is included in the package.
 
 ```{r}
+data("landesgebiet")
 
 library(tmap)
-
-# tmap_mode("view")
-# tmap::tmap_options(limits = c(facets.view = 5))
-
-
+tm_shape(landesgebiet) + 
+   tm_polygons() + show_extents("tmap")
 ```
-
 
 

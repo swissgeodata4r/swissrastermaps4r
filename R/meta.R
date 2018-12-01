@@ -1,5 +1,7 @@
 
 packageEnv <- new.env()
+import::from(magrittr, "%>%")
+
 
 
 geom_from_boundary <- function(df, add = T, epsg = NULL){
@@ -33,6 +35,7 @@ geom_from_boundary <- function(df, add = T, epsg = NULL){
 
 
 init_fdir <- function(rootdir,maxfiles = Inf,scales = c(10,25,50,200,100,500,1000),add_geometry = T){
+
   # needs: dplyr, raster and purrr
 
 
@@ -102,39 +105,44 @@ init_fdir <- function(rootdir,maxfiles = Inf,scales = c(10,25,50,200,100,500,100
 #' faceted by scale and the area is colorized by resolution. The extents have an
 #' alpha value so that overlapping extents can be detected.
 #'
-#' This function requires ggplot2, and tmap and plotly for interactive plots
+#' This function requires ggplot2 and / or tmap, depending on the output type defined
+#' in "method".
 #'
-#' @param filedirectory The file directory aquired by \code{init_fdir()}
-#' @param method The method with which to visualize the data. "ggplot2" or "tmap"
-#' @param interactive Should the plot be interactive or not? If TRUE, plotly()
-#'     is used when method is ggplot2.
-show_extents <- function(filedirectory, method = "ggplot2",interactive = F){
+#'#' @param method The method with which to visualize the data. "ggplot2" or "tmap"
+#' Wrap the output in ggplotly() to get an interactive ggplot output or set tmap_mode
+#' to "view" go get an interactive tmap.
+#' @param as_layers Only applicable if method = "ggplot2". If TRUE, the function
+#' will only return ggplot2 layers (as a list) and the initial ggplot() object
+#' can be self defined
+#' @param filedirectory The file directory aquired by \code{init_fdir()}. If left as
+#' NULL, the fdir from the package Environment is taken.
+
+show_extents <- function(method = "ggplot2",fdir = NULL){
+
+  if(is.null(fdir)){
+    fdir <- get("fdir",envir = packageEnv)
+
+    fdir <- fdir %>%
+      dplyr::mutate(res1 = as.factor(res1))
+  }
+
+
+
   if(method == "ggplot2"){
-    plotoutput <- ggplot2::ggplot(fdir) +
-      ggplot2::geom_sf(aes(fill = factor(res1)),alpha = 0.4) +
+    plotoutput <- ggplot2::ggplot(data = fdir) +
+      ggplot2::geom_sf(mapping = aes(fill = factor(res1)),alpha = 0.4) +
       ggplot2::facet_wrap(~scale) +
       ggplot2::coord_sf(datum = 2056) +
       ggplot2::labs(fill = "Resolution") +
       ggplot2::scale_x_continuous(breaks = seq(25,29,2)*10^5) +
       ggplot2::scale_y_continuous(breaks = seq(11,13,1)*10^5) +
       ggplot2::theme(legend.position = "top",legend.direction = "horizontal")
-    if(!interactive){
-      return(plotoutput)
-    } else{
-      return(plotly::ggplotly(plotoutput))
-    }
   }
   if(method == "tmap"){   # I don't think this is good practice
     plotoutput <- tmap::tm_shape(fdir) +
-      tmap::tm_polygons(col = "res1",alpha = 0.4) +
+      tmap::tm_polygons(col = "res1",alpha = 0.4,group = "extents",palette = "Accent") +
       tmap::tm_facets(by = "scale")
-    if(!interactive){
-      tmap::tmap_mode("plot")
-      return(plotoutput)
-    } else{
-      tmap::tmap_mode("view")
-      return(plotoutput)
-    }
   }
+  return(plotoutput)
 }
 
