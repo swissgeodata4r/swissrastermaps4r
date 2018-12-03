@@ -77,6 +77,12 @@
 <div id="how-is-the-package-used" class="section level2">
 <h2 class="hasAnchor">
 <a href="#how-is-the-package-used" class="anchor"></a>How is the package used?</h2>
+<div id="aquire-raster-data" class="section level3">
+<h3 class="hasAnchor">
+<a href="#aquire-raster-data" class="anchor"></a>Aquire raster data</h3>
+<p>First of all, the raster maps need to be acquired and stored in a folder. The package is developed with a focus on <a href="https://shop.swisstopo.admin.ch/de/products/maps/national/digital/">SwissMapRaster</a>, but probably other raster maps will work as well. Currently only <a href="https://epsg.io/2056">CRS 2056</a> is implemented. We might also include <a href="https://epsg.io/21781">CRS 21781</a> at some point but that’s probably it.</p>
+<p>The raster maps should be sorted in a folder per scale. Currently, the names of the folders must be as follows: “SMR25” for 1:25’000 maps, “SMR50” for 1:50’000 maps and so on. Rasters should not overlap or have gaps.</p>
+</div>
 <div id="download-package" class="section level3">
 <h3 class="hasAnchor">
 <a href="#download-package" class="anchor"></a>Download package</h3>
@@ -86,64 +92,37 @@
 <a class="sourceLine" id="cb1-3" data-line-number="3"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(swissmapraster)</a>
 <a class="sourceLine" id="cb1-4" data-line-number="4"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(dplyr)</a></code></pre></div>
 </div>
-<div id="aquire-raster-data" class="section level3">
+<div id="scan-folder" class="section level3">
 <h3 class="hasAnchor">
-<a href="#aquire-raster-data" class="anchor"></a>Aquire raster data</h3>
-<p>First of all, the raster maps need to be acquired and stored in a folder. The package is developed with a focus on <a href="https://shop.swisstopo.admin.ch/de/products/maps/national/digital/">SwissMapRaster</a>, but probably other raster maps will work as well. Currently only <a href="https://epsg.io/2056">CRS 2056</a> is implemented. We might also include <a href="https://epsg.io/21781">CRS 21781</a> at some point but that’s probably it.</p>
-<p>The raster maps should be sorted in a folder per scale. Currently, the names of the folders must be as follows: “SMR25” for 1:25’000 maps, “SMR50” for 1:50’000 maps and so on. Rasters should not overlap or have gaps.</p>
-<p>Next, the command <code>init_fdir()</code> pointing to the location (parent folder) of this maps initiates the “File Directory”. This means all the folders are scanned recursively and the their content analyzed. All files ending with “tif” are checked for extent, number of layers and resolution. It returns an sf object with all mentioned attributes of each raster file, along with the file path and the extent as a geometry.</p>
+<a href="#scan-folder" class="anchor"></a>Scan Folder</h3>
+<p>Next, run the command <code>init_fdir()</code> pointing to the location (parent folder) of this maps. This command creates a “File Directory” in the package environment by scanning all folders recursively and analyzing the content. All files ending with “tif” are checked for extent, number of layers and resolution. All the mentioned attributes of each raster file, along with the file path and the extent as a geometry, are stoerd in the variable <code>fdir</code> of the package environment.</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" data-line-number="1"><span class="kw">init_fdir</span>(<span class="st">"C:/Users/rata/Geodata/01_Switzerland/01_Maps"</span>)</a></code></pre></div>
-<pre><code>## Simple feature collection with 368 features and 9 fields
-## geometry type:  POLYGON
-## dimension:      XY
-## bbox:           xmin: 2463000 ymin: 1044100 xmax: 2900000 ymax: 1319900
-## epsg (SRID):    2056
-## proj4string:    +proj=somerc +lat_0=46.95240555555556 +lon_0=7.439583333333333 +k_0=1 +x_0=2600000 +y_0=1200000 +ellps=bessel +towgs84=674.374,15.056,405.346,0,0,0,0 +units=m +no_defs
-## First 10 features:
-##       xmin    xmax    ymin    ymax scale
-## 1  2672500 2690000 1290000 1302000    25
-## 2  2690000 2707500 1290000 1302000    25
-## 3  2672500 2690000 1278000 1290000    25
-## 4  2690000 2707500 1278000 1290000    25
-## 5  2707500 2725000 1278000 1290000    25
-## 6  2725000 2742500 1278000 1290000    25
-## 7  2742500 2760000 1278000 1290000    25
-## 8  2602500 2620000 1266000 1278000    25
-## 9  2620000 2637500 1266000 1278000    25
-## 10 2637500 2655000 1266000 1278000    25
-##                                                                                  file
-## 1  C:/Users/rata/Geodata/01_Switzerland/01_Maps/SMR25/SMR25_LV95_KOMB_1011_2013_1.tif
-## 2  C:/Users/rata/Geodata/01_Switzerland/01_Maps/SMR25/SMR25_LV95_KOMB_1012_2014_1.tif
-## 3  C:/Users/rata/Geodata/01_Switzerland/01_Maps/SMR25/SMR25_LV95_KOMB_1031_2013_1.tif
-## 4  C:/Users/rata/Geodata/01_Switzerland/01_Maps/SMR25/SMR25_LV95_KOMB_1032_2014_1.tif
-## 5  C:/Users/rata/Geodata/01_Switzerland/01_Maps/SMR25/SMR25_LV95_KOMB_1033_2014_1.tif
-## 6  C:/Users/rata/Geodata/01_Switzerland/01_Maps/SMR25/SMR25_LV95_KOMB_1034_2014_3.tif
-## 7  C:/Users/rata/Geodata/01_Switzerland/01_Maps/SMR25/SMR25_LV95_KOMB_1035_1988_1.tif
-## 8  C:/Users/rata/Geodata/01_Switzerland/01_Maps/SMR25/SMR25_LV95_KOMB_1047_2011_2.tif
-## 9  C:/Users/rata/Geodata/01_Switzerland/01_Maps/SMR25/SMR25_LV95_KOMB_1048_2012_1.tif
-## 10 C:/Users/rata/Geodata/01_Switzerland/01_Maps/SMR25/SMR25_LV95_KOMB_1049_2012_1.tif
-##    nlayers res1 res2                       geometry
-## 1        1 1.25 1.25 POLYGON ((2672500 1290000, ...
-## 2        1 1.25 1.25 POLYGON ((2690000 1290000, ...
-## 3        1 1.25 1.25 POLYGON ((2672500 1278000, ...
-## 4        1 1.25 1.25 POLYGON ((2690000 1278000, ...
-## 5        1 1.25 1.25 POLYGON ((2707500 1278000, ...
-## 6        1 1.25 1.25 POLYGON ((2725000 1278000, ...
-## 7        1 1.25 1.25 POLYGON ((2742500 1278000, ...
-## 8        1 1.25 1.25 POLYGON ((2602500 1266000, ...
-## 9        1 1.25 1.25 POLYGON ((2620000 1266000, ...
-## 10       1 1.25 1.25 POLYGON ((2637500 1266000, ...</code></pre>
+</div>
+<div id="show-available-raster-extents" class="section level3">
+<h3 class="hasAnchor">
+<a href="#show-available-raster-extents" class="anchor"></a>Show available raster extents</h3>
 <p>In order to view the available extents, call the function <code><a href="reference/show_extents.html">show_extents()</a></code>. The default method is <code>ggplot2</code>.</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" data-line-number="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(ggplot2)</a>
-<a class="sourceLine" id="cb4-2" data-line-number="2"><span class="kw"><a href="reference/show_extents.html">show_extents</a></span>()</a></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" data-line-number="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(ggplot2)</a>
+<a class="sourceLine" id="cb3-2" data-line-number="2"><span class="kw"><a href="reference/show_extents.html">show_extents</a></span>()</a></code></pre></div>
 <p><img src="index_files/figure-html/unnamed-chunk-3-1.png" width="700"></p>
-<p>Use <code>method = "tmap"</code> to show the extents in combination with other spatial data. For example, the boundary of switzerland is included in the package.</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" data-line-number="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/utils/topics/data">data</a></span>(<span class="st">"landesgebiet"</span>)</a>
-<a class="sourceLine" id="cb5-2" data-line-number="2"></a>
-<a class="sourceLine" id="cb5-3" data-line-number="3"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(tmap)</a>
-<a class="sourceLine" id="cb5-4" data-line-number="4"><span class="kw">tm_shape</span>(landesgebiet) <span class="op">+</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb5-5" data-line-number="5"><span class="st">   </span><span class="kw">tm_polygons</span>() <span class="op">+</span><span class="st"> </span><span class="kw"><a href="reference/show_extents.html">show_extents</a></span>(<span class="st">"tmap"</span>)</a></code></pre></div>
+<p>Use <code>method = "tmap"</code> to show the extents in combination with other spatial data. For example, the <a href="https://opendata.swiss/en/dataset/swissboundaries3d-landesgrenzen">boundary of switzerland</a> is included in the package. Load this dataset with <code><a href="https://www.rdocumentation.org/packages/utils/topics/data">data("landesgebiet")</a></code></p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" data-line-number="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/utils/topics/data">data</a></span>(<span class="st">"landesgebiet"</span>)</a>
+<a class="sourceLine" id="cb4-2" data-line-number="2"></a>
+<a class="sourceLine" id="cb4-3" data-line-number="3"></a>
+<a class="sourceLine" id="cb4-4" data-line-number="4"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(tmap)</a>
+<a class="sourceLine" id="cb4-5" data-line-number="5"><span class="kw">tm_shape</span>(landesgebiet) <span class="op">+</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb4-6" data-line-number="6"><span class="st">   </span><span class="kw">tm_polygons</span>() <span class="op">+</span><span class="st"> </span><span class="kw"><a href="reference/show_extents.html">show_extents</a></span>(<span class="st">"tmap"</span>)</a></code></pre></div>
 <p><img src="index_files/figure-html/unnamed-chunk-4-1.png" width="700"></p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" data-line-number="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/utils/topics/data">data</a></span>(<span class="st">"gemeinden_top_centroid"</span>)</a>
+<a class="sourceLine" id="cb5-2" data-line-number="2"></a>
+<a class="sourceLine" id="cb5-3" data-line-number="3"><span class="kw">tm_shape</span>(landesgebiet) <span class="op">+</span><span class="st"> </span><span class="kw">tm_polygons</span>() <span class="op">+</span><span class="st"> </span><span class="kw">tm_shape</span>(gemeinden_top_centroid) <span class="op">+</span><span class="st"> </span><span class="kw">tm_dots</span>(<span class="dt">size =</span> <span class="st">"EINWOHNERZ"</span>)</a></code></pre></div>
+<p><img src="index_files/figure-html/unnamed-chunk-5-1.png" width="700"></p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" data-line-number="1">schweiz_<span class="dv">1000</span> &lt;-<span class="st"> </span><span class="kw">get_raster</span>(<span class="dt">features =</span> gemeinden_top_centroid,<span class="dt">scale_level =</span> <span class="dv">1000</span>,<span class="dt">x_add =</span> <span class="dv">500</span>, <span class="dt">y_add =</span> <span class="dv">500</span>,<span class="dt">method =</span> <span class="st">"bbox"</span>,<span class="dt">epsg =</span> <span class="dv">2056</span>)</a></code></pre></div>
+<pre><code>## Warning in .f(file = .l[[c(1L, 1L)]], res1 = .l[[c(2L, 1L)]], res2
+## = .l[[c(3L, : Rasters in Extent do not have matching resolutions. Using
+## disaggregate in order to enable merging</code></pre>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb8-1" data-line-number="1"><span class="kw">tm_shape</span>(schweiz_<span class="dv">1000</span>) <span class="op">+</span><span class="st"> </span><span class="kw">tm_rgb</span>() <span class="op">+</span><span class="st"> </span><span class="kw">tm_shape</span>(gemeinden_top_centroid) <span class="op">+</span><span class="st"> </span><span class="kw">tm_dots</span>(<span class="dt">size =</span> <span class="st">"EINWOHNERZ"</span>)</a></code></pre></div>
+<p><img src="index_files/figure-html/unnamed-chunk-5-2.png" width="700"></p>
 </div>
 </div>
   </div>

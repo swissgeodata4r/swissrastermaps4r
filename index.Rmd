@@ -83,7 +83,7 @@ tm_shape(landesgebiet) + tm_polygons() + tm_shape(gemeinden_top_centroid) + tm_d
 
 schweiz_1000 <- get_raster(features = gemeinden_top_centroid,scale_level = 1000,x_add = 500, y_add = 500,method = "bbox",epsg = 2056)
 
-tm_shape(ra) + tm_rgb() + tm_shape(gemeinden_top_centroid) + tm_dots(size = "EINWOHNERZ")
+tm_shape(schweiz_1000) + tm_rgb() + tm_shape(gemeinden_top_centroid) + tm_dots(size = "EINWOHNERZ")
 
 ```
 
