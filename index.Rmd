@@ -18,6 +18,14 @@ NO! This package does not give access to any raster maps, by swisstopo or otherw
 
 ## How is the package used? 
 
+
+### Aquire raster data
+
+First of all, the raster maps need to be acquired and stored in a folder. The package is developed with a focus on [SwissMapRaster](https://shop.swisstopo.admin.ch/de/products/maps/national/digital/), but probably other raster maps will work as well. Currently only [CRS 2056](https://epsg.io/2056) is implemented. We might also include [CRS 21781](https://epsg.io/21781) at some point but that's probably it. 
+
+The raster maps should be sorted in a folder per scale. Currently, the names of the folders must be as follows: "SMR25" for 1:25'000 maps, "SMR50" for 1:50'000 maps and so on. Rasters should not overlap or have gaps.
+
+
 ### Download package
 
 Download and load the package
@@ -29,25 +37,20 @@ library(swissmapraster)
 library(dplyr)
 ```
 
+### Scan Folder
 
-### Aquire raster data
+Next, run the command `init_fdir()` pointing to the location (parent folder) of this maps. This command creates a "File Directory" in the package environment by scanning all folders recursively and analyzing the content. All files ending with "tif" are checked for extent, number of layers and resolution. All the mentioned attributes of each raster file, along with the file path and the extent as a geometry, are stoerd in the variable `fdir` of the package environment.
 
-First of all, the raster maps need to be acquired and stored in a folder. The package is developed with a focus on [SwissMapRaster](https://shop.swisstopo.admin.ch/de/products/maps/national/digital/), but probably other raster maps will work as well. Currently only [CRS 2056](https://epsg.io/2056) is implemented. We might also include [CRS 21781](https://epsg.io/21781) at some point but that's probably it. 
-
-The raster maps should be sorted in a folder per scale. Currently, the names of the folders must be as follows: "SMR25" for 1:25'000 maps, "SMR50" for 1:50'000 maps and so on. Rasters should not overlap or have gaps.
-
-Next, the command `init_fdir()` pointing to the location (parent folder) of this maps initiates the "File Directory". This means all the folders are scanned recursively and the their content analyzed. All files ending with "tif" are checked for extent, number of layers and resolution. It returns an sf object with all mentioned attributes of each raster file, along with the file path and the extent as a geometry. 
 
 ```{r,message=F}
-
-
-
 init_fdir("C:/Users/rata/Geodata/01_Switzerland/01_Maps")
 ```
 
 
-In order to view the available extents, call the function `show_extents()`. The 
-default method is `ggplot2`.
+
+### Show available raster extents
+
+In order to view the available extents, call the function `show_extents()`. The default method is `ggplot2`.
 
 ```{r}
 
@@ -57,14 +60,36 @@ show_extents()
 ```
 
 
-Use `method = "tmap"` to show the extents in combination with other spatial data. For example, the boundary of switzerland is included in the package.
+Use `method = "tmap"` to show the extents in combination with other spatial data. For example, the [boundary of switzerland](https://opendata.swiss/en/dataset/swissboundaries3d-landesgrenzen) is included in the package. Load this dataset with `data("landesgebiet")`
 
 ```{r}
+
 data("landesgebiet")
+
 
 library(tmap)
 tm_shape(landesgebiet) + 
    tm_polygons() + show_extents("tmap")
 ```
+
+
+```{r}
+
+
+data("gemeinden_top_centroid")
+
+get_raster(features = gemeinden_top_centroid,scale_level = 500,x_add = 0,y_add = 0,per_feature = F,method = "bbox")
+
+tm_shape(landesgebiet) + tm_polygons() + tm_shape(gemeinden_top_centroid) + tm_dots(size = "EINWOHNERZ") + tm_raster()
+
+
+
+```
+
+
+
+
+
+
 
 

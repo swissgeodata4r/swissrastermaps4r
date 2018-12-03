@@ -13,11 +13,11 @@ gemeinden_top_poly <- hoheitsgebiet %>%
 usethis::use_data(gemeinden_top_poly,overwrite = TRUE)
 
 
-gemeinden_top_cenroid <- gemeinden_top_poly %>%
+gemeinden_top_centroid <- gemeinden_top_poly %>%
   st_centroid()
 
 
-usethis::use_data(gemeinden_top_cenroid, overwrite = TRUE,compress = "xz")
+usethis::use_data(gemeinden_top_centroid, overwrite = TRUE,compress = "xz")
 
 
 data("landesgebiet")

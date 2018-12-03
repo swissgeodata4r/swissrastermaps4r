@@ -204,7 +204,7 @@ get_raster <- function(features,
                        scale_level,
                        x_add,      # add some default values. either 0 or 100..
                        y_add,        # in case of 0, strange things will happen with method centroid
-                       per_feature = T,
+                       per_feature = F,
                        method = "centroid",
                        epsg = NULL,
                        limit = Inf,
@@ -235,7 +235,7 @@ get_raster <- function(features,
 
 
 
-  if(is.null(filedirectory)){
+  if(is.null(fdir)){
     fdir <- get("fdir",envir = packageEnv)
   }
 
@@ -260,13 +260,12 @@ get_raster <- function(features,
 
       res_min <- c(min(rast_file$res1),min(rast_file$res2))
 
-      # colours <- raster::colortable(raster::brick(rast_file[1]))
       rast <- rast_file %>%
         purrr::pmap(function(file,res1,res2){
           raster <- raster::brick(file)
           if(!is.null(epsg)){raster::crs(raster) <- sp::CRS(paste0("+init=EPSG:",epsg))}
           # raster
-          raster::crop(raster,extent_i)
+          raster <- raster::crop(raster,extent_i)
           res_rast <- raster::res(raster)
           if(res_rast[1] > res_min[1] | res_rast[2] > res_min[2]){
             warning("Rasters in Extent do not have matching resolutions. Using disaggregate in order to enable merging")
@@ -299,5 +298,9 @@ get_raster <- function(features,
 
       }
       rast
-    })
+    }) %>%
+    purrr::when(
+      length(.) == 1~magrittr::extract2(.,1),
+      TRUE~.
+    )
 }

@@ -106,22 +106,18 @@ init_fdir <- function(rootdir,maxfiles = Inf,scales = c(10,25,50,200,100,500,100
 #' This function requires ggplot2 and / or tmap, depending on the output type defined
 #' in "method".
 #'
-#'#' @param method The method with which to visualize the data. "ggplot2" or "tmap"
-#' Wrap the output in ggplotly() to get an interactive ggplot output or set tmap_mode
+#' @param method The method with which to visualize the data: \code{ggplot2} or \code{tmap}
+#' Wrap the output in \code{ggplotly()} to get an interactive ggplot output or set \code{tmap_mode}
 #' to "view" go get an interactive tmap.
-#' @param as_layers Only applicable if method = "ggplot2". If TRUE, the function
-#' will only return ggplot2 layers (as a list) and the initial ggplot() object
-#' can be self defined
-#' @param filedirectory The file directory aquired by \code{init_fdir()}. If left as
-#' NULL, the fdir from the package Environment is taken.
+#' @param filedirectory The file directory aquired by \code{\link{init_fdir()}}. If left as
+#' \code{NULL}, the \code{fdir} from the package Environment is taken.
 
 show_extents <- function(method = "ggplot2",fdir = NULL){
 
   if(is.null(fdir)){
     fdir <- get("fdir",envir = packageEnv)
 
-    fdir <- fdir %>%
-      dplyr::mutate(res1 = as.factor(res1))
+    fdir$res1 <- as.factor(fdir$res1)
   }
 
 
@@ -138,7 +134,8 @@ show_extents <- function(method = "ggplot2",fdir = NULL){
   }
   if(method == "tmap"){   # I don't think this is good practice
     plotoutput <- tmap::tm_shape(fdir) +
-      tmap::tm_polygons(col = "res1",alpha = 0.4,group = "extents",palette = "Accent") +
+      tmap::tm_fill(title = "Resolution", col = "res1",alpha = 0.4,group = "extents",palette = "Accent") +
+      tmap::tm_borders() +
       tmap::tm_facets(by = "scale")
   }
   return(plotoutput)
