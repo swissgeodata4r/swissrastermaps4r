@@ -4,15 +4,15 @@
 \alias{show_extents}
 \title{Show extents of Available Raste Files}
 \usage{
-show_extents(filedirectory, method = "ggplot2", interactive = F)
+show_extents(method = "ggplot2", fdir = NULL)
 }
 \arguments{
-\item{filedirectory}{The file directory aquired by \code{init_fdir()}}
+\item{as_layers}{Only applicable if method = "ggplot2". If TRUE, the function
+will only return ggplot2 layers (as a list) and the initial ggplot() object
+can be self defined}
 
-\item{method}{The method with which to visualize the data. "ggplot2" or "tmap"}
-
-\item{interactive}{Should the plot be interactive or not? If TRUE, plotly()
-is used when method is ggplot2.}
+\item{filedirectory}{The file directory aquired by \code{init_fdir()}. If left as
+NULL, the fdir from the package Environment is taken.}
 }
 \description{
 This function visualizes the extents of all available rasters. The plots are
@@ -20,5 +20,10 @@ faceted by scale and the area is colorized by resolution. The extents have an
 alpha value so that overlapping extents can be detected.
 }
 \details{
-This function requires ggplot2, and tmap and plotly for interactive plots
+This function requires ggplot2 and / or tmap, depending on the output type defined
+in "method".
+
+#' @param method The method with which to visualize the data. "ggplot2" or "tmap"
+Wrap the output in ggplotly() to get an interactive ggplot output or set tmap_mode
+to "view" go get an interactive tmap.
 }

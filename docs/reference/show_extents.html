@@ -109,29 +109,31 @@ alpha value so that overlapping extents can be detected.</p>
     
     </div>
 
-    <pre class="usage"><span class='fu'>show_extents</span>(<span class='no'>filedirectory</span>, <span class='kw'>method</span> <span class='kw'>=</span> <span class='st'>"ggplot2"</span>, <span class='kw'>interactive</span> <span class='kw'>=</span> <span class='no'>F</span>)</pre>
+    <pre class="usage"><span class='fu'>show_extents</span>(<span class='kw'>method</span> <span class='kw'>=</span> <span class='st'>"ggplot2"</span>, <span class='kw'>fdir</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
+      <th>as_layers</th>
+      <td><p>Only applicable if method = "ggplot2". If TRUE, the function
+will only return ggplot2 layers (as a list) and the initial ggplot() object
+can be self defined</p></td>
+    </tr>
+    <tr>
       <th>filedirectory</th>
-      <td><p>The file directory aquired by <code>init_fdir()</code></p></td>
-    </tr>
-    <tr>
-      <th>method</th>
-      <td><p>The method with which to visualize the data. "ggplot2" or "tmap"</p></td>
-    </tr>
-    <tr>
-      <th>interactive</th>
-      <td><p>Should the plot be interactive or not? If TRUE, plotly()
-is used when method is ggplot2.</p></td>
+      <td><p>The file directory aquired by <code>init_fdir()</code>. If left as
+NULL, the fdir from the package Environment is taken.</p></td>
     </tr>
     </table>
     
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
-    <p>This function requires ggplot2, and tmap and plotly for interactive plots</p>
+    <p>This function requires ggplot2 and / or tmap, depending on the output type defined
+in "method".</p>
+<p>#' @param method The method with which to visualize the data. "ggplot2" or "tmap"
+Wrap the output in ggplotly() to get an interactive ggplot output or set tmap_mode
+to "view" go get an interactive tmap.</p>
     
 
   </div>

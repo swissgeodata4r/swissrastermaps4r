@@ -90,9 +90,7 @@ init_fdir <- function(rootdir,maxfiles = Inf,scales = c(10,25,50,200,100,500,100
   if(add_geometry){
     fdir <- geom_from_boundary(fdir, add = T,2056)
   }
-
   assign("fdir",fdir,envir = packageEnv)
-  fdir
 }
 
 
