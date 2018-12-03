@@ -202,8 +202,8 @@ get_extent <- function(features,x_add,y_add,method = "centroid",per_feature = T)
 
 get_raster <- function(features,
                        scale_level,
-                       x_add,      # add some default values. either 0 or 100..
-                       y_add,        # in case of 0, strange things will happen with method centroid
+                       x_add = 0,      # add some default values. either 0 or 100..
+                       y_add = 0,        # in case of 0, strange things will happen with method centroid
                        per_feature = F,
                        method = "centroid",
                        epsg = NULL,
@@ -234,10 +234,17 @@ get_raster <- function(features,
                 #Can this be avoided? see which function requires memory loading (probabbly crop or merge)
 
 
+  # if(method == "centroid" & (x_add == 0 | y_add = 0)){stop("Please add x_add AND y_add values when using method 'centroid'")}
+
 
   if(is.null(fdir)){
-    fdir <- get("fdir",envir = packageEnv)
+    if(exists("fdir", envir = packageEnv)){
+      fdir <- get("fdir",envir = packageEnv)
+    } else{
+      stop("Please run init_fdir() first.")
+    }
   }
+
 
   ex <- get_extent(features = features,
                    x_add = x_add,
@@ -245,6 +252,8 @@ get_raster <- function(features,
                    method = method,
                    per_feature = per_feature
                    )
+
+  if(!all(((ex$xmax - ex$xmin) != 0 )& ((ex$ymax - ex$ymin) != 0 ))){stop("All extents must be >0")}
 
 
   ex %>%
@@ -259,6 +268,8 @@ get_raster <- function(features,
         dplyr::select(file,res1,res2) #%>% dplyr::pull()
 
       res_min <- c(min(rast_file$res1),min(rast_file$res2))
+
+
 
       rast <- rast_file %>%
         purrr::pmap(function(file,res1,res2){
@@ -293,12 +304,12 @@ get_raster <- function(features,
         if(raster::nlayers(rast) == 3){
           # maybe turn into singleband raster with rgb_raster2singleband??
         } else if(raster::nlayers(rast) == 1){
-          # probabbly do nothing here
+          raster::colortable(rast) <- raster::colortable(raster::brick(rast_file$file[1]))
         } else(warning("Unexpectend number of Layers"))
 
       }
       rast
-    }) %>%
+    })%>%
     purrr::when(
       length(.) == 1~magrittr::extract2(.,1),
       TRUE~.
