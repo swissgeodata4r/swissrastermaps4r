@@ -40,6 +40,13 @@ ysrgb <- function(val){ifelse(val <= 0.0031308,val,1.055*val^(1/2.4)-0.055)}
 
 
 
+#' Name
+#'
+#' Short Desc
+#'
+#' Long Desc
+#'
+#' @param param desc
 rgb_grey_ysrgb <- function(raster_in,weights = c(0.2126,0.7152,0.0722)){
   raster_in %>%
     purrr::map2(.,weights,~(.x/255)*.y) %>%
@@ -50,6 +57,13 @@ rgb_grey_ysrgb <- function(raster_in,weights = c(0.2126,0.7152,0.0722)){
       )
 }
 
+#' Name
+#'
+#' Short Desc
+#'
+#' Long Desc
+#'
+#' @param param desc
 rgb_grey_weighted <- function(raster_in,weights = c(0.30,0.59,0.11)){
   raster_in %>%
     as.list() %>%
@@ -59,6 +73,13 @@ rgb_grey_weighted <- function(raster_in,weights = c(0.30,0.59,0.11)){
 
 }
 
+#' Name
+#'
+#' Short Desc
+#'
+#' Long Desc
+#'
+#' @param param desc
 rgb_grey_mean <- function(raster_in){
   raster_in %>%
     as.list() %>%
@@ -128,11 +149,19 @@ colortable_greyscale <- function(colortable, method = "ysrgb"){
 
 
 
-
+#' Count the number of RBG Combinations
+#'
+#' Count the number of \strong{used} RGB Combinations in a given raster brick object.
+#'
+#' Given 255 possible values for R, B and G the number of possiblities is \eqn{255^3 = 16581375}
+#' But how many are actually used? This function calculates the number of used
+#' combinations of R, B and G in a given Raster Brick object.
+#' It takes a three band raster, turns all cells into a vector for every band,
+#' counts the number of unique combinations and returns a hex colour code
+#' for each combination
+#' @param param desc
 rgb_brick_count <- function(brick,maxColorValue = 255){
-  # takes a three band raster, turns all cells into a vector for every band,
-  # counts the number of unique combinations and returns a hex colour code
-  # for each combination
+
 
   brick %>%
     as.list() %>%
@@ -145,7 +174,13 @@ rgb_brick_count <- function(brick,maxColorValue = 255){
 }
 
 
-
+#' Get extent of \code{sf} object
+#'
+#' Calculate the extent of an \{sf} object.
+#'
+#' Long Desc
+#'
+#' @param param desc
 get_extent <- function(features,x_add,y_add,method = "centroid",per_feature = T){
   # gets the centeroid of feature(s), adds the x, and y distances and returns a
   # matrix with x/y min/max plus and extent-object.
@@ -200,38 +235,52 @@ get_extent <- function(features,x_add,y_add,method = "centroid",per_feature = T)
 }
 
 
+#' Get corresponding raster maps to feature
+#'
+#' Specify \pkg{sf} Object an some additional parameters to get corresponding raster maps
+#'
+#'  The function takes an \{} object as an input. In addition, scale level
+#'  (a scale 1:1'000'000 is defined as \code{scale = 1000}) and method with which the
+#'  extent is defined (\code{method = }) need to be specified. Currently, two methods
+#'  are implemented: `bbox` takes a bounding box while `centroid` calculates the
+#'  centroid of the sf object. Both methods accept \code{x_add}/\code{y_add} with which the
+#'  extent window is enlarged. Method \code{centroid} _requires_ \code{x_add}/\code{y_add}, since
+#'  the extent windows would have \eqn{\Delta x,\ \Delta y} of Zero.
+#'  Todo
+#' \enumerate{
+#'   \item warning if nlayers != 3 and turn greyscale = T
+#'   \item Add colortable options
+#'   \item "x/y_add" should have a nicer name.. something with distance maybe?
+#'   \item implement other was to get the extent (bounding box w/ or w/o buffer)
+#'   \item add failsafes: e.g check if "features" is really an sf object
+#'   \item make this a lazy function: at the moment, all raster files are downloaded into memory.
+#' }
+#' @param features The \code{sf} object to derive the raster data from
+#' @param scale_level The scale at which to get raster data (x in 1:1'000x). Usually one of the following values (depending on the available rasters): 10,25,100,500,1000
+#' @param x_add,y_add Depending on method, x and y will be added to the centeroid or to the bounding box
+#' @param per_feature A TRUE/FALSE value specifying if one raster map should be returend for the entire \code{sf} object or if one map should be returned per feature
+#' @param method A character string specifying the method with which the extent should be calculated. \code{centroid} calculates the centroid of the object(s), \code{bbox} calculates the bounding box of the object.
+#' @param turn_greyscale Should the output rastermaps be turned into greyscale?
+#' @param name If muliple, different maps are available with overlapping extents, \code{name} can be used to differentiate between different maptypes. Default is an empty sting.
+#' @param fdir By default, the \code{fdir} is retrieved from the package Environment (named \code{packageEnv}). Override this with \code{fdir = }
+#' @param limit For testing puposes only: Limits the number of rasters returned per object. Defaults to \code{Inf}
+#'
 get_raster <- function(features,
                        scale_level,
                        x_add = 0,      # add some default values. either 0 or 100..
                        y_add = 0,        # in case of 0, strange things will happen with method centroid
                        per_feature = F,
                        method = "centroid",
-                       limit = Inf,
                        turn_greyscale = F,
                        name = "",
-                       fdir = NULL
+                       fdir = NULL,
+                       limit = Inf
 ){
 
-  # input features to get raster data of
-  # scale to get raster data (x in 1:1'000x) from 10,25,100,500,1000
-  # file_directory: fdir from init_fdir() (todo: get packageenv fdir if fdir is not supplied)
-  # resolution: resolution of the map. this is different per scale, 25 typically has 1.25, 100 typicically has 10
-  # per feature: will probabbly be removed once this function has a per_feature wrapper
-  # method: "fixed_size_centroid" takes the centeroid of the feature and drawas a fixed window around it with x, and y.
-  #         in the future, I'd like to implement bounding_box with a buffer (x,y)
-  # x_add, y_add: depending on method, x and y will be added to the centeroid (fixed_size_centroid) or to the bounding box
-  # epsg: null if CRS need not be set. Otherwise this is an epsg code wich is turned into a CRS() object using rgdal::CRS
-  # limit: in order to test the function, a limit on the number of rows can be set
 
 
-  # Todo:
-  #   - warning if nlayers != 3 and turn greyscale = T
-  #   - Add colortable options
-  #   - "x/y_add" should have a nicer name.. something with distance maybe?
-  #   - implement other was to get the extent (bounding box w/ or w/o buffer)
-  #   - add failsafes: e.g check if "features" is really an sf object
-  #   - make this a lazy function: at the moment, all raster files are downloaded into memory.
-                #Can this be avoided? see which function requires memory loading (probabbly crop or merge)
+
+
 
 
   # if(method == "centroid" & (x_add == 0 | y_add = 0)){stop("Please add x_add AND y_add values when using method 'centroid'")}

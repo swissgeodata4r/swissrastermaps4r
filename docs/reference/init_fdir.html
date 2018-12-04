@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Threeband RGB to singleband raster — rgb_raster2singleband • swissrastermaps4r</title>
+<title>Initialize File Directory — init_fdir • swissrastermaps4r</title>
 
 <!-- jquery -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
@@ -30,10 +30,10 @@
 
 
 
-<meta property="og:title" content="Threeband RGB to singleband raster — rgb_raster2singleband" />
+<meta property="og:title" content="Initialize File Directory — init_fdir" />
 
-<meta property="og:description" content="rgb_raster2singleband turns a threeband RGB Raster (brick)
-into a singleband raster with a colortable" />
+<meta property="og:description" content="Scans all folders in the root dirctory corresponding to the folders given by
+folders = ." />
 <meta name="twitter:card" content="summary" />
 
 
@@ -98,35 +98,56 @@ into a singleband raster with a colortable" />
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Threeband RGB to singleband raster</h1>
+    <h1>Initialize File Directory</h1>
     
-    <div class="hidden name"><code>rgb_raster2singleband.Rd</code></div>
+    <div class="hidden name"><code>init_fdir.Rd</code></div>
     </div>
 
     <div class="ref-description">
     
-    <p><code>rgb_raster2singleband</code> turns a threeband RGB Raster (<code>brick</code>)
-into a singleband <code>raster</code> with a <code>colortable</code></p>
+    <p>Scans all folders in the root dirctory corresponding to the folders given by
+<code>folders = </code>.</p>
     
     </div>
 
-    <pre class="usage"><span class='fu'>rgb_raster2singleband</span>(<span class='no'>rgb_raster</span>)</pre>
+    <pre class="usage"><span class='fu'>init_fdir</span>(<span class='no'>rootdir</span>, <span class='kw'>maxfiles</span> <span class='kw'>=</span> <span class='fl'>Inf</span>, <span class='kw'>add_geometry</span> <span class='kw'>=</span> <span class='no'>T</span>,
+  <span class='kw'>folders</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"SMR-25_2056"</span>, <span class='st'>"SMR-25_21781"</span>, <span class='st'>"SMR-25_21781"</span>,
+  <span class='st'>"SMR-50_2056"</span>, <span class='st'>"PK-100_2056"</span>, <span class='st'>"PK-200_2056"</span>, <span class='st'>"PK-500_2056"</span>,
+  <span class='st'>"PK-1000_2056_orte"</span>, <span class='st'>"PK-1000_2056_relief"</span>, <span class='st'>"PK-1000_2056_reliefcol"</span>,
+  <span class='st'>"PK-1000_2056_strassen"</span>))</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>rgb_raster</th>
-      <td><p>A character string pointing to a raster brick object or
-an object of class RasterBrick. RBG values are assumed to range from 0-255</p></td>
+      <th>rootdir</th>
+      <td><p>Character string specifying the directory where the folders are stored</p></td>
+    </tr>
+    <tr>
+      <th>maxfiles</th>
+      <td><p>Integer limiting the number of files to be scanned. For testing purposes only.</p></td>
+    </tr>
+    <tr>
+      <th>folders</th>
+      <td><p>Names of the folders containing the raster files. These folders names
+require a very specific nomenclature for this whole thing to work (see description)</p></td>
     </tr>
     </table>
     
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
-    <p>This function turns a three band RGB Raster Brick (from the Package <code>raster</code>)
-into a singleband raster with an included <code>colortable</code>. The function
-requires the packages:  <code>raster</code>, <code>rgdal</code></p>
+    <p>This command creates a "File Directory" in the package environment by scanning
+all folders specified by <code>folders</code> within the <code>rootdir</code> and analyzing the content.
+All files ending with "tif" are checked for extent, number of layers and resolution.
+All the mentioned attributes of each raster file, along with the file path and the extent as a
+geometry, are stoerd in the variable <code>fdir</code> of the package environment.
+Folders as specified by <code>folders</code> require a specific structure:
+<code>TYPE-Scale_EPSG_name</code></p><dl class='dl-horizontal'>
+  <dt><code>TYPE</code></dt><dd><p>corresponds to the maptype. IN Switzerland this is typically SMR, PK, LK or TA. <strong>Must</strong> be followed by a <code>-</code></p></dd>
+  <dt><code>Scale</code></dt><dd><p>defines the map scale as x in 1:1'000x. <strong>Must</strong> be followed by a <code>_</code></p></dd>
+  <dt><code>EPSG</code></dt><dd><p>specifies the CRS of the containing raster data <strong>Must</strong> be followed by a <code>_</code> <strong>only</strong> if <code>name</code> is specified</p></dd>
+  <dt><code>name</code></dt><dd><p>is only needed when multiple map with overlapping extents as well as same scale, level and projection exist (e.g. <a href='SMR1000 https://shop.swisstopo.admin.ch/en/products/maps/national/digital/srm1000'>SMR1000</a>)</p></dd>
+</dl>
     
 
   </div>

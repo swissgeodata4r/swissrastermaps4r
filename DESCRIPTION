@@ -1,4 +1,4 @@
-Package: swissmapraster
+Package: swissrastermaps4r
 Type: Package
 Title: Helps Import, Extract and Plot Swissmapraster Data  
 Version: 0.1.0

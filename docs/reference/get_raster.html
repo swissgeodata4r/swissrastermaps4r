@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Threeband RGB to singleband raster — rgb_raster2singleband • swissrastermaps4r</title>
+<title>Get corresponding raster maps to feature — get_raster • swissrastermaps4r</title>
 
 <!-- jquery -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
@@ -30,10 +30,9 @@
 
 
 
-<meta property="og:title" content="Threeband RGB to singleband raster — rgb_raster2singleband" />
+<meta property="og:title" content="Get corresponding raster maps to feature — get_raster" />
 
-<meta property="og:description" content="rgb_raster2singleband turns a threeband RGB Raster (brick)
-into a singleband raster with a colortable" />
+<meta property="og:description" content="Specify sf Object an some additional parameters to get corresponding raster maps" />
 <meta name="twitter:card" content="summary" />
 
 
@@ -98,35 +97,61 @@ into a singleband raster with a colortable" />
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Threeband RGB to singleband raster</h1>
+    <h1>Get corresponding raster maps to feature</h1>
     
-    <div class="hidden name"><code>rgb_raster2singleband.Rd</code></div>
+    <div class="hidden name"><code>get_raster.Rd</code></div>
     </div>
 
     <div class="ref-description">
     
-    <p><code>rgb_raster2singleband</code> turns a threeband RGB Raster (<code>brick</code>)
-into a singleband <code>raster</code> with a <code>colortable</code></p>
+    <p>Specify <span class="pkg">sf</span> Object an some additional parameters to get corresponding raster maps</p>
     
     </div>
 
-    <pre class="usage"><span class='fu'>rgb_raster2singleband</span>(<span class='no'>rgb_raster</span>)</pre>
+    <pre class="usage"><span class='fu'>get_raster</span>(<span class='no'>features</span>, <span class='no'>scale_level</span>, <span class='kw'>x_add</span> <span class='kw'>=</span> <span class='fl'>0</span>, <span class='kw'>y_add</span> <span class='kw'>=</span> <span class='fl'>0</span>,
+  <span class='kw'>per_feature</span> <span class='kw'>=</span> <span class='no'>F</span>, <span class='kw'>method</span> <span class='kw'>=</span> <span class='st'>"centroid"</span>, <span class='kw'>turn_greyscale</span> <span class='kw'>=</span> <span class='no'>F</span>,
+  <span class='kw'>name</span> <span class='kw'>=</span> <span class='st'>""</span>, <span class='kw'>fdir</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>limit</span> <span class='kw'>=</span> <span class='fl'>Inf</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>rgb_raster</th>
-      <td><p>A character string pointing to a raster brick object or
-an object of class RasterBrick. RBG values are assumed to range from 0-255</p></td>
+      <th>features</th>
+      <td><p>The <code>sf</code> object to derive the raster data from</p></td>
+    </tr>
+    <tr>
+      <th>scale_level</th>
+      <td><p>The scale at which to get raster data (x in 1:1'000x). Usually one of the following values (depending on the available rasters): 10,25,100,500,1000</p></td>
+    </tr>
+    <tr>
+      <th>x_add, y_add</th>
+      <td><p>Depending on method, x and y will be added to the centeroid or to the bounding box</p></td>
+    </tr>
+    <tr>
+      <th>per_feature</th>
+      <td><p>A TRUE/FALSE value specifying if one raster map should be returend for the entire <code>sf</code> object or if one map should be returned per feature</p></td>
+    </tr>
+    <tr>
+      <th>method</th>
+      <td><p>A character string specifying the method with which the extent should be calculated. <code>centroid</code> calculates the centroid of the object(s), <code>bbox</code> calculates the bounding box of the object.</p></td>
+    </tr>
+    <tr>
+      <th>turn_greyscale</th>
+      <td><p>Should the output rastermaps be turned into greyscale?</p></td>
+    </tr>
+    <tr>
+      <th>name</th>
+      <td><p>If muliple, different maps are available with overlapping extents, <code>name</code> can be used to differentiate between different maptypes. Default is an empty sting.</p></td>
+    </tr>
+    <tr>
+      <th>fdir</th>
+      <td><p>By default, the <code>fdir</code> is retrieved from the package Environment (named <code>packageEnv</code>). Override this with <code>fdir = </code></p></td>
+    </tr>
+    <tr>
+      <th>limit</th>
+      <td><p>For testing puposes only: Limits the number of rasters returned per object. Defaults to <code>Inf</code></p></td>
     </tr>
     </table>
-    
-    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
-
-    <p>This function turns a three band RGB Raster Brick (from the Package <code>raster</code>)
-into a singleband raster with an included <code>colortable</code>. The function
-requires the packages:  <code>raster</code>, <code>rgdal</code></p>
     
 
   </div>
@@ -134,9 +159,7 @@ requires the packages:  <code>raster</code>, <code>rgdal</code></p>
     <h2>Contents</h2>
     <ul class="nav nav-pills nav-stacked">
       <li><a href="#arguments">Arguments</a></li>
-      
-      <li><a href="#details">Details</a></li>
-          </ul>
+                </ul>
 
   </div>
 </div>

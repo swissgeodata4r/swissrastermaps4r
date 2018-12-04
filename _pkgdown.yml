@@ -1,0 +1,41 @@
+navbar:
+  structure:
+    left:
+    - home
+    - intro
+    - reference
+    - articles
+    - tutorials
+    - news
+    right: github
+  components:
+    home:
+      icon: fa-home fa-lg
+      href: index.html
+    reference:
+      text: Reference
+      href: reference/index.html
+reference:
+  - title: "Main functions"
+    desc: >
+      The most important functions
+    contents:
+      - init_fdir
+      - get_raster
+      - show_extents
+  - title: "Raster manipulation"
+    desc: >
+      Some helper functions for raster manipulation. These are mostly needed for backend and have little use for front end users.
+    contents:
+      - raster_greyscale
+      - rgb_grey_mean
+      - rgb_grey_weighted
+      - rgb_grey_ysrgb
+      - rgb_raster2singleband
+      - ysrgb
+      - colortable_greyscale
+  - title: "Other helper functions."
+    desc: >
+      These are mostly needed for backend and have little use for front end users.
+    contents:
+      - get_extent

@@ -34,10 +34,35 @@ geom_from_boundary <- function(df, add = T, epsg = NULL){
 }
 
 
+#' Initialize File Directory
+#'
+#' Scans all folders in the root dirctory corresponding to the folders given by
+#' \code{folders = }.
+#'
+#' This command creates a "File Directory" in the package environment by scanning
+#' all folders specified by \code{folders} within the \code{rootdir} and analyzing the content.
+#' All files ending with "tif" are checked for extent, number of layers and resolution.
+#' All the mentioned attributes of each raster file, along with the file path and the extent as a
+#' geometry, are stoerd in the variable \code{fdir} of the package environment.
+#' Folders as specified by \code{folders} require a specific structure:
+#' \code{TYPE-Scale_EPSG_name}
+#' \describe{
+#'   \item{\code{TYPE}}{corresponds to the maptype. IN Switzerland this is typically \code{SMR}, \code{PK}, \code{LK} or \code{TA}. \strong{Must} be followed by a \code{-}}
+#'   \item{\code{Scale}}{defines the map scale as x in 1:1'000x. \strong{Must} be followed by a \code{_}}
+#'   \item{\code{EPSG}}{specifies the CRS of the containing raster data \strong{Must} be followed by a \code{_} \strong{only} if \code{name} is specified}
+#'   \item{\code{name}}{is only needed when multiple maps with overlapping extents as well as same scale, level and projection exist (e.g. \href{SMR1000 https://shop.swisstopo.admin.ch/en/products/maps/national/digital/srm1000}{SMR1000})}
+#' }
+#' @param rootdir Character string specifying the directory where the folders are stored
+#' @param maxfiles Integer limiting the number of files to be scanned. For testing purposes only.
+#' @param add_geometry Should the bounding box of each file be added as a geometry to \code{fdir?
+#' @param folders Names of the folders containing the raster files. These folders names
+#' require a very specific nomenclature for this whole thing to work (see description)
+
 init_fdir <- function(rootdir,
                       maxfiles = Inf,
                       add_geometry = T,
                       folders = c("SMR-25_2056",
+                                  "SMR-25_21781",
                                   "SMR-25_21781",
                                   "SMR-50_2056",
                                   "PK-100_2056",
