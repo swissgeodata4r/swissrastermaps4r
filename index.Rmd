@@ -73,21 +73,78 @@ tm_shape(landesgebiet) +
 ```
 
 
+
+### Prepare single raster
+
+Now let's look at an example where this package actually comes to some use. Say you want to plot a map of the largest cities in Switzerland. There is a sample dataset included in the package with name, location and size of the 10 largest cities in Switzerland. 
+
 ```{r}
-
-
 data("gemeinden_top_centroid")
 
-tm_shape(landesgebiet) + tm_polygons() + tm_shape(gemeinden_top_centroid) + tm_dots(size = "EINWOHNERZ")
 
-
-schweiz_1000 <- get_raster(features = gemeinden_top_centroid,scale_level = 1000,x_add = 500, y_add = 500,method = "bbox",epsg = 2056)
-
-tm_shape(schweiz_1000) + tm_rgb() + tm_shape(gemeinden_top_centroid) + tm_dots(size = "EINWOHNERZ")
-
+gemeinden_top_centroid
 ```
 
 
+We can plot a simple map using the sample data already demonstrated: 
+
+```{r}
+tm_shape(landesgebiet) + 
+  tm_polygons() + 
+  tm_shape(gemeinden_top_centroid) + 
+  tm_dots(size = "EINWOHNERZ")
+```
+
+Now if you would want to include a swiss raster map into this plot you would:
+
+1. first decide on a scale
+2. look for the relevant map numbers based on the [division ("Blatteinteilung")](https://map.geo.admin.ch/?selectedNode=node_ch.swisstopo.pixelkarte-pk50.metadata1&Y=660000&X=190000&zoom=1&bgLayer=ch.swisstopo.pixelkarte-farbe&layers=ch.swisstopo.pixelkarte-pk50.metadata&time_current=latest&lang=de&topic=ech)
+3. find the appropriate raster maps based on the map numbers from the previous step
+4. check raste resolutions and possilby resample all rasters to same resolution
+5. merge all the relevant raster maps into a single file
+6. possilbly reassign `CRS` and `colormap` 
+7. import raster into `R`
+
+This package aims to automate steps 2 - 7 with the function `get_raster()`. The function takes an `sf` object as an input. In addition, scale level (a scale 1:1'000'000 is defined as `scale = 1000`) and method with which the extent is defined (`method = `) need to be specified. Currently, two methods are implemented: `bbox` takes a bounding box while `centroid` calculates the centroid of the sf object. Both methods accept `x_add`/`y_add` with which the extent window is enlarged. Method `centroid` _requires_ `x_add`/`y_add`, since the extent windows would have x/y demensions of Zero.
+
+```{r}
+
+rastermap <- get_raster(features = landesgebiet,
+                        scale_level = 1000,
+                        method = "bbox", 
+                        name = "relief")
+
+tm_shape(rastermap) + 
+  tm_rgb() + 
+  tm_shape(gemeinden_top_centroid) + 
+  tm_dots(size = "EINWOHNERZ")
+```
+
+
+In the previouse example, little was gained using the `get_raster` function. The function get's much more useful when multiple raster are needed. Using the same dataset, we can get a raster _per city_ using the option `per_feature = T`.
+
+If multiple rasters are returned, the output is a `list()` of rasters with a length corresponding to the number of featuers (i.e. rows) in the input features.
+
+```{r}
+
+rastermap <- get_raster(features = gemeinden_top_centroid,
+                        x_add = 1000,
+                        y_add = 1000,
+                        per_feature = T,
+                        scale_level = 25,
+                        method = "centroid")
+
+tm_shape(rastermap[[1]]) + 
+  tm_rgb() + 
+  tm_shape(gemeinden_top_centroid[1,]) + 
+  tm_dots(size = "EINWOHNERZ")
+
+
+tm_shape(rastermap[[2]]) + 
+  tm_rgb() + 
+  tm_shape(gemeinden_top_centroid[2,]) + 
+  tm_dots(size = "EINWOHNERZ")
+```
 
 
 

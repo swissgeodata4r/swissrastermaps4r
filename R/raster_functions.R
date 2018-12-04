@@ -206,9 +206,9 @@ get_raster <- function(features,
                        y_add = 0,        # in case of 0, strange things will happen with method centroid
                        per_feature = F,
                        method = "centroid",
-                       epsg = NULL,
                        limit = Inf,
                        turn_greyscale = F,
+                       name = "",
                        fdir = NULL
 ){
 
@@ -246,6 +246,7 @@ get_raster <- function(features,
   }
 
 
+
   ex <- get_extent(features = features,
                    x_add = x_add,
                    y_add = y_add,
@@ -253,31 +254,44 @@ get_raster <- function(features,
                    per_feature = per_feature
                    )
 
-  if(!all(((ex$xmax - ex$xmin) != 0 )& ((ex$ymax - ex$ymin) != 0 ))){stop("All extents must be >0")}
+  if(!all(((ex$xmax - ex$xmin) != 0 )& ((ex$ymax - ex$ymin) != 0 ))){
+    stop("All extents must be >0")
+    }
 
+  name_i <- name # to avoid conflicts with columns of the same name
 
   ex %>%
     sf::st_set_geometry(NULL) %>%
-    head(limit) %>%
+    # slice(8) %->% c(xmin_i,xmax_i,ymin_i,ymax_i,extent_i)
+    head(limit)  %>%
     purrr::pmap(function(xmin_i,xmax_i,ymin_i,ymax_i,extent_i){
       rast_file <- fdir %>%
         data.frame(stringsAsFactors = F) %>%
         dplyr::filter(scale == scale_level) %>%
         dplyr::filter(xmin <= xmax_i & xmax >= xmin_i) %>%
         dplyr::filter(ymin <= ymax_i & ymax >= ymin_i) %>%
-        dplyr::select(file,res1,res2) #%>% dplyr::pull()
+        dplyr::filter(name == name_i) %>%
+        dplyr::select(file,res1,res2,name,epsg,nlayers)
+
+      # if(nrow(rast_file)>1){
+      #   stop("Overlapping Rasters found. Please check your data
+      #   or specify map with opiton 'name'.")}
+      if(nrow(rast_file)==0){
+        stop("No raster files found with matching criteria.")}
 
       res_min <- c(min(rast_file$res1),min(rast_file$res2))
+      res_min <- as.integer(round(res_min))
 
 
 
       rast <- rast_file %>%
-        purrr::pmap(function(file,res1,res2){
+        purrr::pmap(function(file,res1,res2,name,epsg,nlayers){
           raster <- raster::brick(file)
-          if(!is.null(epsg)){raster::crs(raster) <- sp::CRS(paste0("+init=EPSG:",epsg))}
+          raster::crs(raster) <- sp::CRS(paste0("+init=EPSG:",epsg))
           # raster
           raster <- raster::crop(raster,extent_i)
           res_rast <- raster::res(raster)
+          res_rast <- as.integer(round(res_rast))
           if(res_rast[1] > res_min[1] | res_rast[2] > res_min[2]){
             warning("Rasters in Extent do not have matching resolutions. Using disaggregate in order to enable merging")
             fac1 <- res_rast[1]/res_min[1]

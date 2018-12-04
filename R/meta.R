@@ -34,7 +34,20 @@ geom_from_boundary <- function(df, add = T, epsg = NULL){
 }
 
 
-init_fdir <- function(rootdir,maxfiles = Inf,scales = c(10,25,50,200,100,500,1000),add_geometry = T){
+init_fdir <- function(rootdir,
+                      maxfiles = Inf,
+                      add_geometry = T,
+                      folders = c("SMR-25_2056",
+                                  "SMR-25_21781",
+                                  "SMR-50_2056",
+                                  "PK-100_2056",
+                                  "PK-200_2056",
+                                  "PK-500_2056",
+                                  "PK-1000_2056_orte",
+                                  "PK-1000_2056_relief",
+                                  "PK-1000_2056_reliefcol",
+                                  "PK-1000_2056_strassen")
+                      ){
 
   # needs: dplyr, raster and purrr
 
@@ -46,27 +59,63 @@ init_fdir <- function(rootdir,maxfiles = Inf,scales = c(10,25,50,200,100,500,100
   # (note: "name" is the name of the map on one hand, and the keyword which
   # will be queried on the other)
   # Needs to be rewritten if other maptypes are included (LK, PK..)
-  maptypes <- dplyr::data_frame(
-    name = paste0("smr",scales),
-    scale = scales
-  )
+  # folder_poss <- purrr::map_dfr(maptypes,function(maptype){
+  #   purrr::map_dfr(scales,function(scale){
+  #     purrr::map_dfr(epsg_codes,function(epsg){
+  #       data.frame(
+  #         maptype = maptype,
+  #         scale = scale,
+  #         epsg = epsg,
+  #         folder = paste0(maptype,scale,"_",epsg),
+  #         stringsAsFactors = F)
+  #     })
+  #   })
+  # })
 
-  # Get all directories in rootdir
-  dirs <- list.dirs(rootdir,recursive = T,full.names = F)
+    # Get all directories in rootdir
+  # dirs <- list.dirs(rootdir,recursive = T,full.names = F)
+
+  folders_df <- strsplit(folders,"-") %>%
+    purrr::map_dfr(function(x){
+      strsplit(x[2],"_") %>%
+        purrr::map_dfr(function(y){
+          data.frame(
+            maptype = x[1],
+            scale = y[1],
+            epsg = y[2],
+            name = ifelse(length(y) == 3,y[3],""),
+            stringsAsFactors = F
+          )
+        })
+      }) %>%
+    dplyr::mutate(
+      folder = folders
+    )
+
+
+
+
 
   # Assign Folders to each maptype. This part is very fragile and will break
   # if more than one folder meets the query, and if rasterfiles are organized
   # in subfolders of each maptype-folder. Must be rewritten!
-  folderpaths <- maptypes %>%
-    purrr::pmap_dfr(function(name,scale){
-      folder = dirs[grepl(paste0(name,"$"),dirs,ignore.case = T)]
-      dplyr::data_frame(name = name, folder = folder,scale = scale)
-    })
+  # folderpaths <- maptypes %>%
+  #   purrr::pmap_dfr(function(name,scale){
+  #     folder <-  dirs[grepl(paste0(name,"_"),dirs,ignore.case = T)]
+  #     epsg <-  strsplit(folder,split = "_")[[1]]
+  #     epsg <- epsg[length(epsg)]
+  #     data.frame(
+  #       name = name,
+  #       folder = folder,
+  #       scale = scale,
+  #       epsg = epsg,
+  #       stringsAsFactors = F)
+  #   })
 
   # Creates a data_frame by going through all the maptypes and their
   # corresponding folders, reading in all raster files (only "tifs" at the )
-  fdir <- folderpaths %>%
-    purrr::pmap_dfr(function(name,folder,scale){
+  fdir <- folders_df %>%
+    purrr::pmap_dfr(function(maptype,scale,epsg,name,folder){
       folderpath <- file.path(rootdir,folder)
       list.files(folderpath,".tif$",full.names = T) %>%
         head(maxfiles) %>% # this can be used to test and debug the function
@@ -79,18 +128,23 @@ init_fdir <- function(rootdir,maxfiles = Inf,scales = c(10,25,50,200,100,500,100
             matrix(nrow = 1) %>%
             as.data.frame() %>%
             magrittr::set_colnames(c("xmin","xmax","ymin","ymax")) %>%
-            dplyr::mutate(scale = scale,
-                   file = x,
-                   nlayers = n_layers,
-                   res1 = reso[1],
-                   res2 = reso[2]
-                   )
+            dplyr::mutate(
+              maptype = maptype,
+              scale = scale,
+              epsg = epsg,
+              name = name,
+              file = x,
+              nlayers = n_layers,
+              res1 = reso[1],
+              res2 = reso[2]
+            )
         })
     })
   if(add_geometry){
     fdir <- geom_from_boundary(fdir, add = T,2056)
   }
   assign("fdir",fdir,envir = packageEnv)
+  fdir
 }
 
 
