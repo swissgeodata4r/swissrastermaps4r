@@ -68,13 +68,14 @@ data("landesgebiet")
 
 
 library(tmap)
+
 tm_shape(landesgebiet) + 
    tm_polygons() + show_extents("tmap")
 ```
 
 
 
-### Prepare single raster
+### Retrieve single raster
 
 Now let's look at an example where this package actually comes to some use. Say you want to plot a map of the largest cities in Switzerland. There is a sample dataset included in the package with name, location and size of the 10 largest cities in Switzerland. 
 
@@ -120,11 +121,9 @@ tm_shape(rastermap) +
   tm_dots(size = "EINWOHNERZ")
 ```
 
+### Retrieve multiple rasters
 
 In the previouse example, little was gained using the `get_raster` function. The function get's much more useful when multiple raster are needed. Using the same dataset, we can get a raster _per city_ using the option `per_feature = T`.
-
-If multiple rasters are returned, the output is a `list()` of rasters with a length corresponding to the number of featuers (i.e. rows) in the input features.
-
 ```{r}
 
 rastermap <- get_raster(features = gemeinden_top_centroid,
@@ -132,20 +131,30 @@ rastermap <- get_raster(features = gemeinden_top_centroid,
                         y_add = 1000,
                         per_feature = T,
                         scale_level = 25,
-                        method = "centroid")
+                        method = "centroid",
+                        limit = 4)
 
-tm_shape(rastermap[[1]]) + 
-  tm_rgb() + 
-  tm_shape(gemeinden_top_centroid[1,]) + 
-  tm_dots(size = "EINWOHNERZ")
-
-
-tm_shape(rastermap[[2]]) + 
-  tm_rgb() + 
-  tm_shape(gemeinden_top_centroid[2,]) + 
-  tm_dots(size = "EINWOHNERZ")
 ```
 
+If multiple rasters are returned, the output is a `list()` of rasters with a length corresponding to the number of featuers (i.e. rows) in the input features. To access the first map in the list, we use the double parenthese `[[]]`.
+
+
+```{r}
+tm_shape(rastermap[[1]]) + tm_rgb()
+
+```
+
+
+We can of course now add all of our vector data stored in the input feature. To keep things simple, we'll refrain from doing this in this example. Just one last thing: Having the maps in lists lets us wield the power of `purrr`:
+
+```{r}
+library(purrr)
+
+map(rastermap,function(x){
+  tm_shape(x) + tm_rgb()
+}) %>%
+  tmap_arrange(ncol = 2)
+```
 
 
 
