@@ -64,32 +64,7 @@ init_fdir <- function(rootdir,
                       maptypes = c("PK","SMR","LK","TA")
                       ){
 
-  # needs: dplyr, raster and purrr
-
-
-  # maxfiles: maximum number of files per maptype
-  # scales: what scales should be looked for?
-
-  # create a data_frame with all maptypes and scale.
-  # (note: "name" is the name of the map on one hand, and the keyword which
-  # will be queried on the other)
-  # Needs to be rewritten if other maptypes are included (LK, PK..)
-  # folder_poss <- purrr::map_dfr(maptypes,function(maptype){
-  #   purrr::map_dfr(scales,function(scale){
-  #     purrr::map_dfr(epsg_codes,function(epsg){
-  #       data.frame(
-  #         maptype = maptype,
-  #         scale = scale,
-  #         epsg = epsg,
-  #         folder = paste0(maptype,scale,"_",epsg),
-  #         stringsAsFactors = F)
-  #     })
-  #   })
-  # })
-
-    # Get all directories in rootdir
   dirs <- list.dirs(rootdir,recursive = F,full.names = F)
-
   dirs <- purrr::map(maptypes,~dirs[grepl(.x,dirs)]) %>% unlist()
 
 
@@ -140,8 +115,10 @@ init_fdir <- function(rootdir,
   if(add_geometry){
     fdir <- geom_from_boundary(fdir, add = T,2056)
   }
+  return_fdir = F  # if needed, this can be included as a function option.
   assign("fdir",fdir,envir = packageEnv)
-  fdir
+  if(return_fdir){return(fdir)}
+  print(paste("Done.",nrow(fdir),"Files saved in fdir. Use show_extents() to show their extents."))
 }
 
 

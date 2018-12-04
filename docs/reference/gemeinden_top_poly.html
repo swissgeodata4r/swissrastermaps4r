@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Show extents of Available Raste Files — show_extents • swissrastermaps4r</title>
+<title>Gemeinden Top Poly — gemeinden_top_poly • swissrastermaps4r</title>
 
 <!-- jquery -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
@@ -30,11 +30,9 @@
 
 
 
-<meta property="og:title" content="Show extents of Available Raste Files — show_extents" />
+<meta property="og:title" content="Gemeinden Top Poly — gemeinden_top_poly" />
 
-<meta property="og:description" content="This function visualizes the extents of all available rasters. The plots are
-faceted by scale and the area is colorized by resolution. The extents have an
-alpha value so that overlapping extents can be detected." />
+<meta property="og:description" content="Polygons of the 10 largest muncipalities (&quot;Gemeinden&quot;) in Switzerland." />
 <meta name="twitter:card" content="summary" />
 
 
@@ -99,50 +97,40 @@ alpha value so that overlapping extents can be detected." />
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Show extents of Available Raste Files</h1>
+    <h1>Gemeinden Top Poly</h1>
     
-    <div class="hidden name"><code>show_extents.Rd</code></div>
+    <div class="hidden name"><code>gemeinden_top_poly.Rd</code></div>
     </div>
 
     <div class="ref-description">
     
-    <p>This function visualizes the extents of all available rasters. The plots are
-faceted by scale and the area is colorized by resolution. The extents have an
-alpha value so that overlapping extents can be detected.</p>
+    <p>Polygons of the 10 largest muncipalities ("Gemeinden") in Switzerland.</p>
     
     </div>
 
-    <pre class="usage"><span class='fu'>show_extents</span>(<span class='kw'>method</span> <span class='kw'>=</span> <span class='st'>"ggplot2"</span>, <span class='kw'>fdir</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)</pre>
-    
-    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
-    <table class="ref-arguments">
-    <colgroup><col class="name" /><col class="desc" /></colgroup>
-    <tr>
-      <th>method</th>
-      <td><p>The method with which to visualize the data: <code>ggplot2</code> or <code>tmap</code>
-Wrap the output in <code>ggplotly()</code> to get an interactive ggplot output or set <code>tmap_mode</code>
-to "view" go get an interactive tmap.</p></td>
-    </tr>
-    <tr>
-      <th>filedirectory</th>
-      <td><p>The file directory aquired by <code><a href='init_fdir.html'>init_fdir()</a></code>. If left as
-<code>NULL</code>, the <code>fdir</code> from the package Environment is taken.</p></td>
-    </tr>
-    </table>
-    
-    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
+    <pre class="usage"><span class='no'>gemeinden_top_poly</span></pre>
+        
+    <h2 class="hasAnchor" id="format"><a class="anchor" href="#format"></a>Format</h2>
 
-    <p>This function requires ggplot2 and / or tmap, depending on the output type defined
-in "method".</p>
+    <p>An <code>sf</code> object containing polygon data</p><dl class='dl-horizontal'>
+  <dt>NAME</dt><dd><p>Name of the muncipality in its main language</p></dd>
+  <dt>EINWOHNERZ</dt><dd><p>Number of inhabitants</p></dd>
+  <dt>geometry</dt><dd><p>sfc_POLYGON  data in EPSG 2056</p></dd>
+</dl>
+    
+    <h2 class="hasAnchor" id="source"><a class="anchor" href="#source"></a>Source</h2>
+
+    <p><a href='https://shop.swisstopo.admin.ch/de/products/landscape/boundaries3D'>https://shop.swisstopo.admin.ch/de/products/landscape/boundaries3D</a></p>
     
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
     <ul class="nav nav-pills nav-stacked">
-      <li><a href="#arguments">Arguments</a></li>
       
-      <li><a href="#details">Details</a></li>
+      <li><a href="#format">Format</a></li>
+
+      <li><a href="#source">Source</a></li>
           </ul>
 
   </div>
