@@ -44,6 +44,13 @@ init_fdir("C:/Users/rata/Geodata/01_Switzerland/01_Maps")
 ```
 
 
+`init_fdir` stored an `sf` object in the package's own environment (called `packageEnv`). It's a list of all raster files, stored with their extent, scale, resolution and other information (see `init_fdir()`).
+
+
+```{r}
+ls(envir = packageEnv)
+```
+
 
 ### Show available raster extents
 
