@@ -1,0 +1,108 @@
+---
+title: "Showcasing"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Here's a little showcase on how this package can be used. Just some code, with not much explaination.
+
+## Prepare Environment
+
+```{r,warning=F,message=F}
+devtools::install_git("https://github.engineering.zhaw.ch/rata/swissmapraster.git",upgrade = F,quiet = T)
+
+
+library(swissrastermaps4r)
+library(sf)
+library(purrr)
+library(dplyr)
+library(tmap)
+library(glue)
+library(grid)
+```
+
+
+## Get Data
+
+Initialize the file directory and load the dataset `gemeinden_top_poly` containing the largest 10 municipalities in Switzerland.
+
+```{r,warning=F,message=F}
+init_fdir("C:/Users/rata/Geodata/01_Switzerland/01_Maps")
+
+data("gemeinden_top_poly")
+```
+
+
+## Prepare Vector Data
+
+
+Calculate area and population density per municipality:
+```{r}
+gemeinden_top_poly <- gemeinden_top_poly %>%
+  mutate(
+    area_km2 = as.integer(st_area(gemeinden_top_poly)/1000000),
+    dichte = EINWOHNERZ/area_km2
+    )
+```
+
+Create an cookiecutter shape for each feature.  
+```{r}
+ext_inv <- gemeinden_top_poly %>%
+  get_extent(.,x_add = 0,y_add = 0,method = "bbox",per_feature = T) %>%
+  st_geometry() %>%
+  map2(st_geometry(gemeinden_top_poly),~st_difference(.x,.y)) %>%
+  st_sfc() %>%
+  st_set_crs(2056)
+
+```
+
+
+## Prepare Figure Captions
+
+Create a (text) caption per municipality which can later be included in `fig.cap =` of the markdown chunk (not visible in the output document). 
+```{r}
+caption <- st_set_geometry(gemeinden_top_poly,NULL) %>%
+  pmap_chr(function(NAME,EINWOHNERZ,area_km2,dichte,rank){
+    glue("Die Gemeindegrenze von {NAME} umfasst ein Fläche von {area_km2} km^2^. In diesem Gebiet leben {formatC(EINWOHNERZ,big.mark = ",")} Einwohner, was eine Einwohnerdichte von {as.integer(dichte)}
+         Menschen pro km^2^ bedeutet.")
+  })
+```
+
+
+## Create plots
+
+Run a loop over each feature calling `get_raster()` within the plot. This avoids saving 
+all the rasters in a huge list.
+
+```{r,results='asis',fig.cap=caption}
+# Give credit to whom credit due:
+credits <- "Geodata \u00A9 Swisstopo" 
+
+data("landesgebiet")
+
+
+
+for(i in 1:nrow(gemeinden_top_poly)){
+  extent_indicator <- tm_shape(landesgebiet) + 
+    tm_polygons() + 
+    tm_shape(get_extent(gemeinden_top_poly[i,],x_add = 1000,y_add = 1000,method = "bbox")) + 
+    tm_polygons(col = "red", alpha = 0.5) +
+    tm_layout(frame = F) +
+    tm_view(alpha = 0)
+  mainmap <- tm_shape(get_raster(gemeinden_top_poly[i,],100,method = "bbox")) + 
+    tm_rgb() + 
+    tm_shape(ext_inv[i])+ 
+    tm_polygons(alpha = 0.8,fill = "white") +
+    tm_credits(credits,bg.color = "white",bg.alpha = 0.8) +
+    tm_compass(position = c("right","top")) +
+    tm_layout(frame = F)
+  grid.newpage()
+  print(mainmap, vp=viewport(0,0,0.7,1,just = c("left","bottom")))
+  print(extent_indicator, vp=viewport(1,1,0.3,0.3,just = c("right","top")))
+}
+
+```
+

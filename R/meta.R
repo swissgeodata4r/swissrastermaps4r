@@ -1,6 +1,6 @@
 
 packageEnv <- new.env()
-import::from(magrittr, "%>%")
+
 
 
 

@@ -180,7 +180,7 @@ rgb_brick_count <- function(brick,maxColorValue = 255){
 #' Long Desc
 #'
 #' @param param desc
-get_extent <- function(features,x_add,y_add,method = "centroid",per_feature = T){
+get_extent <- function(features,x_add = 0,y_add = 0,method = "centroid",per_feature = T){
   # gets the centeroid of feature(s), adds the x, and y distances and returns a
   # matrix with x/y min/max plus and extent-object.
 
@@ -224,6 +224,11 @@ get_extent <- function(features,x_add,y_add,method = "centroid",per_feature = T)
     } else(
       stop(paste("This method is not defined:",method))
     )
+
+  if(!all(((ext$xmax - ext$xmin) != 0 )& ((ext$ymax - ext$ymin) != 0 ))){
+    stop("All extents must be >0")
+  }
+
   ext %>%
     dplyr::rowwise() %>%
     dplyr::mutate(
@@ -231,7 +236,8 @@ get_extent <- function(features,x_add,y_add,method = "centroid",per_feature = T)
     ) %>%
     dplyr::ungroup() %>%
     geom_from_boundary(add = T,2056)
-}
+
+  }
 
 
 #' Get corresponding raster maps to feature
@@ -302,9 +308,7 @@ get_raster <- function(features,
                    per_feature = per_feature
                    )
 
-  if(!all(((ex$xmax - ex$xmin) != 0 )& ((ex$ymax - ex$ymin) != 0 ))){
-    stop("All extents must be >0")
-    }
+
 
   name_i <- name # to avoid conflicts with columns of the same name
 

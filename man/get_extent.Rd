@@ -4,7 +4,7 @@
 \alias{get_extent}
 \title{Get extent of \code{sf} object}
 \usage{
-get_extent(features, x_add, y_add, method = "centroid",
+get_extent(features, x_add = 0, y_add = 0, method = "centroid",
   per_feature = T)
 }
 \arguments{

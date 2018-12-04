@@ -144,20 +144,27 @@ If multiple rasters are returned, the output is a `list()` of rasters with a len
 
 
 ```{r}
-tm_shape(rastermap[[1]]) + tm_rgb()
+credits <- "Geodata \u00A9 Swisstopo"
+
+tm_shape(rastermap[[1]]) + 
+  tm_rgb() + 
+  tm_credits(credits,bg.color = "white",bg.alpha = 0.8)
 
 ```
 
 
-We can of course now add all of our vector data stored in the input feature. To keep things simple, we'll refrain from doing this in this example. Just one last thing: Having the maps in lists lets us wield the power of `purrr`:
+We can of course now add all of our vector data stored in the input feature. To keep things simple, we'll refrain from doing this in this example. Just one last thing: Having the maps in lists lets us wield the power of `purrr`. (`map()` is wrapped in `invisible()` to suppress item index)
 
-```{r}
+```{r,results='asis'}
 library(purrr)
 
-map(rastermap,function(x){
-  tm_shape(x) + tm_rgb()
-}) %>%
-  tmap_arrange(ncol = 2)
+invisible(
+  map(rastermap,function(x){
+  tm_shape(x) + 
+    tm_rgb() +
+    tm_credits(credits,bg.color = "white",bg.alpha = 0.8)
+})
+)
 ```
 
 
