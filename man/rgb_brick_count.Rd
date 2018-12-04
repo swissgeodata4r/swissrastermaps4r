@@ -2,7 +2,7 @@
 % Please edit documentation in R/raster_functions.R
 \name{rgb_brick_count}
 \alias{rgb_brick_count}
-\title{Name}
+\title{Count the number of RBG Combinations}
 \usage{
 rgb_brick_count(brick, maxColorValue = 255)
 }
@@ -10,8 +10,13 @@ rgb_brick_count(brick, maxColorValue = 255)
 \item{param}{desc}
 }
 \description{
-Short Desc
+Count the number of \strong{used} RGB Combinations in a given raster brick object.
 }
 \details{
-Long Desc
+Given 255 possible values for R, B and G the number of possiblities is \eqn{255^3 = 16581375}
+But how many are actually used? This function calculates the number of used
+combinations of R, B and G in a given Raster Brick object.
+It takes a three band raster, turns all cells into a vector for every band,
+counts the number of unique combinations and returns a hex colour code
+for each combination
 }

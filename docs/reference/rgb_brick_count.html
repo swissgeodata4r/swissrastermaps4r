@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Name — rgb_brick_count • swissrastermaps4r</title>
+<title>Count the number of RBG Combinations — rgb_brick_count • swissrastermaps4r</title>
 
 <!-- jquery -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
@@ -30,9 +30,9 @@
 
 
 
-<meta property="og:title" content="Name — rgb_brick_count" />
+<meta property="og:title" content="Count the number of RBG Combinations — rgb_brick_count" />
 
-<meta property="og:description" content="Short Desc" />
+<meta property="og:description" content="Count the number of used RGB Combinations in a given raster brick object." />
 <meta name="twitter:card" content="summary" />
 
 
@@ -97,14 +97,14 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Name</h1>
+    <h1>Count the number of RBG Combinations</h1>
     
     <div class="hidden name"><code>rgb_brick_count.Rd</code></div>
     </div>
 
     <div class="ref-description">
     
-    <p>Short Desc</p>
+    <p>Count the number of <strong>used</strong> RGB Combinations in a given raster brick object.</p>
     
     </div>
 
@@ -121,7 +121,12 @@
     
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
-    <p>Long Desc</p>
+    <p>Given 255 possible values for R, B and G the number of possiblities is \(255^3 = 16581375\)
+But how many are actually used? This function calculates the number of used
+combinations of R, B and G in a given Raster Brick object.
+It takes a three band raster, turns all cells into a vector for every band,
+counts the number of unique combinations and returns a hex colour code
+for each combination</p>
     
 
   </div>

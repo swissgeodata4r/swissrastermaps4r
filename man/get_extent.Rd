@@ -2,7 +2,7 @@
 % Please edit documentation in R/raster_functions.R
 \name{get_extent}
 \alias{get_extent}
-\title{Name}
+\title{Get extent of \code{sf} object}
 \usage{
 get_extent(features, x_add, y_add, method = "centroid",
   per_feature = T)
@@ -11,7 +11,7 @@ get_extent(features, x_add, y_add, method = "centroid",
 \item{param}{desc}
 }
 \description{
-Short Desc
+Get extent of \code{sf} object
 }
 \details{
 Long Desc

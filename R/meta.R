@@ -44,34 +44,24 @@ geom_from_boundary <- function(df, add = T, epsg = NULL){
 #' All files ending with "tif" are checked for extent, number of layers and resolution.
 #' All the mentioned attributes of each raster file, along with the file path and the extent as a
 #' geometry, are stoerd in the variable \code{fdir} of the package environment.
-#' Folders as specified by \code{folders} require a specific structure:
-#' \code{TYPE-Scale_EPSG_name}
+#' Parent folders containing the rasterdata require a specific structure:
+#' \code{TYPE_Scale_EPSG_name}
 #' \describe{
-#'   \item{\code{TYPE}}{corresponds to the maptype. IN Switzerland this is typically \code{SMR}, \code{PK}, \code{LK} or \code{TA}. \strong{Must} be followed by a \code{-}}
+#'   \item{\code{TYPE}}{corresponds to the maptype. IN Switzerland this is typically \code{SMR}, \code{PK}, \code{LK} or \code{TA}. \strong{Must} be followed by a \code{_}}
 #'   \item{\code{Scale}}{defines the map scale as x in 1:1'000x. \strong{Must} be followed by a \code{_}}
 #'   \item{\code{EPSG}}{specifies the CRS of the containing raster data \strong{Must} be followed by a \code{_} \strong{only} if \code{name} is specified}
 #'   \item{\code{name}}{is only needed when multiple maps with overlapping extents as well as same scale, level and projection exist (e.g. \href{SMR1000 https://shop.swisstopo.admin.ch/en/products/maps/national/digital/srm1000}{SMR1000})}
 #' }
 #' @param rootdir Character string specifying the directory where the folders are stored
 #' @param maxfiles Integer limiting the number of files to be scanned. For testing purposes only.
-#' @param add_geometry Should the bounding box of each file be added as a geometry to \code{fdir?
-#' @param folders Names of the folders containing the raster files. These folders names
-#' require a very specific nomenclature for this whole thing to work (see description)
+#' @param add_geometry Should the bounding box of each file be added as a geometry to \code{fdir}?
+#' @param maptypes Names of the maptypes to look for. Only folders containing at least one of the
+#' the character strings noted here are included in the search.
 
 init_fdir <- function(rootdir,
                       maxfiles = Inf,
                       add_geometry = T,
-                      folders = c("SMR-25_2056",
-                                  "SMR-25_21781",
-                                  "SMR-25_21781",
-                                  "SMR-50_2056",
-                                  "PK-100_2056",
-                                  "PK-200_2056",
-                                  "PK-500_2056",
-                                  "PK-1000_2056_orte",
-                                  "PK-1000_2056_relief",
-                                  "PK-1000_2056_reliefcol",
-                                  "PK-1000_2056_strassen")
+                      maptypes = c("PK","SMR","LK","TA")
                       ){
 
   # needs: dplyr, raster and purrr
@@ -98,44 +88,24 @@ init_fdir <- function(rootdir,
   # })
 
     # Get all directories in rootdir
-  # dirs <- list.dirs(rootdir,recursive = T,full.names = F)
+  dirs <- list.dirs(rootdir,recursive = F,full.names = F)
 
-  folders_df <- strsplit(folders,"-") %>%
+  dirs <- purrr::map(maptypes,~dirs[grepl(.x,dirs)]) %>% unlist()
+
+
+  folders_df <- strsplit(dirs,"_") %>%
     purrr::map_dfr(function(x){
-      strsplit(x[2],"_") %>%
-        purrr::map_dfr(function(y){
-          data.frame(
-            maptype = x[1],
-            scale = y[1],
-            epsg = y[2],
-            name = ifelse(length(y) == 3,y[3],""),
-            stringsAsFactors = F
-          )
-        })
-      }) %>%
+      data.frame(
+        maptype = x[1],
+        scale = x[2],
+        epsg = x[3],
+        name = ifelse(length(x)==4,x[4],""),
+        stringsAsFactors = F
+      )
+    }) %>%
     dplyr::mutate(
-      folder = folders
+      folder = dirs
     )
-
-
-
-
-
-  # Assign Folders to each maptype. This part is very fragile and will break
-  # if more than one folder meets the query, and if rasterfiles are organized
-  # in subfolders of each maptype-folder. Must be rewritten!
-  # folderpaths <- maptypes %>%
-  #   purrr::pmap_dfr(function(name,scale){
-  #     folder <-  dirs[grepl(paste0(name,"_"),dirs,ignore.case = T)]
-  #     epsg <-  strsplit(folder,split = "_")[[1]]
-  #     epsg <- epsg[length(epsg)]
-  #     data.frame(
-  #       name = name,
-  #       folder = folder,
-  #       scale = scale,
-  #       epsg = epsg,
-  #       stringsAsFactors = F)
-  #   })
 
   # Creates a data_frame by going through all the maptypes and their
   # corresponding folders, reading in all raster files (only "tifs" at the )
@@ -164,7 +134,9 @@ init_fdir <- function(rootdir,
               res2 = reso[2]
             )
         })
-    })
+    }) %>%
+    dplyr::filter(epsg == 2056) #. in this stage, only epsg 2056 is supported. A way to handle other EPSG should at one point be implemented
+
   if(add_geometry){
     fdir <- geom_from_boundary(fdir, add = T,2056)
   }

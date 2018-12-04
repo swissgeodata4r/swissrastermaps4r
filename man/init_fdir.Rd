@@ -5,18 +5,17 @@
 \title{Initialize File Directory}
 \usage{
 init_fdir(rootdir, maxfiles = Inf, add_geometry = T,
-  folders = c("SMR-25_2056", "SMR-25_21781", "SMR-25_21781",
-  "SMR-50_2056", "PK-100_2056", "PK-200_2056", "PK-500_2056",
-  "PK-1000_2056_orte", "PK-1000_2056_relief", "PK-1000_2056_reliefcol",
-  "PK-1000_2056_strassen"))
+  maptypes = c("PK", "SMR", "LK", "TA"))
 }
 \arguments{
 \item{rootdir}{Character string specifying the directory where the folders are stored}
 
 \item{maxfiles}{Integer limiting the number of files to be scanned. For testing purposes only.}
 
-\item{folders}{Names of the folders containing the raster files. These folders names
-require a very specific nomenclature for this whole thing to work (see description)}
+\item{add_geometry}{Should the bounding box of each file be added as a geometry to \code{fdir}?}
+
+\item{maptypes}{Names of the maptypes to look for. Only folders containing at least one of the
+the character strings noted here are included in the search.}
 }
 \description{
 Scans all folders in the root dirctory corresponding to the folders given by
@@ -28,12 +27,12 @@ all folders specified by \code{folders} within the \code{rootdir} and analyzing 
 All files ending with "tif" are checked for extent, number of layers and resolution.
 All the mentioned attributes of each raster file, along with the file path and the extent as a
 geometry, are stoerd in the variable \code{fdir} of the package environment.
-Folders as specified by \code{folders} require a specific structure:
-\code{TYPE-Scale_EPSG_name}
+Parent folders containing the rasterdata require a specific structure:
+\code{TYPE_Scale_EPSG_name}
 \describe{
-  \item{\code{TYPE}}{corresponds to the maptype. IN Switzerland this is typically SMR, PK, LK or TA. \strong{Must} be followed by a \code{-}}
+  \item{\code{TYPE}}{corresponds to the maptype. IN Switzerland this is typically \code{SMR}, \code{PK}, \code{LK} or \code{TA}. \strong{Must} be followed by a \code{_}}
   \item{\code{Scale}}{defines the map scale as x in 1:1'000x. \strong{Must} be followed by a \code{_}}
   \item{\code{EPSG}}{specifies the CRS of the containing raster data \strong{Must} be followed by a \code{_} \strong{only} if \code{name} is specified}
-  \item{\code{name}}{is only needed when multiple map with overlapping extents as well as same scale, level and projection exist (e.g. \href{SMR1000 https://shop.swisstopo.admin.ch/en/products/maps/national/digital/srm1000}{SMR1000})}
+  \item{\code{name}}{is only needed when multiple maps with overlapping extents as well as same scale, level and projection exist (e.g. \href{SMR1000 https://shop.swisstopo.admin.ch/en/products/maps/national/digital/srm1000}{SMR1000})}
 }
 }

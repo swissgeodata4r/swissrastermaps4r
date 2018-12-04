@@ -1,4 +1,3 @@
-
 import::from(magrittr, "%>%")
 
 #' Threeband RGB to singleband raster
