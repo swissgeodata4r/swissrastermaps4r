@@ -1,5 +1,5 @@
 ---
-title: "Package swissmapraster 4 R"
+title: "Package swissrastermaps4R"
 subtitle: "(Package Name under construction)"
 output: html_document
 ---

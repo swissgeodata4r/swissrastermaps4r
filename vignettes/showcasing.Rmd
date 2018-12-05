@@ -69,8 +69,8 @@ Create a (text) caption per municipality which can later be included in `fig.cap
 ```{r}
 caption <- st_set_geometry(gemeinden_top_poly,NULL) %>%
   pmap_chr(function(NAME,EINWOHNERZ,area_km2,dichte,rank){
-    glue("Die Gemeindegrenze von {NAME} umfasst ein Fläche von {area_km2} km^2^. In diesem Gebiet leben {formatC(EINWOHNERZ,big.mark = ",")} Einwohner, was eine Einwohnerdichte von {as.integer(dichte)}
-         Menschen pro km^2^ bedeutet.")
+    glue("Die Gemeindegrenze von {NAME} umfasst ein Fläche von {area_km2} km2. In diesem Gebiet leben {formatC(EINWOHNERZ,big.mark = ",")} Einwohner, was eine Einwohnerdichte von {as.integer(dichte)}
+         Menschen pro km2 bedeutet.")
   })
 ```
 
@@ -80,13 +80,8 @@ caption <- st_set_geometry(gemeinden_top_poly,NULL) %>%
 Run a loop over each feature calling `get_raster()` within the plot. This avoids saving 
 all the rasters in a huge list.
 
-```{r,results='asis',fig.cap=caption}
-# Give credit to whom credit due:
-credits <- "Geodata \u00A9 Swisstopo" 
-
+```{r,results='asis'}
 data("landesgebiet")
-
-
 
 for(i in 1:nrow(gemeinden_top_poly)){
   extent_indicator <- tm_shape(landesgebiet) + 
@@ -106,6 +101,12 @@ for(i in 1:nrow(gemeinden_top_poly)){
   grid.newpage()
   print(mainmap, vp=viewport(0,0,0.7,1,just = c("left","bottom")))
   print(extent_indicator, vp=viewport(1,1,0.3,0.3,just = c("right","top")))
+  grid.text(sapply(strwrap(caption[i],30,simplify = F), paste, collapse = "\n"),
+            x = 0.7,
+            y = 0.6,
+            vjust = 1,
+            hjust=0,
+            gp=gpar(fontsize=10))
 }
 
 ```

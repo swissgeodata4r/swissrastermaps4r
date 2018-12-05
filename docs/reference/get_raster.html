@@ -122,14 +122,14 @@
 
     <pre class="usage"><span class='fu'>get_raster</span>(<span class='no'>features</span>, <span class='no'>scale_level</span>, <span class='kw'>x_add</span> <span class='kw'>=</span> <span class='fl'>0</span>, <span class='kw'>y_add</span> <span class='kw'>=</span> <span class='fl'>0</span>,
   <span class='kw'>per_feature</span> <span class='kw'>=</span> <span class='no'>F</span>, <span class='kw'>method</span> <span class='kw'>=</span> <span class='st'>"centroid"</span>, <span class='kw'>turn_greyscale</span> <span class='kw'>=</span> <span class='no'>F</span>,
-  <span class='kw'>name</span> <span class='kw'>=</span> <span class='st'>""</span>, <span class='kw'>fdir</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>limit</span> <span class='kw'>=</span> <span class='fl'>Inf</span>)</pre>
+  <span class='kw'>name</span> <span class='kw'>=</span> <span class='st'>""</span>, <span class='kw'>fdir</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>limit</span> <span class='kw'>=</span> <span class='fl'>Inf</span>, <span class='kw'>asp</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>features</th>
-      <td><p>The <code>sf</code> object to derive the raster data from</p></td>
+      <td><p>The <span class="pkg">sf</span>  object to derive the raster data from</p></td>
     </tr>
     <tr>
       <th>scale_level</th>
@@ -141,7 +141,7 @@
     </tr>
     <tr>
       <th>per_feature</th>
-      <td><p>A TRUE/FALSE value specifying if one raster map should be returend for the entire <code>sf</code> object or if one map should be returned per feature</p></td>
+      <td><p>A TRUE/FALSE value specifying if one raster map should be returend for the entire <span class="pkg">sf</span>  object or if one map should be returned per feature</p></td>
     </tr>
     <tr>
       <th>method</th>

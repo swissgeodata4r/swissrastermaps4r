@@ -167,7 +167,7 @@ rgb_brick_count <- function(brick,maxColorValue = 255){
     map(as.vector) %>%
     bind_cols() %>%
     magrittr::set_colnames(c("r","g","b")) %>%
-    group_by_all() %>%
+    dplyr::group_by_all() %>%
     count() %>%
     dplyr::mutate(hex = rgb(r,g,b,maxColorValue = maxColorValue))
 }
@@ -190,7 +190,7 @@ get_extent <- function(features,x_add = 0,y_add = 0,method = "centroid",per_feat
 
   if(!per_feature){
     features <- features %>%
-      group_by(1) %>%
+      dplyr::group_by(1) %>%
       summarise()
   }
 

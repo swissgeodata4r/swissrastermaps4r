@@ -32,7 +32,7 @@ reference:
       - landesgebiet
   - title: "Raster manipulation"
     desc: >
-      Some helper functions for raster manipulation. These are mostly needed for backend and have little use for front end users.
+      Some auxiliary functions for raster manipulation. These are mostly needed for backend and have little use for front end users.
     contents:
       - raster_greyscale
       - rgb_grey_mean
@@ -42,8 +42,9 @@ reference:
       - ysrgb
       - colortable_greyscale
       - rgb_brick_count
-  - title: "Other helper functions."
+  - title: "Other functions."
     desc: >
-      These are mostly needed for backend and have little use for front end users.
+      Some more auxiliary functions. These are mostly needed for backend and have little use for front end users.
     contents:
       - get_extent
+      - asp2extent
