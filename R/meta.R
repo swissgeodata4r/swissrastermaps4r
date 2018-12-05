@@ -201,3 +201,10 @@ asp2extent <- function(xmin,xmax,ymin,ymax,asp = 1){
              ymax = ymax,
              stringsAsFactors = F)
 }
+
+
+credits <- function(who){
+  if(who == "swisstopo"){
+  "Geodata \u00A9 Swisstopo"
+  }
+}

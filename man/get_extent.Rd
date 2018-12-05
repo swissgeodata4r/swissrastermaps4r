@@ -2,16 +2,16 @@
 % Please edit documentation in R/raster_functions.R
 \name{get_extent}
 \alias{get_extent}
-\title{Get extent of \code{sf} object}
+\title{Get extent of \pkg{sf}  object}
 \usage{
 get_extent(features, x_add = 0, y_add = 0, method = "centroid",
-  per_feature = T)
+  per_feature = T, asp = NULL)
 }
 \arguments{
 \item{param}{desc}
 }
 \description{
-Get extent of \code{sf} object
+Get extent of \pkg{sf}  object
 }
 \details{
 Long Desc

@@ -91,7 +91,7 @@ data("landesgebiet")
 for(i in 1:nrow(gemeinden_top_poly)){
   extent_indicator <- tm_shape(landesgebiet) + 
     tm_polygons() + 
-    tm_shape(get_extent(exts[1,],x_add = 1000,y_add = 1000,method = "bbox")) + 
+    tm_shape(get_extent(exts[i,],x_add = 1000,y_add = 1000,method = "bbox")) + 
     tm_polygons(col = "red", alpha = 0.5) +
     tm_layout(frame = F) +
     tm_view(alpha = 0)
@@ -100,7 +100,7 @@ for(i in 1:nrow(gemeinden_top_poly)){
     tm_shape(ext_inv[i])+ 
     tm_polygons(alpha = 0.8,fill = "white") +
     tm_scale_bar(position = c("left","bottom")) +
-    tm_credits(credits,bg.color = "white",bg.alpha = 0.8) +
+    tm_credits(credits("swisstopo"),bg.color = "white",bg.alpha = 0.8) +
     tm_compass(position = c("right","top")) +
     tm_layout(frame = F) 
   grid.newpage()

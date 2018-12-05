@@ -6,16 +6,16 @@
 \usage{
 get_raster(features, scale_level, x_add = 0, y_add = 0,
   per_feature = F, method = "centroid", turn_greyscale = F,
-  name = "", fdir = NULL, limit = Inf)
+  name = "", fdir = NULL, limit = Inf, asp = NULL)
 }
 \arguments{
-\item{features}{The \code{sf} object to derive the raster data from}
+\item{features}{The \pkg{sf}  object to derive the raster data from}
 
 \item{scale_level}{The scale at which to get raster data (x in 1:1'000x). Usually one of the following values (depending on the available rasters): 10,25,100,500,1000}
 
 \item{x_add, y_add}{Depending on method, x and y will be added to the centeroid or to the bounding box}
 
-\item{per_feature}{A TRUE/FALSE value specifying if one raster map should be returend for the entire \code{sf} object or if one map should be returned per feature}
+\item{per_feature}{A TRUE/FALSE value specifying if one raster map should be returend for the entire \pkg{sf}  object or if one map should be returned per feature}
 
 \item{method}{A character string specifying the method with which the extent should be calculated. \code{centroid} calculates the centroid of the object(s), \code{bbox} calculates the bounding box of the object.}
 
