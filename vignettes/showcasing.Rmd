@@ -50,8 +50,11 @@ gemeinden_top_poly <- gemeinden_top_poly %>%
 
 Create an cookiecutter shape for each feature.  
 ```{r}
-ext_inv <- gemeinden_top_poly %>%
-  get_extent(.,x_add = 0,y_add = 0,method = "bbox",per_feature = T) %>%
+
+exts <- gemeinden_top_poly %>%
+  get_extent(.,x_add = 0,y_add = 0,method = "bbox",per_feature = T,asp = 1)
+
+ext_inv <- exts %>%
   st_geometry() %>%
   map2(st_geometry(gemeinden_top_poly),~st_difference(.x,.y)) %>%
   st_sfc() %>%
@@ -88,11 +91,11 @@ data("landesgebiet")
 for(i in 1:nrow(gemeinden_top_poly)){
   extent_indicator <- tm_shape(landesgebiet) + 
     tm_polygons() + 
-    tm_shape(get_extent(gemeinden_top_poly[i,],x_add = 1000,y_add = 1000,method = "bbox")) + 
+    tm_shape(get_extent(exts[1,],x_add = 1000,y_add = 1000,method = "bbox")) + 
     tm_polygons(col = "red", alpha = 0.5) +
     tm_layout(frame = F) +
     tm_view(alpha = 0)
-  mainmap <- tm_shape(get_raster(gemeinden_top_poly[i,],100,method = "bbox")) + 
+  mainmap <- tm_shape(get_raster(exts[i,],100,method = "bbox")) + 
     tm_rgb() + 
     tm_shape(ext_inv[i])+ 
     tm_polygons(alpha = 0.8,fill = "white") +

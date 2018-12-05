@@ -173,14 +173,14 @@ rgb_brick_count <- function(brick,maxColorValue = 255){
 }
 
 
-#' Get extent of \code{sf} object
+#' Get extent of \pkg{sf}  object
 #'
-#' Calculate the extent of an \{sf} object.
+#' Calculate the extent of an \code\{sf} object.
 #'
 #' Long Desc
 #'
 #' @param param desc
-get_extent <- function(features,x_add = 0,y_add = 0,method = "centroid",per_feature = T){
+get_extent <- function(features,x_add = 0,y_add = 0,method = "centroid",per_feature = T,asp = NULL){
   # gets the centeroid of feature(s), adds the x, and y distances and returns a
   # matrix with x/y min/max plus and extent-object.
 
@@ -225,9 +225,13 @@ get_extent <- function(features,x_add = 0,y_add = 0,method = "centroid",per_feat
       stop(paste("This method is not defined:",method))
     )
 
+
   if(!all(((ext$xmax - ext$xmin) != 0 )& ((ext$ymax - ext$ymin) != 0 ))){
     stop("All extents must be >0")
   }
+
+  if(!is.null(asp)){ext <- asp2extent(ext$xmin,ext$xmax,ext$ymin,ext$ymax,asp = asp)}
+
 
   ext %>%
     dplyr::rowwise() %>%
@@ -248,7 +252,7 @@ get_extent <- function(features,x_add = 0,y_add = 0,method = "centroid",per_feat
 #'  (a scale 1:1'000'000 is defined as \code{scale = 1000}) and method with which the
 #'  extent is defined (\code{method = }) need to be specified. Currently, two methods
 #'  are implemented: `bbox` takes a bounding box while `centroid` calculates the
-#'  centroid of the sf object. Both methods accept \code{x_add}/\code{y_add} with which the
+#'  centroid of the \pkg{sf}  object. Both methods accept \code{x_add}/\code{y_add} with which the
 #'  extent window is enlarged. Method \code{centroid} _requires_ \code{x_add}/\code{y_add}, since
 #'  the extent windows would have \eqn{\Delta x,\ \Delta y} of Zero.
 #'  Todo
@@ -257,13 +261,13 @@ get_extent <- function(features,x_add = 0,y_add = 0,method = "centroid",per_feat
 #'   \item Add colortable options
 #'   \item "x/y_add" should have a nicer name.. something with distance maybe?
 #'   \item implement other was to get the extent (bounding box w/ or w/o buffer)
-#'   \item add failsafes: e.g check if "features" is really an sf object
+#'   \item add failsafes: e.g check if "features" is really an \pkg{sf}  object
 #'   \item make this a lazy function: at the moment, all raster files are downloaded into memory.
 #' }
-#' @param features The \code{sf} object to derive the raster data from
+#' @param features The \pkg{sf}  object to derive the raster data from
 #' @param scale_level The scale at which to get raster data (x in 1:1'000x). Usually one of the following values (depending on the available rasters): 10,25,100,500,1000
 #' @param x_add,y_add Depending on method, x and y will be added to the centeroid or to the bounding box
-#' @param per_feature A TRUE/FALSE value specifying if one raster map should be returend for the entire \code{sf} object or if one map should be returned per feature
+#' @param per_feature A TRUE/FALSE value specifying if one raster map should be returend for the entire \pkg{sf}  object or if one map should be returned per feature
 #' @param method A character string specifying the method with which the extent should be calculated. \code{centroid} calculates the centroid of the object(s), \code{bbox} calculates the bounding box of the object.
 #' @param turn_greyscale Should the output rastermaps be turned into greyscale?
 #' @param name If muliple, different maps are available with overlapping extents, \code{name} can be used to differentiate between different maptypes. Default is an empty sting.
@@ -279,7 +283,8 @@ get_raster <- function(features,
                        turn_greyscale = F,
                        name = "",
                        fdir = NULL,
-                       limit = Inf
+                       limit = Inf,
+                       asp = NULL
 ){
 
 
@@ -305,7 +310,8 @@ get_raster <- function(features,
                    x_add = x_add,
                    y_add = y_add,
                    method = method,
-                   per_feature = per_feature
+                   per_feature = per_feature,
+                   asp = asp
                    )
 
 

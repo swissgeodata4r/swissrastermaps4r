@@ -169,3 +169,35 @@ show_extents <- function(method = "ggplot2",fdir = NULL){
   return(plotoutput)
 }
 
+
+#' Recalculate extent values from a given aspect ratio
+#'
+#' Takes four vectors (xmin, xmax, ymin and ymax) and returns the new values based on a given aspect ratio
+#' Aspect ratio is calculated as \eqn{\frac{\Delta y\ }{\Delta x\ }}. Values > 1 therefore means portrait,
+#' values < 1 means landscape.
+#'
+#' At the moment, this function can only enlargen the extent in order to match the aspect ratio. At one point,
+#' it might be neccessary to add the option to shrink the extent accordingly.
+#'
+#' @param xmin,xmax,ymin,ymax Numeric Vectors of the same length specifying the x/y extents
+#' @param aps Aspect ratio calculated as specified in the description. A single numeric value or a vector in the
+#' same length as xmin etc.
+#' @param return Returns a dataframe with four columns named \code{xmin}, \code{xmax}, \code{ymin}, \code{ymax}
+asp2extent <- function(xmin,xmax,ymin,ymax,asp = 1){
+  width = xmax-xmin
+  height = ymax-ymin
+  asp_calc = height/width
+  width_new = ifelse(asp_calc>asp,asp*height,width)
+  height_new = ifelse(asp_calc<asp,asp*width,height)
+  width_diff = width_new - width
+  height_diff = height_new-height
+  xmin = xmin-width_diff/2
+  xmax = xmax+width_diff/2
+  ymin = ymin-height_diff/2
+  ymax = ymax+height_diff/2
+  data.frame(xmin = xmin,
+             xmax = xmax,
+             ymin = ymin,
+             ymax = ymax,
+             stringsAsFactors = F)
+}
