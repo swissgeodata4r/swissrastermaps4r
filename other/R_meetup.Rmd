@@ -37,7 +37,9 @@ library(tidyverse)
 
 --
 
-I would like to simplify access to swisstopo geodata from within `R`. Currently, using swisstopo maps in `R` is easy if: 
+I would like to simplify access to swisstopo geodata from within `R`. 
+
+Currently, using swisstopo rastermaps in `R` is easy if: 
 
 --
 
@@ -49,7 +51,10 @@ I would like to simplify access to swisstopo geodata from within `R`. Currently,
 
 --
 
-.footnote[[1] Smaller scale maps are split into multiple tiles. For exmple, the 1:25'000 map consists of 260 Tiles] 
+**BUT:** 
+
+- Smaller scale maps are split into multiple tiles. 
+- For example, the 1:25'000 map consists of 260 individual Tiles
 
 
 ```{r,include=F}
@@ -71,7 +76,7 @@ zuerich <- gemeinden_top_poly[gemeinden_top_poly$NAME == "Zürich",]
 
 ## Current workflow
 
-To create a map with one of these tiles, we have to follow the following steps:
+
 
 --
 
@@ -79,19 +84,19 @@ To create a map with one of these tiles, we have to follow the following steps:
 
 --
 
-2. look for the relevant map numbers based on the division (“Blatteinteilung”)
+2. search for the relevant map number(s)
 
 --
 
-3. find the appropriate raster maps based on the map numbers from the previous step
+3. find the appropriate raster map(s) based on the map numbers
 
 --
 
-4. import raster into R
+4. import raster data into R
 
 --
 
-5. check raster resolutions and possibly resample all rasters to same resolution
+5. check resolutions and possibly resample all rasters to same resolution
 
 --
 
@@ -107,33 +112,10 @@ To create a map with one of these tiles, we have to follow the following steps:
 
 --
 
----
+→ This is where `swissrastermaps4r` comes in.
 
-## Current workflow
+→ This `R` package (work in progress) automates steps 2 - 7
 
-
-To create a map with one of these tiles, we have to follow the following steps:
-
-
-1. first decide on a scale
-
-2. ~~look for the relevant map numbers based on the division (“Blatteinteilung”)~~
-
-3. ~~find the appropriate raster maps based on the map numbers from the previous step~~
-
-4. ~~import raster into R~~
-
-5. ~~check raster resolutions and possibly resample all rasters to same resolution~~
-
-6. ~~merge all the relevant raster maps into a single file~~
-
-7. ~~possibly reassign CRS and colormap~~
-
-8. finally: plot data
-
-→ This is where `swissrastermaps4r` comes in. 
-
-→ It is a package that automates steps 2 - 7
 ---
 
 ## swissrastermaps4r
@@ -171,7 +153,7 @@ init_fdir("C:/Users/rata/Geodata/01_Switzerland/01_Maps")
 ---
 ## Want to join?
 
-I'm looking for people who would like to simplify access for swiss raster maps in `R` because:
+I'm looking for people to join this venture. If
 
 --
 
@@ -186,7 +168,11 @@ I'm looking for people who would like to simplify access for swiss raster maps i
 - you have connections to **swisstopo** and/or **geodata4edu** _and / or_
 
 --
+
 - you have too much spare time 😄
+
+--
+
 
 ### Contact me!
 
@@ -194,13 +180,13 @@ I'm looking for people who would like to simplify access for swiss raster maps i
 
 ---
 
-## It's on Github! 
+## We're on Github! 
 
 [https://github.engineering.zhaw.ch/rata/swissmapraster](https://github.engineering.zhaw.ch/rata/swissmapraster)
 
 ![](github_pkgdown.jpg)
 --
 
-Openly accessible on the **ZHAW** github, I can easily move it to github.com
+(Openly accessible on the **ZHAW** github, is easily moved to github.com)
 
 **rata@zhaw.ch**
