@@ -37,13 +37,13 @@ library(tidyverse)
 
 --
 
-I would like to simplify access to swisstopo geodata from within `R`. 
+I want to simplify access to swisstopo geodata from within `R`. 
 
 Currently, using swisstopo rastermaps in `R` is easy if: 
 
 --
 
-- the map only incldes _one single_ file<sup>1</sup>
+- the map only incldes _one single_ file  
 
 --
 
@@ -153,30 +153,50 @@ init_fdir("C:/Users/rata/Geodata/01_Switzerland/01_Maps")
 ---
 ## Want to join?
 
-I'm looking for people to join this venture. If
-
---
-
-- you use swiss raster maps in `R`  _and / or_
-
---
-
-- you want to learn package development _and / or_
-
---
-
-- you have connections to **swisstopo** and/or **geodata4edu** _and / or_
-
---
-
-- you have too much spare time 😄
-
---
 
 
-### Contact me!
+```{r,eval=F}
+if(
+  any(
+    c(
+      "you use swiss raster maps in R",
+      "you want to learn package development",
+      "you have connections to swisstopo and/or geodata4edu",
+      "you have too much spare time"
+    )
+  )
+){
+  contact(who = "Nils Ratnaweera",how = "rata@zhaw")
+}
+```
 
-**rata@zhaw.ch**
+
+
+
+<!-- I'm looking for people to join this venture. If -->
+
+<!-- -- -->
+
+<!-- - you use swiss raster maps in `R`  _and / or_ -->
+
+<!-- -- -->
+
+<!-- - you want to learn package development _and / or_ -->
+
+<!-- -- -->
+
+<!-- - you have connections to **swisstopo** and/or **geodata4edu** _and / or_ -->
+
+<!-- -- -->
+
+<!-- - you have too much spare time 😄 -->
+
+<!-- -- -->
+
+
+<!-- ### Contact me! -->
+
+<!-- **rata@zhaw.ch** -->
 
 ---
 
@@ -185,7 +205,6 @@ I'm looking for people to join this venture. If
 [https://github.engineering.zhaw.ch/rata/swissmapraster](https://github.engineering.zhaw.ch/rata/swissmapraster)
 
 ![](github_pkgdown.jpg)
---
 
 (Openly accessible on the **ZHAW** github, is easily moved to github.com)
 
