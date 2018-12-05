@@ -110,6 +110,8 @@ tm_shape(switzerland) +
 
 Using a custom raster map is cumbersome. We have to follow the following steps:
 
+--
+
 1. first decide on a scale
 
 --
@@ -140,6 +142,8 @@ Using a custom raster map is cumbersome. We have to follow the following steps:
 
 8. finally: plot data
 
+--
+
 --> This is where `swissrastermaps4r` comes in. It is a package that tries to automate steps 2 - 7
 ---
 
@@ -164,8 +168,6 @@ Using a custom raster map is cumbersome. We have to follow the following steps:
 
 8. finally: plot data
 
---
-
 --> This is where `swissrastermaps4r` comes in. It is a package that tries to automate steps 2 - 7
 ---
 
@@ -181,9 +183,14 @@ Using a custom raster map is cumbersome. We have to follow the following steps:
 
 ```{r}
 init_fdir("C:/Users/rata/Geodata/01_Switzerland/01_Maps")
-{{zuerich_raster <- get_raster(zuerich,scale_level = 100,method = "bbox")}}
-
 ```
+
+--
+
+```{r}
+{{zuerich_raster <- get_raster(zuerich,scale_level = 100,method = "bbox")}}
+```
+
 
 ---
 
@@ -215,7 +222,6 @@ Want to join? I'm looking for people who would like to simplify access for swiss
 
 --
 - they have too much spare time 😄
-
 
 --
 
