@@ -1,0 +1,12 @@
+name: r_meetup2
+title: R_meetup
+username: rata_publisher
+account: rata_publisher
+server: rstudio-pubs-dev.zhaw.ch
+hostUrl: https://rstudio-pubs-dev.zhaw.ch/__api__
+appId: 159
+bundleId: 239
+url: http://rstudio-pubs-dev.zhaw.ch/content/159/
+when: 1544025892.40665
+asMultiple: TRUE
+asStatic: TRUE

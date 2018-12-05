@@ -1,36 +1,26 @@
 ---
 title: "Swiss Geodata 4 R"
-subtitle: "Easy Access to Raster and Vector data from within R"
+subtitle: "Simplifying Access to Raster and Vector data from within R"
 author: "Nils Ratnaweera"
-date: "2018/12/05 (updated: `r Sys.Date()`)"
+date: "`r Sys.Date()`"
 output:
   xaringan::moon_reader:
     lib_dir: libs
     nature:
+      countdown: 10000
       highlightStyle: github
       highlightLines: true
       countIncrementalSlides: false
 ---
+
 
 ```{r setup, include=FALSE}
 options(htmltools.dir.version = FALSE)
 knitr::opts_chunk$set(warning = F,message = F)
 ```
 
-Easy << --- >> hard
 
-- Vector data << --- >> Raster data
-- Open data << --- >> Custom data (swisstopo)
-- single map << --- >> map series
-- whole extent << --- >> custom extent
-- single map tile << --- >> multiple map tiles
-- single resolution <<--- >> multiple resolutions
-
----
-
-## Load necessary libraries
-
-```{r}
+```{r, include=F}
 
 library(tmap,quietly = T)
 library(sf,quietly = T)
@@ -42,34 +32,25 @@ data("landesgebiet")
 
 library(tidyverse)
 ```
----
-## Create a chloropleth map in `R`
 
-This has become very easy with the new packages `sf`and `tmap`:
+## What's this about?
 
-```{r}
-tm_shape(landesgebiet) + tm_sf(col = "NAME")
-```
----
+--
 
-## Use open raster basemaps
+I would like to simplify access to swisstopo geodata from within `R`. Currently, using swisstopo maps in `R` is easy if: 
 
-This is still very easy, especially when working with interactive maps
+--
 
-```{r, include=FALSE}
-landesgebiet <- st_zm(landesgebiet)
-```
+- the map only incldes _one single_ file<sup>1</sup>
 
+--
 
-```{r}
-tmap_mode("view")
-tm_shape(landesgebiet) + tm_sf(col = "NAME") + tm_basemap()
-```
----
+- you know exactly where to find that file
 
-## Use Swisstopo basemap
+--
 
-Also fairly easy, if the map only includes a single file and it is clear which one this is:
+.footnote[[1] Smaller scale maps are split into multiple tiles. For exmple, the 1:25'000 map consists of 260 Tiles] 
+
 
 ```{r,include=F}
 tmap_mode("plot")
@@ -77,38 +58,20 @@ tmap_mode("plot")
 switzerland<- raster::brick("C:/Users/rata/Geodata/01_Switzerland/01_Maps/PK_1000_2056_relief/1mio_relief.tif")
 raster::crs(switzerland) <- sp::CRS("+init=EPSG:2056")
 
+library(swissrastermaps4r)
 ```
 
 
-```{r}
-tm_shape(switzerland) + 
-  tm_rgb() +
-  tm_shape(landesgebiet,is.master = T) + 
-  tm_sf(col = "NAME", alpha = 0.3)
-```
-
----
 ```{r,include=F}
 data("gemeinden_top_poly")
 zuerich <- gemeinden_top_poly[gemeinden_top_poly$NAME == "Zürich",]
 ```
 
-## Use Swisstopo basemap (II)
-
-What if we want to plot Zurich only? Using the 1:1'000'000 Map from before will not do:
-```{r}
-tm_shape(switzerland) + 
-  tm_rgb() +
-  tm_shape(zuerich,is.master = T) + 
-  tm_sf(col = "NAME", alpha = 0.3)
-```
-
 ---
 
-## Use Swisstopo basemap (III)
+## Current workflow
 
-
-Using a custom raster map is cumbersome. We have to follow the following steps:
+To create a map with one of these tiles, we have to follow the following steps:
 
 --
 
@@ -124,19 +87,23 @@ Using a custom raster map is cumbersome. We have to follow the following steps:
 
 --
 
-4. check raster resolutions and possibly resample all rasters to same resolution
+4. import raster into R
 
 --
 
-5. merge all the relevant raster maps into a single file
+5. check raster resolutions and possibly resample all rasters to same resolution
 
 --
 
-6. possibly reassign CRS and colormap
+6. merge all the relevant raster maps into a single file
 
 --
 
-7. import raster into R
+7. possibly reassign CRS and colormap
+
+--
+
+
 
 --
 
@@ -144,13 +111,13 @@ Using a custom raster map is cumbersome. We have to follow the following steps:
 
 --
 
---> This is where `swissrastermaps4r` comes in. It is a package that tries to automate steps 2 - 7
 ---
 
-## Use Swisstopo basemap (III)
+## Current workflow
 
 
-Using a custom raster map is cumbersome. We have to follow the following steps:
+To create a map with one of these tiles, we have to follow the following steps:
+
 
 1. first decide on a scale
 
@@ -158,17 +125,19 @@ Using a custom raster map is cumbersome. We have to follow the following steps:
 
 3. ~~find the appropriate raster maps based on the map numbers from the previous step~~
 
-4. ~~check raster resolutions and possibly resample all rasters to same resolution~~
+4. ~~import raster into R~~
 
-5. ~~merge all the relevant raster maps into a single file~~
+5. ~~check raster resolutions and possibly resample all rasters to same resolution~~
 
-6. ~~possibly reassign CRS and colormap~~
+6. ~~merge all the relevant raster maps into a single file~~
 
-7. ~~import raster into R~~
+7. ~~possibly reassign CRS and colormap~~
 
 8. finally: plot data
 
---> This is where `swissrastermaps4r` comes in. It is a package that tries to automate steps 2 - 7
+→ This is where `swissrastermaps4r` comes in. 
+
+→ It is a package that automates steps 2 - 7
 ---
 
 ## swissrastermaps4r
@@ -194,9 +163,9 @@ init_fdir("C:/Users/rata/Geodata/01_Switzerland/01_Maps")
 
 ---
 
-## swissrastermaps4r (I)
+## swissrastermaps4r
 ```{r}
-tm_shape({{zuerich_raster}}) + 
+{{tm_shape(zuerich_raster)}} + 
   tm_rgb() +
   tm_shape(zuerich,is.master = T) + 
   tm_borders(col = "red",lwd = 3)
@@ -204,31 +173,38 @@ tm_shape({{zuerich_raster}}) +
 
 
 ---
-## swissrastermaps4r (II)
+## Want to join?
 
-Want to join? I'm looking for people who would like to simplify access for swiss raster maps in R because:
-
---
-
-- they want to use swiss raster maps in R themselves _and / or_
+I'm looking for people who would like to simplify access for swiss raster maps in `R` because:
 
 --
 
-- want to learn package development (I am a novice myself) _and / or_
+- you use swiss raster maps in `R`  _and / or_
 
 --
 
-- they have connections to swisstopo and/or geodata4edu _and / or_
+- you want to learn package development _and / or_
 
 --
-- they have too much spare time 😄
+
+- you have connections to **swisstopo** and/or **geodata4edu** _and / or_
 
 --
+- you have too much spare time 😄
+
+### Contact me!
+
+**rata@zhaw.ch**
+
+---
 
 ## It's on Github! 
 
 [https://github.engineering.zhaw.ch/rata/swissmapraster](https://github.engineering.zhaw.ch/rata/swissmapraster)
 
+![](github_pkgdown.jpg)
 --
 
-Openly accessible on the ZHAW github, I can easily move it to github.com
+Openly accessible on the **ZHAW** github, I can easily move it to github.com
+
+**rata@zhaw.ch**
