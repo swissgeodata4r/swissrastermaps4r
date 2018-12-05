@@ -160,9 +160,11 @@ library(purrr)
 
 invisible(
   map(rastermap,function(x){
-  tm_shape(x) + 
+  print(
+    tm_shape(x) + 
     tm_rgb() +
     tm_credits(credits,bg.color = "white",bg.alpha = 0.8)
+  )
 })
 )
 ```

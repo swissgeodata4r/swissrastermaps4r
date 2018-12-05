@@ -96,9 +96,10 @@ for(i in 1:nrow(gemeinden_top_poly)){
     tm_rgb() + 
     tm_shape(ext_inv[i])+ 
     tm_polygons(alpha = 0.8,fill = "white") +
+    tm_scale_bar(position = c("left","bottom")) +
     tm_credits(credits,bg.color = "white",bg.alpha = 0.8) +
     tm_compass(position = c("right","top")) +
-    tm_layout(frame = F)
+    tm_layout(frame = F) 
   grid.newpage()
   print(mainmap, vp=viewport(0,0,0.7,1,just = c("left","bottom")))
   print(extent_indicator, vp=viewport(1,1,0.3,0.3,just = c("right","top")))

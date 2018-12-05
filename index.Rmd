@@ -16,3 +16,7 @@ This Package is meant as a Bridge between Swissmapraster Data (SMR) and R. It is
 
 NO! This package does not give access to any raster maps, by swisstopo or otherwise. Access to this data has to be acquire elsewhere: Either through [swisstopo](https://shop.swisstopo.admin.ch) directly or via third parties such as [geodata4edu](https://www.geodata4edu.ch). In fact, in the current version of the package the data has to be stored locally on your own hard drive (_urgh!_). Our hope is however, that this will change soon so that the data can be hosted on a network folder or on a GIS Server. 
 
+## Who's in the team?
+
+Currently, it's just [me](https://www.zhaw.ch/de/ueber-uns/person/rata/). But I'm hoping for some people to collaborate with and maybe we can level this up!
+

@@ -1,8 +1,10 @@
 Package: swissrastermaps4r
 Type: Package
 Title: Helps Import, Extract and Plot Swissmapraster Data  
-Version: 0.1.0
-Author: Nils Ratnaweera
+Version: 0.1.1
+Author@r: c(
+    person("Nils", "Ratnaweera", , "rata@zhaw.ch", role = c("aut", "cre"))
+    )
 Maintainer: Nils Ratnaweera <rata@zhaw.ch>
 Description: This Package is meant as a Bridge between Swissmapraster
     Data (SMR) and R. It is the hope of the package developer(s) that this
@@ -13,6 +15,8 @@ Description: This Package is meant as a Bridge between Swissmapraster
     this data. It simply provides an interface for cases where the data is
     already available to the user.
 License: GPL-2 (arbitrarily chosen)
+URL: https://github.engineering.zhaw.ch/pages/rata/swissmapraster/, https://github.engineering.zhaw.ch/rata/swissmapraster
+BugReports: https://github.engineering.zhaw.ch/rata/swissmapraster/issues
 Encoding: UTF-8
 LazyData: true
 Imports: 
