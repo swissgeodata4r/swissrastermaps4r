@@ -1,6 +1,6 @@
 ---
-title: "Swiss Geodata 4 R"
-subtitle: "Simplifying Access to Raster and Vector data from within R"
+title: "swissrastermaps4R"
+subtitle: "Simplifying Access to Raster (and Vector) data from within R"
 author: "Nils Ratnaweera"
 date: "`r Sys.Date()`"
 output:
@@ -166,7 +166,9 @@ if(
     )
   )
 ){
-  contact(who = "Nils Ratnaweera",how = "rata@zhaw")
+  contact(who = "Nils Ratnaweera",how = "rata@zhaw") else{
+    go_to("Apero")
+  }
 }
 ```
 
