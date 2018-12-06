@@ -9,17 +9,17 @@ vignette: >
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-### Creating maps in `R`
+<!-- ### Creating maps in `R` -->
 
-Some things are easy, others are hard.
+<!-- Some things are easy, others are hard. -->
 
-- **Easy** ↔ **hard**
-- Vector data ↔ Raster data
-- Open data ↔ Custom data
-- single map ↔ map series
-- whole extent ↔ custom extent
-- single map tile ↔ multiple map tiles
-- single resolution ↔ multiple resolutions
+<!-- - **Easy** ↔ **hard** -->
+<!-- - Vector data ↔ Raster data -->
+<!-- - Open data ↔ Custom data -->
+<!-- - single map ↔ map series -->
+<!-- - whole extent ↔ custom extent -->
+<!-- - single map tile ↔ multiple map tiles -->
+<!-- - single resolution ↔ multiple resolutions -->
 
 
 
@@ -86,7 +86,8 @@ data("landesgebiet")
 library(tmap)
 
 tm_shape(landesgebiet) + 
-   tm_polygons() + show_extents("tmap")
+   tm_polygons() + 
+  show_extents("tmap")
 ```
 
 
