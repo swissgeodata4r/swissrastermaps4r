@@ -15,8 +15,8 @@ Description: This Package is meant as a Bridge between Swissmapraster
     this data. It simply provides an interface for cases where the data is
     already available to the user.
 License: GPL-2 (arbitrarily chosen)
-URL: https://github.engineering.zhaw.ch/pages/rata/swissmapraster/, https://github.engineering.zhaw.ch/rata/swissmapraster
-BugReports: https://github.engineering.zhaw.ch/rata/swissmapraster/issues
+URL: https://github.com/swissgeodata4r/swissrastermaps4r/
+BugReports: https://github.com/swissgeodata4r/swissrastermaps4r/issues
 Encoding: UTF-8
 LazyData: true
 Imports: 
