@@ -2,7 +2,23 @@
 packageEnv <- new.env()
 
 
+pattern_keywords <- data_frame(
+  keyword = c("A","B","C","D","E","F"),
+  name = paste("fn",c("maptype","scale","CRS","format","sheet", "year"),sep = "_")
+)
 
+dissect_name <- function(filename,pattern){
+  filename %>% map_dfr(function(filename_i){
+    pattern_keywords %>% pmap_dfr(function(keyword,name){
+      ints <- gregexpr(keyword,pattern)[[1]]
+      star <- min(ints)
+      sto <- max(ints)
+      su <- substr(filename_i,star,sto)
+      data_frame(name = name,val = su,filename = filename_i)
+    }) %>%
+      spread(name,val)
+  })
+}
 
 geom_from_boundary <- function(df, add = T, epsg = NULL){
   # This functions creates a "bounding box"-polygon from 4
@@ -60,7 +76,7 @@ geom_from_boundary <- function(df, add = T, epsg = NULL){
 
 init_fdir <- function(rootdir,
                       maxfiles = Inf,
-                      add_geometry = T,
+                      # add_geometry = T,
                       maptypes = c("PK","SMR","LK","TA")
                       ){
 
@@ -74,7 +90,6 @@ init_fdir <- function(rootdir,
         maptype = x[1],
         scale = x[2],
         epsg = x[3],
-        name = ifelse(length(x)==4,x[4],""),
         stringsAsFactors = F
       )
     }) %>%
@@ -85,14 +100,28 @@ init_fdir <- function(rootdir,
   # Creates a data_frame by going through all the maptypes and their
   # corresponding folders, reading in all raster files (only "tifs" at the )
   fdir <- folders_df %>%
+    # head(1) %->% c(maptype,scale,epsg,folder) # use only to debugg pmap_dfr()
     purrr::pmap_dfr(function(maptype,scale,epsg,name,folder){
       folderpath <- file.path(rootdir,folder)
-      list.files(folderpath,".tif$",full.names = T) %>%
+      pattern <- list.files(folderpath,".pattern",full.names = F)
+      if(length(pattern)>1){
+        warning("Fround more than one file with the ending '.pattern'. Using only first one")
+        } else if(length(pattern) == 1){
+          pattern <- strsplit(pattern,"\\.")[[1]][1]
+        } else(
+          pattern <- ""
+        )
+      list.files(folderpath,".tif$",full.names = F) %>%
+        # head(1) -> x
         head(maxfiles) %>% # this can be used to test and debug the function
         purrr::map_dfr(function(x){
-          raster_i <- raster::brick(x)
+          folderfile <- file.path(folderpath,x)
+          raster_i <- raster::brick(folderfile)
+          size_mb <- file.info(folderfile)$size/1e+6
           n_layers <- raster::nlayers(raster_i)
           reso <- raster::res(raster_i)
+          name_dissection <- dissect_name(x,pattern)
+
           raster_i %>%
             raster::extent() %>%
             matrix(nrow = 1) %>%
@@ -102,23 +131,22 @@ init_fdir <- function(rootdir,
               maptype = maptype,
               scale = scale,
               epsg = epsg,
-              name = name,
-              file = x,
+              file = folderfile,
               nlayers = n_layers,
               res1 = reso[1],
-              res2 = reso[2]
-            )
+              res2 = reso[2],
+              size_mb = size_mb
+            ) %>%
+            cbind(name_dissection)
         })
-    }) %>%
-    dplyr::filter(epsg == 2056) #. in this stage, only epsg 2056 is supported. A way to handle other EPSG should at one point be implemented
+    }) #%>% dplyr::filter(epsg == 2056) #. in this stage, only epsg 2056 is supported. A way to handle other EPSG should at one point be implemented
 
-  if(add_geometry){
-    fdir <- geom_from_boundary(fdir, add = T,2056)
-  }
-  return_fdir = F  # if needed, this can be included as a function option.
+  # if(add_geometry){
+  #   fdir <- geom_from_boundary(fdir, add = T,2056)
+  # }
   assign("fdir",fdir,envir = packageEnv)
-  if(return_fdir){return(fdir)}
-  print(paste("Done.",nrow(fdir),"Files saved in fdir. Use show_extents() to show their extents."))
+  mb <- format(sum(fdir$size_mb),big.mark = "'")
+  print(paste0("Done. Scanned ",nrow(fdir), " Files", " (",mb," MB)."," All metadata stored in fdir."))
 }
 
 
@@ -141,6 +169,7 @@ init_fdir <- function(rootdir,
 #' \code{NULL}, the \code{fdir} from the package Environment is taken.
 
 show_extents <- function(method = "ggplot2",fdir = NULL){
+  stop("currently not working since I'm implementing a way to handle different CRS'")
 
   if(is.null(fdir)){
     fdir <- get("fdir",envir = packageEnv)
@@ -151,7 +180,7 @@ show_extents <- function(method = "ggplot2",fdir = NULL){
 
 
   if(method == "ggplot2"){
-    plotoutput <- ggplot2::ggplot(data = fdir) +
+    plotoutput <- ggplot2::ggplot(x) +
       ggplot2::geom_sf(mapping = aes(fill = factor(res1)),alpha = 0.4) +
       ggplot2::facet_wrap(~scale) +
       ggplot2::coord_sf(datum = 2056) +
@@ -160,7 +189,7 @@ show_extents <- function(method = "ggplot2",fdir = NULL){
       ggplot2::scale_y_continuous(breaks = seq(11,13,1)*10^5) +
       ggplot2::theme(legend.position = "top",legend.direction = "horizontal")
   }
-  if(method == "tmap"){   # I don't think this is good practice
+  if(method == "tmap"){
     plotoutput <- tmap::tm_shape(fdir) +
       tmap::tm_fill(title = "Resolution", col = "res1",alpha = 0.4,group = "extents",palette = "Accent") +
       tmap::tm_borders() +

@@ -177,18 +177,17 @@ rgb_brick_count <- function(brick,maxColorValue = 255){
 #'
 #' Calculate the extent of an \code\{sf} object.
 #'
-#' Long Desc
+#' gets the centeroid of feature(s), adds the x, and y distances and returns a
+#' matrix with x/y min/max plus and extent-object.
 #'
-#' @param param desc
+#' @param features an object of type sf
+#' @param per_feature per feature: should raster be returned PER FEATURE part or for the whole sf object?
+#' @param x_add,yadd: the distances from the centeroid, with which the extent window should be drawn
 get_extent <- function(features,x_add = 0,y_add = 0,method = "centroid",per_feature = T,asp = NULL){
-  # gets the centeroid of feature(s), adds the x, and y distances and returns a
-  # matrix with x/y min/max plus and extent-object.
 
-  # features: an object of type sf
-  # per feature: should raster be returned PER FEATURE part or for the whole sf object?
-  # x_add, yadd: the distances from the centeroid, with which the extent window should be drawn
+  epsg_i <- sf::st_crs(features)$epsg
 
-  if(!per_feature){
+    if(!per_feature){
     features <- features %>%
       dplyr::group_by(1) %>%
       summarise()
@@ -239,7 +238,7 @@ get_extent <- function(features,x_add = 0,y_add = 0,method = "centroid",per_feat
       extent = list(raster::extent(matrix(c(xmin,xmax,ymin,ymax),nrow = 2,byrow = T)))
     ) %>%
     dplyr::ungroup() %>%
-    geom_from_boundary(add = T,2056)
+    geom_from_boundary(add = T,epsg_i)
 
   }
 
@@ -320,7 +319,7 @@ get_raster <- function(features,
 
   ex %>%
     sf::st_set_geometry(NULL) %>%
-    # slice(8) %->% c(xmin_i,xmax_i,ymin_i,ymax_i,extent_i)
+    # slice(1) %->% c(xmin_i,xmax_i,ymin_i,ymax_i,extent_i)
     head(limit)  %>%
     purrr::pmap(function(xmin_i,xmax_i,ymin_i,ymax_i,extent_i){
       rast_file <- fdir %>%
@@ -329,7 +328,7 @@ get_raster <- function(features,
         dplyr::filter(xmin <= xmax_i & xmax >= xmin_i) %>%
         dplyr::filter(ymin <= ymax_i & ymax >= ymin_i) %>%
         dplyr::filter(name == name_i) %>%
-        dplyr::select(file,res1,res2,name,epsg,nlayers)
+        dplyr::select(file,res1,res2,epsg,nlayers)
 
       # if(nrow(rast_file)>1){
       #   stop("Overlapping Rasters found. Please check your data

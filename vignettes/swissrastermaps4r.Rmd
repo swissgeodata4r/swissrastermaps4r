@@ -27,8 +27,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 First of all, the raster maps need to be acquired and stored in a folder. The package is developed with a focus on [SwissMapRaster](https://shop.swisstopo.admin.ch/de/products/maps/national/digital/), but probably other raster maps will work as well. Currently only [CRS 2056](https://epsg.io/2056) is implemented. We might also include [CRS 21781](https://epsg.io/21781) at some point but that's probably it. 
 
-The raster maps should be sorted in a folder per scale. Currently, the names of the folders must be as follows: "SMR25" for 1:25'000 maps, "SMR50" for 1:50'000 maps and so on. Rasters should not overlap or have gaps.
-
+The raster maps should be sorted in a folder per scale. See `init_fdir` to check the requirements for naming the folders.
 
 ### Download package
 
