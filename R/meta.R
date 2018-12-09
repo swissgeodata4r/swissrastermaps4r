@@ -33,6 +33,22 @@ metainfo_from_filename <- function(filename,pattern){
   })
 }
 
+
+#' Make Geometry from boundary
+#'
+#' Takes a dataframe at returns an \pkg{sf} object.
+#'
+#' This function takes a dataframe and returns an \pkg{sf} object. The dataframe
+#' must contain the columns, \code{xmin}, \code{xmax}, \code{ymin}, \code{max},
+#' which will be turned into the edges of a rectangular \pkg{sf} polygon.
+#'
+#' @param df A dataframe including the columns \code{xmin}, \code{xmax},
+#' \code{ymin}, \code{max}
+#' @param add A boolean determining whether the geometries should be added to the
+#' input dataframe (\code{add = TRUE}) or if only the geometries should be returned
+#' (\code{add = FALSE}).
+#' @param epsg Intger value of the CRS the data is set to.
+
 geom_from_boundary <- function(df, add = T, epsg = NULL){
   # This functions creates a "bounding box"-polygon from 4
   # numeric values. The colnames storing the values must be
@@ -111,14 +127,14 @@ init_fdir <- function(rootdir,
     )
 
   # Creates a data_frame by going through all the maptypes and their
-  # corresponding folders, reading in all raster files (only "tifs" at the )
+  # corresponding folders, reading in all raster files (only "tifs" at the moment)
   fdir <- folders_df %>%
     # head(1) %->% c(maptype,scale,epsg,folder) # use only to debugg pmap_dfr()
     purrr::pmap_dfr(function(maptype,scale,epsg,name,folder){
       folderpath <- file.path(rootdir,folder)
       pattern <- list.files(folderpath,".pattern",full.names = F)
       if(length(pattern)>1){
-        warning("Fround more than one file with the ending '.pattern'. Using only first one")
+        warning("Found more than one file with the ending '.pattern'. Using only first one")
         } else if(length(pattern) == 1){
           pattern <- strsplit(pattern,"\\.")[[1]][1]
         } else(

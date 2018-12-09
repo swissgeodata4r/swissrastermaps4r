@@ -49,3 +49,4 @@ reference:
       - get_extent
       - asp2extent
       - metainfo_from_filename
+      - geom_from_boundary
