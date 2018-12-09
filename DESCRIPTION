@@ -23,7 +23,8 @@ Imports:
   dplyr,
   purrr,
   raster,
-  sf
+  sf,
+  tidyr
 Suggests: 
 RoxygenNote: 6.1.1
 

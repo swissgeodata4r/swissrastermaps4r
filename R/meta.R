@@ -1,22 +1,35 @@
 
-packageEnv <- new.env()
+swissmaprasterEnv <- new.env()
 
 
-pattern_keywords <- data_frame(
+pattern_keywords <- data.frame(
   keyword = c("A","B","C","D","E","F"),
-  name = paste("fn",c("maptype","scale","CRS","format","sheet", "year"),sep = "_")
+  name = paste("fn",c("maptype","scale","CRS","format","sheet", "year"),sep = "_"),
+  stringsAsFactors = F
 )
 
-dissect_name <- function(filename,pattern){
-  filename %>% map_dfr(function(filename_i){
-    pattern_keywords %>% pmap_dfr(function(keyword,name){
+#' Get Metadata from filename
+#'
+#' Retrieves metadata from filename through a defined pattern
+#'
+#' Takes a filename (character string) and retrieves metadata from the filename
+#' by consulting a defined pattern. The whole process is somewhat similar to
+#' specifying a format of a datetime object (see \code{strftime}). The pattern is
+#' specified by placeholders, which are in turn specified in a dataframe.
+#'
+metainfo_from_filename <- function(filename,pattern){
+  filename %>% purrr::map_dfr(function(filename_i){
+    pattern_keywords %>% purrr::pmap_dfr(function(keyword,name){
       ints <- gregexpr(keyword,pattern)[[1]]
       star <- min(ints)
       sto <- max(ints)
       su <- substr(filename_i,star,sto)
-      data_frame(name = name,val = su,filename = filename_i)
+      data.frame(name = name,
+                 val = su,
+                 filename = filename_i,
+                 stringsAsFactors = F)
     }) %>%
-      spread(name,val)
+      tidyr::spread(name,val)
   })
 }
 
@@ -61,12 +74,12 @@ geom_from_boundary <- function(df, add = T, epsg = NULL){
 #' All the mentioned attributes of each raster file, along with the file path and the extent as a
 #' geometry, are stoerd in the variable \code{fdir} of the package environment.
 #' Parent folders containing the rasterdata require a specific structure:
-#' \code{TYPE_Scale_EPSG_name}
+#' \code{TYPE_Scale_EPSG_index}
 #' \describe{
 #'   \item{\code{TYPE}}{corresponds to the maptype. IN Switzerland this is typically \code{SMR}, \code{PK}, \code{LK} or \code{TA}. \strong{Must} be followed by a \code{_}}
 #'   \item{\code{Scale}}{defines the map scale as x in 1:1'000x. \strong{Must} be followed by a \code{_}}
 #'   \item{\code{EPSG}}{specifies the CRS of the containing raster data \strong{Must} be followed by a \code{_} \strong{only} if \code{name} is specified}
-#'   \item{\code{name}}{is only needed when multiple maps with overlapping extents as well as same scale, level and projection exist (e.g. \href{SMR1000 https://shop.swisstopo.admin.ch/en/products/maps/national/digital/srm1000}{SMR1000})}
+#'   \item{\code{index}}{Needed when multiple folders with same maptype, scale and epsg code exist, but different naming patterns.}
 #' }
 #' @param rootdir Character string specifying the directory where the folders are stored
 #' @param maxfiles Integer limiting the number of files to be scanned. For testing purposes only.
@@ -88,8 +101,8 @@ init_fdir <- function(rootdir,
     purrr::map_dfr(function(x){
       data.frame(
         maptype = x[1],
-        scale = x[2],
-        epsg = x[3],
+        scale = as.integer(x[2]),
+        epsg = as.integer(x[3]),
         stringsAsFactors = F
       )
     }) %>%
@@ -120,7 +133,7 @@ init_fdir <- function(rootdir,
           size_mb <- file.info(folderfile)$size/1e+6
           n_layers <- raster::nlayers(raster_i)
           reso <- raster::res(raster_i)
-          name_dissection <- dissect_name(x,pattern)
+          name_dissection <- metainfo_from_filename(x,pattern)
 
           raster_i %>%
             raster::extent() %>%
@@ -144,7 +157,7 @@ init_fdir <- function(rootdir,
   # if(add_geometry){
   #   fdir <- geom_from_boundary(fdir, add = T,2056)
   # }
-  assign("fdir",fdir,envir = packageEnv)
+  assign("fdir",fdir,envir = swissmaprasterEnv)
   mb <- format(sum(fdir$size_mb),big.mark = "'")
   print(paste0("Done. Scanned ",nrow(fdir), " Files", " (",mb," MB)."," All metadata stored in fdir."))
 }
@@ -172,7 +185,7 @@ show_extents <- function(method = "ggplot2",fdir = NULL){
   stop("currently not working since I'm implementing a way to handle different CRS'")
 
   if(is.null(fdir)){
-    fdir <- get("fdir",envir = packageEnv)
+    fdir <- get("fdir",envir = swissmaprasterEnv)
 
     fdir$res1 <- as.factor(fdir$res1)
   }

@@ -1,4 +1,4 @@
-import::from(magrittr, "%>%")
+# import::from(magrittr, "%>%")
 
 #' Threeband RGB to singleband raster
 #'
@@ -190,7 +190,7 @@ get_extent <- function(features,x_add = 0,y_add = 0,method = "centroid",per_feat
     if(!per_feature){
     features <- features %>%
       dplyr::group_by(1) %>%
-      summarise()
+      dplyr::summarise()
   }
 
   ext <- if(method == "centroid"){
@@ -235,7 +235,8 @@ get_extent <- function(features,x_add = 0,y_add = 0,method = "centroid",per_feat
   ext %>%
     dplyr::rowwise() %>%
     dplyr::mutate(
-      extent = list(raster::extent(matrix(c(xmin,xmax,ymin,ymax),nrow = 2,byrow = T)))
+      extent = list(raster::extent(matrix(c(xmin,xmax,ymin,ymax),nrow = 2,byrow = T))),
+      epsg = epsg_i
     ) %>%
     dplyr::ungroup() %>%
     geom_from_boundary(add = T,epsg_i)
@@ -270,13 +271,13 @@ get_extent <- function(features,x_add = 0,y_add = 0,method = "centroid",per_feat
 #' @param method A character string specifying the method with which the extent should be calculated. \code{centroid} calculates the centroid of the object(s), \code{bbox} calculates the bounding box of the object.
 #' @param turn_greyscale Should the output rastermaps be turned into greyscale?
 #' @param name If muliple, different maps are available with overlapping extents, \code{name} can be used to differentiate between different maptypes. Default is an empty sting.
-#' @param fdir By default, the \code{fdir} is retrieved from the package Environment (named \code{packageEnv}). Override this with \code{fdir = }
+#' @param fdir By default, the \code{fdir} is retrieved from the package Environment (named \code{swissmaprasterEnv}). Override this with \code{fdir = }
 #' @param limit For testing puposes only: Limits the number of rasters returned per object. Defaults to \code{Inf}
 #'
 get_raster <- function(features,
                        scale_level,
-                       x_add = 0,      # add some default values. either 0 or 100..
-                       y_add = 0,        # in case of 0, strange things will happen with method centroid
+                       x_add = 0,
+                       y_add = 0,
                        per_feature = F,
                        method = "centroid",
                        turn_greyscale = F,
@@ -292,12 +293,9 @@ get_raster <- function(features,
 
 
 
-  # if(method == "centroid" & (x_add == 0 | y_add = 0)){stop("Please add x_add AND y_add values when using method 'centroid'")}
-
-
   if(is.null(fdir)){
-    if(exists("fdir", envir = packageEnv)){
-      fdir <- get("fdir",envir = packageEnv)
+    if(exists("fdir", envir = swissmaprasterEnv)){
+      fdir <- get("fdir",envir = swissmaprasterEnv)
     } else{
       stop("Please run init_fdir() first.")
     }
@@ -319,11 +317,12 @@ get_raster <- function(features,
 
   ex %>%
     sf::st_set_geometry(NULL) %>%
-    # slice(1) %->% c(xmin_i,xmax_i,ymin_i,ymax_i,extent_i)
+    # dplyr::slice(1) %->% c(xmin_i,xmax_i,ymin_i,ymax_i,extent_i,epsg_i)
     head(limit)  %>%
-    purrr::pmap(function(xmin_i,xmax_i,ymin_i,ymax_i,extent_i){
+    purrr::pmap(function(xmin_i,xmax_i,ymin_i,ymax_i,extent_i,epsg_i){
       rast_file <- fdir %>%
         data.frame(stringsAsFactors = F) %>%
+        dplyr::filter(epsg == epsg_i) %>%
         dplyr::filter(scale == scale_level) %>%
         dplyr::filter(xmin <= xmax_i & xmax >= xmin_i) %>%
         dplyr::filter(ymin <= ymax_i & ymax >= ymin_i) %>%
