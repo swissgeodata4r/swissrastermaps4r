@@ -53,7 +53,7 @@ rgb_grey_ysrgb <- function(raster_in,weights = c(0.2126,0.7152,0.0722)){
     purrr::when(
       class(.) == "RasterLayer" ~raster::calc(.,ysrgb)*255,
       class(.) == "numeric"~ysrgb(.)*255
-      )
+    )
 }
 
 #' Name
@@ -187,7 +187,7 @@ get_extent <- function(features,x_add = 0,y_add = 0,method = "centroid",per_feat
 
   epsg_i <- sf::st_crs(features)$epsg
 
-    if(!per_feature){
+  if(!per_feature){
     features <- features %>%
       dplyr::group_by(1) %>%
       dplyr::summarise()
@@ -210,9 +210,9 @@ get_extent <- function(features,x_add = 0,y_add = 0,method = "centroid",per_feat
     features %>%
       sf::st_geometry() %>%
       purrr::map_dfr(~sf::st_bbox(.x) %>%
-                   as.matrix() %>%
-                   t() %>%
-                   as.data.frame()) %>%
+                       as.matrix() %>%
+                       t() %>%
+                       as.data.frame()) %>%
       dplyr::select(xmin,xmax,ymin,ymax) %>%
       dplyr::mutate(
         xmin = xmin-x_add,
@@ -220,9 +220,9 @@ get_extent <- function(features,x_add = 0,y_add = 0,method = "centroid",per_feat
         ymin = ymin-y_add,
         ymax = ymax+y_add
       )
-    } else(
-      stop(paste("This method is not defined:",method))
-    )
+  } else(
+    stop(paste("This method is not defined:",method))
+  )
 
 
   if(!all(((ext$xmax - ext$xmin) != 0 )& ((ext$ymax - ext$ymin) != 0 ))){
@@ -241,7 +241,7 @@ get_extent <- function(features,x_add = 0,y_add = 0,method = "centroid",per_feat
     dplyr::ungroup() %>%
     geom_from_boundary(add = T,epsg_i)
 
-  }
+}
 
 
 #' Get corresponding raster maps to feature
@@ -284,7 +284,8 @@ get_raster <- function(features,
                        name = "",
                        fdir = NULL,
                        limit = Inf,
-                       asp = NULL
+                       asp = NULL,
+                       year = NULL
 ){
 
 
@@ -309,11 +310,15 @@ get_raster <- function(features,
                    method = method,
                    per_feature = per_feature,
                    asp = asp
-                   )
+  )
 
 
 
   name_i <- name # to avoid conflicts with columns of the same name
+  year_i <- year # to avoid confusion with the column name
+  # todo: make columns integer
+
+  # library(zeallot)
 
   ex %>%
     sf::st_set_geometry(NULL) %>%
@@ -326,14 +331,61 @@ get_raster <- function(features,
         dplyr::filter(scale == scale_level) %>%
         dplyr::filter(xmin <= xmax_i & xmax >= xmin_i) %>%
         dplyr::filter(ymin <= ymax_i & ymax >= ymin_i) %>%
-        dplyr::filter(name == name_i) %>%
-        dplyr::select(file,res1,res2,epsg,nlayers)
+        # dplyr::filter(name == name_i) %>%
+        purrr::when(
+          !is.null(year_i)~dplyr::filter(.,fn_year == year_i),
+          TRUE~.
+        )
 
-      # if(nrow(rast_file)>1){
-      #   stop("Overlapping Rasters found. Please check your data
-      #   or specify map with opiton 'name'.")}
-      if(nrow(rast_file)==0){
+      if(nrow(rast_file) == 0){
         stop("No raster files found with matching criteria.")}
+
+
+      if(nrow(rast_file)>1){
+        geoms <- geom_from_boundary(rast_file,add = T,epsg = epsg_i)
+
+        # cover <- sf::st_covers(geoms,sparse = F)
+        # overl <- sf::st_overlaps(geoms,sparse = F)
+
+        inters <- sf::st_intersects(geoms,sparse = F)
+        touch <- sf::st_touches(geoms,sparse = F)
+
+        # since intersections includes instances where geometries just touch,
+        # I'm trying to remove these by applying !st_touches(). Since I dont know
+        # the operaions that well, I'm not sure if this can break at some point
+        pure_intersection <- inters & !touch
+
+        pure_intersection[lower.tri(pure_intersection,diag = T)] <- NA
+
+        # rast_file_intersect <- sf::st_intersects(geoms,sparse = F)
+
+
+        if(any(pure_intersection,na.rm = T)){
+          rast_file_intersect_message <- pure_intersection %>%
+            which(arr.ind = T) %>%
+            head(1) %>%
+            as.data.frame() %>%
+            pmap_chr(function(row,col){
+              row <- as.integer(row)
+              col <- as.integer(col)
+              paste(rast_file$filename[row],"INTERSECTS",rast_file$filename[col])
+            }) %>%
+            paste(collapse = "\n")
+
+          rast_file_years <- paste(sort(unique(rast_file$fn_year)),collapse = ",")
+
+          stop(
+            paste("At least some rasters overlapping. Showing first overlap:",
+                  rast_file_intersect_message,"\n",
+                  "Maybe multiple years? Here are the years:\n",
+                  rast_file_years)
+          )
+        }
+
+      }
+
+
+      # check if some geometries are self overlapping. Stop the function if TRUE
 
       res_min <- c(min(rast_file$res1),min(rast_file$res2))
       res_min <- as.integer(round(res_min))
@@ -341,6 +393,7 @@ get_raster <- function(features,
 
 
       rast <- rast_file %>%
+        dplyr::select(file,res1,res2,epsg,nlayers) %>%
         purrr::pmap(function(file,res1,res2,name,epsg,nlayers){
           raster <- raster::brick(file)
           raster::crs(raster) <- sp::CRS(paste0("+init=EPSG:",epsg))

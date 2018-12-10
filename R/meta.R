@@ -3,14 +3,16 @@ swissmaprasterEnv <- new.env()
 
 
 data.frame(
-  placeholder = c("A","B","C","D","E","F"),
-  name = paste("fn",c("maptype","scale","CRS","format","sheet", "year"),sep = "_"),
+  placeholder = c("A","B","C","D","E","F","G"),
+  name = paste("fn",c("maptype","scale","CRS","format","sheet", "year","index"),sep = "_"),
   description = c("Name of the map (LK,PK, SMR, TA)",
                   "Scale, usually in two digits",
                   "Projection, usually either LV95 or LV03",
                   "Format of the data (usually KREL or KOMB)",
                   "A character or number specifying the sheet name/number",
-                  "An integer, specifying the year of publication (4 digits)"),
+                  "An integer, specifying the year of publication (4 digits)",
+                  "An index usually at the end of the filename, specifying some sort of map index"
+                  ),
   stringsAsFactors = F
 ) %>%
   assign("search_pattern_dict",.,envir = swissmaprasterEnv)
@@ -24,7 +26,9 @@ data.frame(
 #' function \code{metainfo_from_filename}. Any characters not specified in
 #' \code{search_pattern_dict} will be ignored in the '.pattern' file.
 #'
-#'
+
+# Todo: dont allow overwriting of placeholder / filenames, only allow adding addition number
+# with NEW placeholes and NEW names (where "fn_" is automatically prepended)
 search_pattern <- function(direction = "get",search_pattern_dict_new = NULL){
   stopifnot(direction %in% c("get","set"))
   if(direction == "get"){
@@ -127,7 +131,10 @@ geom_from_boundary <- function(df, add = T, epsg = NULL){
 #' Initialize File Directory
 #'
 #' Scans all folders in the root dirctory corresponding to the folders given by
-#' \code{folders = }.
+#' \code{folders = }. OR: Makes an existing fdir object (either a variable or
+#' an .Rda File) the current fdir file by writing it to the Environment
+#' 'swissmaprasterEnv'. If stored as an Rda File, the associated variable name
+#' must be \code{fdir}
 #'
 #' This command creates a "File Directory" in the package environment by scanning
 #' all folders specified by \code{folders} within the \code{rootdir} and analyzing the content.
@@ -142,7 +149,8 @@ geom_from_boundary <- function(df, add = T, epsg = NULL){
 #'   \item{\code{EPSG}}{specifies the CRS of the containing raster data \strong{Must} be followed by a \code{_} \strong{only} if \code{name} is specified}
 #'   \item{\code{index}}{Needed when multiple folders with same maptype, scale and epsg code exist, but different naming patterns.}
 #' }
-#' @param rootdir Character string specifying the directory where the folders are stored
+#' @param rootdir Character string specifying the directory where the folders are stored OR
+#' character string pointing to an .Rda file from a previous init_fdir() run OR an fdir variable.
 #' @param maxfiles Integer limiting the number of files to be scanned. For testing purposes only.
 #' @param add_geometry Should the bounding box of each file be added as a geometry to \code{fdir}?
 #' @param maptypes Names of the maptypes to look for. Only folders containing at least one of the
@@ -150,77 +158,138 @@ geom_from_boundary <- function(df, add = T, epsg = NULL){
 
 init_fdir <- function(rootdir,
                       maxfiles = Inf,
-                      # add_geometry = T,
+                      add_geometry = T,
                       maptypes = c("PK","SMR","LK","TA")
                       ){
 
-  dirs <- list.dirs(rootdir,recursive = F,full.names = F)
-  dirs <- purrr::map(maptypes,~dirs[grepl(.x,dirs)]) %>% unlist()
+  start <- Sys.time()
+
+  if(is.data.frame(rootdir)){
+    fdir <- rootdir
+    # maby do some checks on the neccessary columns?
+  } else if(endsWith(tolower(rootdir),".rda")){
+    load(rootdir)
+    # maby do some checks on the neccessary columns?
+
+  } else {
+    dirs <- list.dirs(rootdir,recursive = F,full.names = F)
+    dirs <- purrr::map(maptypes,~dirs[grepl(.x,dirs)]) %>% unlist()
 
 
-  folders_df <- strsplit(dirs,"_") %>%
-    purrr::map_dfr(function(x){
-      data.frame(
-        maptype = x[1],
-        scale = as.integer(x[2]),
-        epsg = as.integer(x[3]),
-        stringsAsFactors = F
+    folders_df <- strsplit(dirs,"_") %>%
+      purrr::map_dfr(function(x){
+        data.frame(
+          maptype = x[1],
+          scale = as.integer(x[2]),
+          epsg = as.integer(x[3]),
+          stringsAsFactors = F
+        )
+      }) %>%
+      dplyr::mutate(
+        folder = dirs
       )
-    }) %>%
-    dplyr::mutate(
-      folder = dirs
-    )
-
-  # Creates a data_frame by going through all the maptypes and their
-  # corresponding folders, reading in all raster files (only "tifs" at the moment)
-  fdir <- folders_df %>%
-    # head(1) %->% c(maptype,scale,epsg,folder) # use only to debugg pmap_dfr()
-    purrr::pmap_dfr(function(maptype,scale,epsg,name,folder){
-      folderpath <- file.path(rootdir,folder)
-      pattern <- list.files(folderpath,".pattern",full.names = F)
-      if(length(pattern)>1){
-        warning("Found more than one file with the ending '.pattern'. Using only first one")
+    # Creates a data_frame by going through all the maptypes and their
+    # corresponding folders, reading in all raster files (only "tifs" at the moment)
+    fdir <- folders_df %>%
+      # head(1) %->% c(maptype,scale,epsg,folder) # use only to debugg pmap_dfr()
+      purrr::pmap_dfr(function(maptype,scale,epsg,name,folder){
+        folderpath <- file.path(rootdir,folder)
+        pattern <- list.files(folderpath,".pattern",full.names = F)
+        if(length(pattern)>1){
+          warning("Found more than one file with the ending '.pattern'. Using only first one")
         } else if(length(pattern) == 1){
           pattern <- strsplit(pattern,"\\.")[[1]][1]
         } else(
           pattern <- ""
         )
-      list.files(folderpath,".tif$",full.names = F) %>%
-        # head(1) -> x
-        head(maxfiles) %>% # this can be used to test and debug the function
-        purrr::map_dfr(function(x){
-          folderfile <- file.path(folderpath,x)
-          raster_i <- raster::brick(folderfile)
-          size_mb <- file.info(folderfile)$size/1e+6
-          n_layers <- raster::nlayers(raster_i)
-          reso <- raster::res(raster_i)
-          name_dissection <- metainfo_from_filename(x,pattern)
+        list.files(folderpath,".tif$",full.names = F) %>%
+          # head(1) -> x
+          head(maxfiles) %>% # this can be used to test and debug the function
+          purrr::map_dfr(function(x){
+            folderfile <- file.path(folderpath,x)
+            raster_i <- raster::brick(folderfile)
+            size_mb <- file.info(folderfile)$size/1e+6
+            n_layers <- raster::nlayers(raster_i)
+            reso <- raster::res(raster_i)
 
-          raster_i %>%
-            raster::extent() %>%
-            matrix(nrow = 1) %>%
-            as.data.frame() %>%
-            magrittr::set_colnames(c("xmin","xmax","ymin","ymax")) %>%
-            dplyr::mutate(
-              maptype = maptype,
-              scale = scale,
-              epsg = epsg,
-              file = folderfile,
-              nlayers = n_layers,
-              res1 = reso[1],
-              res2 = reso[2],
-              size_mb = size_mb
-            ) %>%
-            cbind(name_dissection)
-        })
-    }) #%>% dplyr::filter(epsg == 2056) #. in this stage, only epsg 2056 is supported. A way to handle other EPSG should at one point be implemented
+            # This function is called on a per file basis. The function can be called on multiple files
+            # call this function one loop-level up, on a folder basis to speed up the
+            # process
+            name_dissection <- metainfo_from_filename(x,pattern)
 
-  # if(add_geometry){
-  #   fdir <- geom_from_boundary(fdir, add = T,2056)
-  # }
+            raster_i %>%
+              raster::extent() %>%
+              matrix(nrow = 1) %>%
+              as.data.frame() %>%
+              magrittr::set_colnames(c("xmin","xmax","ymin","ymax")) %>%
+              dplyr::mutate(
+                maptype = maptype,
+                scale = scale,
+                epsg = epsg,
+                file = folderfile,
+                nlayers = n_layers,
+                res1 = reso[1],
+                res2 = reso[2],
+                size_mb = size_mb
+              ) %>%
+              cbind(name_dissection) %>%
+              # the following lines break if user changed search_pattern_dict
+              # todo: make this more generic / flexible
+              dplyr::mutate(
+                fn_year = as.integer(fn_year),
+                fn_scale = as.integer(fn_scale)
+              )
+          })
+      })
+
+    # Added this to solve an ad hoc problem. Don't know if this works in this works
+    # generically.
+
+    #In addition: Should probbably not use max(row) but the index to sort out the duplicates
+    fdir <- fdir %>%
+      dplyr::group_by(maptype,fn_sheet,fn_year) %>%
+      dplyr::mutate(row = dplyr::row_number()) %>%
+      dplyr::filter(row == max(row)) %>%
+      dplyr::ungroup()
+
+    # Not sure if this is going to work.. test it
+    fdir %>%
+      st_set_geometry(NULL) %>%
+      dplyr::group_by(maptype,fn_sheet) %>%
+      dplyr::arrange(maptype,fn_sheet,fn_year) %>%
+      dplyr::select(maptype,fn_sheet,fn_year) %>%
+      dplyr::mutate(
+        fn_year_start = as.integer(fn_year - floor((fn_year-lag(fn_year))/2)),
+        fn_year_start = dplyr::if_else(is.na(fn_year_start),as.integer(fn_year-5),as.integer(fn_year_start)),
+        fn_year_end = as.integer(fn_year + ceiling((lead(fn_year)-fn_year)/2))-1,
+        fn_year_end = dplyr::if_else(is.na(fn_year_end),as.integer(fn_year+5),as.integer(fn_year_end)),
+      )
+
+
+    epsgs <- unique(fdir$epsg)
+    epsgs <- epsgs[!is.na(epsgs)]
+
+    if(add_geometry){
+      if(length(epsgs)== 1){
+        fdir <- geom_from_boundary(fdir, add = T,epsgs)
+      } else if(length(epsgs)==0){
+        warning("No EPSG Numbers found. Cannot add geometry")
+      } else if(length(epsgs>0)){
+        warning("Multiple EPSG Numbers found. Cannot add geometry")
+      }
+    }
+
+
+    }
   assign("fdir",fdir,envir = swissmaprasterEnv)
   mb <- format(sum(fdir$size_mb),big.mark = "'")
-  print(paste0("Done. Scanned ",nrow(fdir), " Files", " (",mb," MB)."," All metadata stored in fdir."))
+  duration_minutes <- difftime(Sys.time(),start,units = "mins") %>%
+    as.numeric() %>%
+    round(2) %>%
+    format(nsmall = 2)
+
+  # if passing on a variable or Rda file, this next message is not quite right ("scanned")
+  print(paste0("Done. Scanned ",nrow(fdir), " Files", " (",mb," MB) in ",duration_minutes," minutes. "," All metadata stored in fdir."))
 }
 
 
@@ -243,13 +312,14 @@ init_fdir <- function(rootdir,
 #' \code{NULL}, the \code{fdir} from the package Environment is taken.
 
 show_extents <- function(method = "ggplot2",fdir = NULL){
-  stop("currently not working since I'm implementing a way to handle different CRS'")
 
   if(is.null(fdir)){
     fdir <- get("fdir",envir = swissmaprasterEnv)
 
     fdir$res1 <- as.factor(fdir$res1)
   }
+
+  stopifnot("sf" %in% class(fdir))
 
 
 

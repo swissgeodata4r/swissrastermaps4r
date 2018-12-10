@@ -48,6 +48,9 @@ library(dplyr)
 ### Scan Folder
 
 Next, run the command `init_fdir()` pointing to the location (parent folder) of this maps. This command creates a "File Directory" in the package environment by scanning all folders recursively and analyzing the content. All files ending with "tif" are checked for extent, number of layers and resolution. All the mentioned attributes of each raster file, along with the file path and the extent as a geometry, are stored in the variable `fdir` of the package environment.
+```{r}
+
+```
 
 
 ```{r}
