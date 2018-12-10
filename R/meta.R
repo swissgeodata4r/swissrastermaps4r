@@ -96,7 +96,7 @@ metainfo_from_filename <- function(filename,pattern,search_pattern_dict = NULL){
 #' (\code{add = FALSE}).
 #' @param epsg Intger value of the CRS the data is set to.
 
-geom_from_boundary <- function(df, add = T, epsg = NULL){
+geom_from_boundary <- function(df, epsg, add = T){
   # This functions creates a "bounding box"-polygon from 4
   # numeric values. The colnames storing the values must be
   # named xmin, xmax, ymin, ymax.
@@ -107,6 +107,7 @@ geom_from_boundary <- function(df, add = T, epsg = NULL){
   #       the new geom's CRS.
 
   stopifnot(all(c("xmin","xmax","ymin","xmax") %in% names(df)))
+  stopifnot(length(epsg) == 1)
 
   geo <- df %>%
     dplyr::select(xmin,ymin,xmax,ymax) %>%
@@ -244,39 +245,32 @@ init_fdir <- function(rootdir,
 
     # Added this to solve an ad hoc problem. Don't know if this works in this works
     # generically.
-
     #In addition: Should probbably not use max(row) but the index to sort out the duplicates
     fdir <- fdir %>%
       dplyr::group_by(maptype,fn_sheet,fn_year) %>%
       dplyr::mutate(row = dplyr::row_number()) %>%
       dplyr::filter(row == max(row)) %>%
-      dplyr::ungroup()
+      dplyr::ungroup() %>%
+      dplyr::select(-row)
 
     # Not sure if this is going to work.. test it
-    fdir %>%
-      st_set_geometry(NULL) %>%
+    fdir <- fdir %>%
       dplyr::group_by(maptype,fn_sheet) %>%
       dplyr::arrange(maptype,fn_sheet,fn_year) %>%
-      dplyr::select(maptype,fn_sheet,fn_year) %>%
       dplyr::mutate(
-        fn_year_start = as.integer(fn_year - floor((fn_year-lag(fn_year))/2)),
+        fn_year_start = as.integer(fn_year - floor((fn_year-dplyr::lag(fn_year))/2)),
         fn_year_start = dplyr::if_else(is.na(fn_year_start),as.integer(fn_year-5),as.integer(fn_year_start)),
-        fn_year_end = as.integer(fn_year + ceiling((lead(fn_year)-fn_year)/2))-1,
+        fn_year_end = as.integer(fn_year + ceiling((dplyr::lead(fn_year)-fn_year)/2))-1,
         fn_year_end = dplyr::if_else(is.na(fn_year_end),as.integer(fn_year+5),as.integer(fn_year_end)),
-      )
+      ) %>%
+      dplyr::ungroup()
 
 
     epsgs <- unique(fdir$epsg)
     epsgs <- epsgs[!is.na(epsgs)]
 
     if(add_geometry){
-      if(length(epsgs)== 1){
-        fdir <- geom_from_boundary(fdir, add = T,epsgs)
-      } else if(length(epsgs)==0){
-        warning("No EPSG Numbers found. Cannot add geometry")
-      } else if(length(epsgs>0)){
-        warning("Multiple EPSG Numbers found. Cannot add geometry")
-      }
+      fdir <- geom_from_boundary(fdir, epsgs, add = T)
     }
 
 
@@ -319,13 +313,17 @@ show_extents <- function(method = "ggplot2",fdir = NULL){
     fdir$res1 <- as.factor(fdir$res1)
   }
 
-  stopifnot("sf" %in% class(fdir))
+  if(!"sf" %in% class(fdir)){
+    epsgs <- unique(fdir$epsg)
+    epsgs <- epsgs[!is.na(epsgs)]
+    fdir <- geom_from_boundary(fdir,epsg = epsgs,add = T)
+  }
 
 
 
   if(method == "ggplot2"){
-    plotoutput <- ggplot2::ggplot(x) +
-      ggplot2::geom_sf(mapping = aes(fill = factor(res1)),alpha = 0.4) +
+    plotoutput <- ggplot2::ggplot(fdir) +
+      ggplot2::geom_sf(mapping = ggplot2::aes(fill = factor(res1)),alpha = 0.4) +
       ggplot2::facet_wrap(~scale) +
       ggplot2::coord_sf(datum = 2056) +
       ggplot2::labs(fill = "Resolution") +

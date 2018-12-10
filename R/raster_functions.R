@@ -239,7 +239,7 @@ get_extent <- function(features,x_add = 0,y_add = 0,method = "centroid",per_feat
       epsg = epsg_i
     ) %>%
     dplyr::ungroup() %>%
-    geom_from_boundary(add = T,epsg_i)
+    geom_from_boundary(epsg = epsg_i, add = T)
 
 }
 
@@ -342,7 +342,7 @@ get_raster <- function(features,
 
 
       if(nrow(rast_file)>1){
-        geoms <- geom_from_boundary(rast_file,add = T,epsg = epsg_i)
+        geoms <- geom_from_boundary(rast_file,epsg = epsg_i,add = T)
 
         # cover <- sf::st_covers(geoms,sparse = F)
         # overl <- sf::st_overlaps(geoms,sparse = F)
@@ -365,21 +365,30 @@ get_raster <- function(features,
             which(arr.ind = T) %>%
             head(1) %>%
             as.data.frame() %>%
-            pmap_chr(function(row,col){
+            purrr::pmap_chr(function(row,col){
               row <- as.integer(row)
               col <- as.integer(col)
               paste(rast_file$filename[row],"INTERSECTS",rast_file$filename[col])
             }) %>%
             paste(collapse = "\n")
 
-          rast_file_years <- paste(sort(unique(rast_file$fn_year)),collapse = ",")
+          rast_file_years <- rast_file %>%
+            dplyr::group_by(maptype,scale,epsg,fn_sheet) %>%
+            dplyr::summarise(years = paste(fn_year,collapse = ","))
 
-          stop(
-            paste("At least some rasters overlapping. Showing first overlap:",
-                  rast_file_intersect_message,"\n",
-                  "Maybe multiple years? Here are the years:\n",
-                  rast_file_years)
-          )
+          # rast_file_years <- paste(sort(unique(rast_file$fn_year)),collapse = ",")
+
+
+          message(paste(
+            "Some rasters overlapping (e.g. :",
+            rast_file_intersect_message,") \n",
+            "Maybe multiple years? Printing sheet-years dataframe\n"
+          ))
+          message(paste0(capture.output(rast_file_years), collapse = "\n"))
+          stop()
+
+
+
         }
 
       }
