@@ -2,25 +2,68 @@
 swissmaprasterEnv <- new.env()
 
 
-pattern_keywords <- data.frame(
-  keyword = c("A","B","C","D","E","F"),
+data.frame(
+  placeholder = c("A","B","C","D","E","F"),
   name = paste("fn",c("maptype","scale","CRS","format","sheet", "year"),sep = "_"),
+  description = c("Name of the map (LK,PK, SMR, TA)",
+                  "Scale, usually in two digits",
+                  "Projection, usually either LV95 or LV03",
+                  "Format of the data (usually KREL or KOMB)",
+                  "A character or number specifying the sheet name/number",
+                  "An integer, specifying the year of publication (4 digits)"),
   stringsAsFactors = F
-)
+) %>%
+  assign("search_pattern_dict",.,envir = swissmaprasterEnv)
+
+
+#' Gets or set the search pattern nomenklature
+#'
+#' Gets or sets the search pattern nomenklature
+#'
+#' Retrieves ('get') or specifies ('set') the \code{search_pattern_dict} which is used in the
+#' function \code{metainfo_from_filename}. Any characters not specified in
+#' \code{search_pattern_dict} will be ignored in the '.pattern' file.
+#'
+#'
+search_pattern <- function(direction = "get",search_pattern_dict_new = NULL){
+  stopifnot(direction %in% c("get","set"))
+  if(direction == "get"){
+    search_pattern_dict <- get("search_pattern_dict",envir = swissmaprasterEnv)
+    print(search_pattern_dict)
+    } else if(direction == "set"){
+      stopifnot(is.data.frame(search_pattern_dict_new))
+      stopifnot(all(c("placeholder","description") %in% names(search_pattern_dict_new)))
+      assign("search_pattern_dict",search_pattern_dict_new,envir = swissmaprasterEnv)
+      print("Assigned new search_pattern_dict. Use search_pattern() to check the new
+            search pattern nomenklature. Remember to update all '.pattern' files and
+            rememeber also that the changes are only applied this session.")
+  }
+}
 
 #' Get Metadata from filename
 #'
-#' Retrieves metadata from filename through a defined pattern
+#' Retrieves metadata from filename with the help of a predefined 'pattern'
 #'
 #' Takes a filename (character string) and retrieves metadata from the filename
-#' by consulting a defined pattern. The whole process is somewhat similar to
+#' by consulting a predefined pattern. The whole process is somewhat similar to
 #' specifying a format of a datetime object (see \code{strftime}). The pattern is
-#' specified by placeholders, which are in turn specified in a dataframe.
+#' specified by placeholders (in the argument \code{pattern} ), which are in turn
+#' specified in a dataframe (in the argument \code{search_pattern_dict}). Run \code{search_pattern}
+#' to see what these argument currently are.
 #'
-metainfo_from_filename <- function(filename,pattern){
+metainfo_from_filename <- function(filename,pattern,search_pattern_dict = NULL){
+
+  stopifnot(is.data.frame(search_pattern_dict) | is.null(search_pattern_dict))
+
+  if(is.null(search_pattern_dict)){
+    search_pattern_dict <- get("search_pattern_dict",envir = swissmaprasterEnv)
+  }
+
   filename %>% purrr::map_dfr(function(filename_i){
-    pattern_keywords %>% purrr::pmap_dfr(function(keyword,name){
-      ints <- gregexpr(keyword,pattern)[[1]]
+    search_pattern_dict %>%
+      dplyr::select(placeholder,name) %>%
+      purrr::pmap_dfr(function(placeholder,name){
+      ints <- gregexpr(placeholder,pattern)[[1]]
       star <- min(ints)
       sto <- max(ints)
       su <- substr(filename_i,star,sto)
