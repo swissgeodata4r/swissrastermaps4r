@@ -48,5 +48,7 @@ reference:
     contents:
       - get_extent
       - asp2extent
-      - metainfo_from_filename
       - geom_from_boundary
+      - metainfo_from_filename
+      - search_pattern
+

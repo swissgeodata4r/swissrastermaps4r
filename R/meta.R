@@ -102,6 +102,8 @@ geom_from_boundary <- function(df, add = T, epsg = NULL){
   # epsg: if not set to null, the epsg code will be set as
   #       the new geom's CRS.
 
+  stopifnot(all(c("xmin","xmax","ymin","xmax") %in% names(df)))
+
   geo <- df %>%
     dplyr::select(xmin,ymin,xmax,ymax) %>%
     purrr::pmap(function(xmin,ymin,xmax,ymax){
