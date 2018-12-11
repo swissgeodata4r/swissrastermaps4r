@@ -255,8 +255,8 @@ init_fdir <- function(rootdir,
 
     # Not sure if this is going to work.. test it
     fdir <- fdir %>%
-      dplyr::group_by(maptype,fn_sheet) %>%
-      dplyr::arrange(maptype,fn_sheet,fn_year) %>%
+      dplyr::group_by(fn_sheet) %>%
+      dplyr::arrange(fn_sheet,fn_year) %>%
       dplyr::mutate(
         fn_year_start = as.integer(fn_year - floor((fn_year-dplyr::lag(fn_year))/2)),
         fn_year_start = dplyr::if_else(is.na(fn_year_start),as.integer(fn_year-5),as.integer(fn_year_start)),

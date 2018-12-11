@@ -316,7 +316,10 @@ get_raster <- function(features,
 
   name_i <- name # to avoid conflicts with columns of the same name
   year_i <- year # to avoid confusion with the column name
-  # todo: make columns integer
+
+  # get_raster_from_ex <- function(extent,fdir,epsg,scale,year = NULL){
+  #
+  # }
 
   # library(zeallot)
 
@@ -325,6 +328,9 @@ get_raster <- function(features,
     # dplyr::slice(1) %->% c(xmin_i,xmax_i,ymin_i,ymax_i,extent_i,epsg_i)
     head(limit)  %>%
     purrr::pmap(function(xmin_i,xmax_i,ymin_i,ymax_i,extent_i,epsg_i){
+
+
+
       rast_file <- fdir %>%
         data.frame(stringsAsFactors = F) %>%
         dplyr::filter(epsg == epsg_i) %>%
@@ -333,7 +339,7 @@ get_raster <- function(features,
         dplyr::filter(ymin <= ymax_i & ymax >= ymin_i) %>%
         # dplyr::filter(name == name_i) %>%
         purrr::when(
-          !is.null(year_i)~dplyr::filter(.,fn_year == year_i),
+          !is.null(year_i)~dplyr::filter(.,fn_year_start <= year_i,fn_year_end >= year_i),
           TRUE~.
         )
 
