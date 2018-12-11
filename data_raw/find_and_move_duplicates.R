@@ -59,19 +59,6 @@ ov %>%
 
 
 
-fdir %>%
-  select(-c(fn_year_start,fn_year_end)) %>%
-  dplyr::group_by(maptype,fn_sheet) %>%
-  dplyr::arrange(maptype,fn_sheet,fn_year) %>%
-  dplyr::mutate(
-    fn_year_start = as.integer(fn_year - floor((fn_year-dplyr::lag(fn_year))/2)),
-    fn_year_start = dplyr::if_else(is.na(fn_year_start),as.integer(fn_year-5),as.integer(fn_year_start)),
-    fn_year_end = as.integer(fn_year + ceiling((dplyr::lead(fn_year)-fn_year)/2))-1,
-    fn_year_end = dplyr::if_else(is.na(fn_year_end),as.integer(fn_year+5),as.integer(fn_year_end)),
-  ) %>%
-  filter(fn_sheet == "1106") %>%
-  select(fn_year_start,fn_year,fn_year_end) %>%
-  filter(fn_year_end >= lead(fn_year_start))
 
 
 

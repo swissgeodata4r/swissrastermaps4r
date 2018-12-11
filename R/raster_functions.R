@@ -434,7 +434,7 @@ get_raster <- function(features,
         if(raster::nlayers(rast) == 3){
           rast <- raster_greyscale(rast)
         } else if(raster::nlayers(rast) == 1){
-          coltab <- colortable(raster::raster(rast_file)) # colortable_greyscle can probabbly be subsituted to something more generic
+          coltab <- raster::colortable(raster::raster(rast_file)) # colortable_greyscle can probabbly be subsituted to something more generic
           raster::colortable(rast) <- colortable_greyscale(coltab)
         } else(warning("Unexpectend number of Layers"))
 

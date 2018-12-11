@@ -8,9 +8,37 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## What's the idea behind swissmapraster 4 R?
+<!-- ## What's the idea behind swissmapraster 4 R? -->
 
-This Package is meant as a Bridge between Swissmapraster Data (SMR) and R. It is the hope of the package developer(s) that this Package will prove to be necessary for a short time period, just so long till SwissMapRaster Data is freely and openly available to the public,  along with an appropriate R-interface. Unfortunately, since the SMR Data is still behind a paywall, this package does not provide access to this data. It simply provides an interface for cases where the data is already available to the user.
+<!-- This Package is meant as a Bridge between Swissmapraster Data (SMR) and R. It is the hope of the package developer(s) that this Package will prove to be necessary for a short time period, just so long till SwissMapRaster Data is freely and openly available to the public,  along with an appropriate R-interface. Unfortunately, since the SMR Data is still behind a paywall, this package does not provide access to this data. It simply provides an interface for cases where the data is already available to the user. -->
+
+<!-- <!-- ### Creating maps in `R` --> -->
+
+<!-- <!-- Some things are easy, others are hard. --> -->
+
+<!-- <!-- - **Easy** ↔ **hard** --> -->
+<!-- <!-- - Vector data ↔ Raster data --> -->
+<!-- <!-- - Open data ↔ Custom data --> -->
+<!-- <!-- - single map ↔ map series --> -->
+<!-- <!-- - whole extent ↔ custom extent --> -->
+<!-- <!-- - single map tile ↔ multiple map tiles --> -->
+<!-- <!-- - single resolution ↔ multiple resolutions --> -->
+
+## What is this package about?
+
+I want to simplify access to swisstopo geodata from within `R`. 
+
+Currently, using swisstopo rastermaps in `R` is easy if: 
+
+* the map only incldes _one single_ file  
+* you know exactly where to find that file
+
+**BUT:** 
+
+- Smaller scale maps are split into multiple tiles. 
+- For example, the 1:25'000 map consists of 260 individual Tiles
+
+
 
 ## Does this package provide access to map data?
 

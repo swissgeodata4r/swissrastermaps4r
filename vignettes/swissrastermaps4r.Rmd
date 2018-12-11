@@ -9,18 +9,6 @@ vignette: >
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-<!-- ### Creating maps in `R` -->
-
-<!-- Some things are easy, others are hard. -->
-
-<!-- - **Easy** ↔ **hard** -->
-<!-- - Vector data ↔ Raster data -->
-<!-- - Open data ↔ Custom data -->
-<!-- - single map ↔ map series -->
-<!-- - whole extent ↔ custom extent -->
-<!-- - single map tile ↔ multiple map tiles -->
-<!-- - single resolution ↔ multiple resolutions -->
-
 
 
 ### Aquire raster data

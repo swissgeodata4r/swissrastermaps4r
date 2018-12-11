@@ -14,5 +14,3 @@
 # multiple CRS must include the crs of the feature in the get_raster() function?
 #
 # todo: update all the docs
-# learn to make branches
-# implement the possiliblty to add multiple rootdirs in init_fdir()
