@@ -12,7 +12,7 @@
 "landesgebiet"
 
 
-#' Gemeinden Top Poly
+#' Sample Polygons
 #'
 #' Polygons of the 10 largest muncipalities ("Gemeinden") in Switzerland.
 #'
@@ -28,10 +28,10 @@
 
 
 
-#' Gemeinden Top Centroid
+#' Sample Points
 #'
 #' Centroids of the 10 largest muncipalities ("Gemeinden") in Switzerland.
-#' This dataset is based on \code{\link{gemeinden_top_centroid}}
+#' This dataset is based on \code{\link{sample_points}}
 #'
 #' @format An \code{sf} object containing point data
 #' \describe{
@@ -41,4 +41,4 @@
 
 #' }
 #' @source \url{https://shop.swisstopo.admin.ch/de/products/landscape/boundaries3D}
-"gemeinden_top_centroid"
+"sample_points"

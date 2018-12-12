@@ -68,8 +68,8 @@ library(swissrastermaps4r)
 
 
 ```{r,include=F}
-data("gemeinden_top_poly")
-zuerich <- gemeinden_top_poly[gemeinden_top_poly$NAME == "Zürich",]
+data("sample_polygon")
+zuerich <- sample_polygon[sample_polygon$NAME == "Zürich",]
 ```
 
 ---

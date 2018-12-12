@@ -3,25 +3,28 @@ library(tidyverse)
 library(swissboundriesR)
 data("hoheitsgebiet")
 
-gemeinden_top_poly <- hoheitsgebiet %>%
+sample_polygons <- hoheitsgebiet %>%
   filter(OBJEKTART == "Gemeindegebiet") %>%
   select(NAME,EINWOHNERZ) %>%
   arrange(desc(EINWOHNERZ)) %>%
   head(10)
 
 
-usethis::use_data(gemeinden_top_poly,overwrite = TRUE)
+usethis::use_data(sample_polygons,overwrite = TRUE)
 
 
-gemeinden_top_centroid <- gemeinden_top_poly %>%
+sample_points <- sample_polygons %>%
   st_centroid()
 
 
-usethis::use_data(gemeinden_top_centroid, overwrite = TRUE,compress = "xz")
+usethis::use_data(sample_points, overwrite = TRUE,compress = "xz")
 
 
 data("landesgebiet")
 
+switzerland <- landesgebiet %>%
+  select(NAME,EINWOHNERZ) %>%
+  st_zm()
 
-usethis::use_data(landesgebiet, overwrite = TRUE,compress = "xz")
+usethis::use_data(switzerland, overwrite = TRUE,compress = "xz")
 

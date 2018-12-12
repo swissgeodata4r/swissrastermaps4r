@@ -278,7 +278,7 @@ get_raster <- function(features,
                        scale_level,
                        x_add = 0,
                        y_add = 0,
-                       per_feature = F,
+                       # per_feature = F,
                        method = "centroid",
                        turn_greyscale = F,
                        name = "",
@@ -308,148 +308,127 @@ get_raster <- function(features,
                    x_add = x_add,
                    y_add = y_add,
                    method = method,
-                   per_feature = per_feature,
+                   per_feature = F,
                    asp = asp
   )
 
+  # to avoid conflicts with columns of the same name
+  name_i <- name
+  year_i <- year
 
-
-  name_i <- name # to avoid conflicts with columns of the same name
-  year_i <- year # to avoid confusion with the column name
-
-  # get_raster_from_ex <- function(extent,fdir,epsg,scale,year = NULL){
-  #
-  # }
-
-  # library(zeallot)
-
-  ex %>%
-    sf::st_set_geometry(NULL) %>%
-    # dplyr::slice(1) %->% c(xmin_i,xmax_i,ymin_i,ymax_i,extent_i,epsg_i)
-    head(limit)  %>%
-    purrr::pmap(function(xmin_i,xmax_i,ymin_i,ymax_i,extent_i,epsg_i){
-
-
-
-      rast_file <- fdir %>%
-        data.frame(stringsAsFactors = F) %>%
-        dplyr::filter(epsg == epsg_i) %>%
-        dplyr::filter(scale == scale_level) %>%
-        dplyr::filter(xmin <= xmax_i & xmax >= xmin_i) %>%
-        dplyr::filter(ymin <= ymax_i & ymax >= ymin_i) %>%
-        # dplyr::filter(name == name_i) %>%
-        purrr::when(
-          !is.null(year_i)~dplyr::filter(.,fn_year_start <= year_i,fn_year_end >= year_i),
-          TRUE~.
-        )
-
-      if(nrow(rast_file) == 0){
-        stop("No raster files found with matching criteria.")}
-
-
-      if(nrow(rast_file)>1){
-        geoms <- geom_from_boundary(rast_file,epsg = epsg_i,add = T)
-
-        # cover <- sf::st_covers(geoms,sparse = F)
-        # overl <- sf::st_overlaps(geoms,sparse = F)
-
-        inters <- sf::st_intersects(geoms,sparse = F)
-        touch <- sf::st_touches(geoms,sparse = F)
-
-        # since intersections includes instances where geometries just touch,
-        # I'm trying to remove these by applying !st_touches(). Since I dont know
-        # the operaions that well, I'm not sure if this can break at some point
-        pure_intersection <- inters & !touch
-
-        pure_intersection[lower.tri(pure_intersection,diag = T)] <- NA
-
-        # rast_file_intersect <- sf::st_intersects(geoms,sparse = F)
-
-
-        if(any(pure_intersection,na.rm = T)){
-          rast_file_intersect_message <- pure_intersection %>%
-            which(arr.ind = T) %>%
-            head(1) %>%
-            as.data.frame() %>%
-            purrr::pmap_chr(function(row,col){
-              row <- as.integer(row)
-              col <- as.integer(col)
-              paste(rast_file$filename[row],"INTERSECTS",rast_file$filename[col])
-            }) %>%
-            paste(collapse = "\n")
-
-          rast_file_years <- rast_file %>%
-            dplyr::group_by(maptype,scale,epsg,fn_sheet) %>%
-            dplyr::summarise(years = paste(fn_year,collapse = ","))
-
-          # rast_file_years <- paste(sort(unique(rast_file$fn_year)),collapse = ",")
-
-
-          message(paste(
-            "Some rasters overlapping (e.g. :",
-            rast_file_intersect_message,") \n",
-            "Maybe multiple years? Printing sheet-years dataframe\n"
-          ))
-          message(paste0(capture.output(rast_file_years), collapse = "\n"))
-          stop()
-
-
-
-        }
-
-      }
-
-
-      # check if some geometries are self overlapping. Stop the function if TRUE
-
-      res_min <- c(min(rast_file$res1),min(rast_file$res2))
-      res_min <- as.integer(round(res_min))
-
-
-
-      rast <- rast_file %>%
-        dplyr::select(file,res1,res2,epsg,nlayers) %>%
-        purrr::pmap(function(file,res1,res2,name,epsg,nlayers){
-          raster <- raster::brick(file)
-          raster::crs(raster) <- sp::CRS(paste0("+init=EPSG:",epsg))
-          # raster
-          raster <- raster::crop(raster,extent_i)
-          res_rast <- raster::res(raster)
-          res_rast <- as.integer(round(res_rast))
-          if(res_rast[1] > res_min[1] | res_rast[2] > res_min[2]){
-            warning("Rasters in Extent do not have matching resolutions. Using disaggregate in order to enable merging")
-            fac1 <- res_rast[1]/res_min[1]
-            fac2 <- res_rast[2]/res_min[2]
-            raster <- raster::disaggregate(raster,fact = c(fac1,fac2))
-
-          }
-          raster
-        }) %>%
-        purrr::map(function(x){raster::crop(x,extent_i)}) %>%
-        purrr::accumulate(function(x,y){raster::merge(x,y)}) %>%
-        tail(1) %>%
-        magrittr::extract2(1)
-
-      if(turn_greyscale){
-        if(raster::nlayers(rast) == 3){
-          rast <- raster_greyscale(rast)
-        } else if(raster::nlayers(rast) == 1){
-          coltab <- raster::colortable(raster::raster(rast_file)) # colortable_greyscle can probabbly be subsituted to something more generic
-          raster::colortable(rast) <- colortable_greyscale(coltab)
-        } else(warning("Unexpectend number of Layers"))
-
-      }else{ # if raster should not be turned greyscale
-        if(raster::nlayers(rast) == 3){
-          # maybe turn into singleband raster with rgb_raster2singleband??
-        } else if(raster::nlayers(rast) == 1){
-          raster::colortable(rast) <- raster::colortable(raster::brick(rast_file$file[1]))
-        } else(warning("Unexpectend number of Layers"))
-
-      }
-      rast
-    })%>%
+  fdir_filtered <- fdir %>%
+    data.frame(stringsAsFactors = F) %>%
+    dplyr::filter(epsg == ex$epsg) %>%
+    dplyr::filter(scale == scale_level) %>%
+    dplyr::filter(xmin <= ex$xmax & xmax >= ex$xmin) %>%
+    dplyr::filter(ymin <= ex$ymax & ymax >= ex$ymin) %>%
+    # dplyr::filter(name == name_i) %>%
     purrr::when(
-      length(.) == 1~magrittr::extract2(.,1),
+      !is.null(year_i)~dplyr::filter(.,fn_year_start <= year_i,fn_year_end >= year_i),
       TRUE~.
     )
+
+  if(nrow(fdir_filtered) == 0){
+    stop("No raster files found with matching criteria.")}
+
+
+  if(nrow(fdir_filtered)>1){
+    geoms <- geom_from_boundary(fdir_filtered,epsg = ex$epsg,add = T)
+
+    # cover <- sf::st_covers(geoms,sparse = F)
+    # overl <- sf::st_overlaps(geoms,sparse = F)
+
+    inters <- sf::st_intersects(geoms,sparse = F)
+    touch <- sf::st_touches(geoms,sparse = F)
+
+    # since intersections includes instances where geometries just touch,
+    # I'm trying to remove these by applying !st_touches(). Since I dont know
+    # the operaions that well, I'm not sure if this can break at some point
+    pure_intersection <- inters & !touch
+
+    pure_intersection[lower.tri(pure_intersection,diag = T)] <- NA
+
+    # fdir_filtered_intersect <- sf::st_intersects(geoms,sparse = F)
+
+
+    if(any(pure_intersection,na.rm = T)){
+      fdir_filtered_intersect_message <- pure_intersection %>%
+        which(arr.ind = T) %>%
+        head(1) %>%
+        as.data.frame() %>%
+        purrr::pmap_chr(function(row,col){
+          row <- as.integer(row)
+          col <- as.integer(col)
+          paste(fdir_filtered$filename[row],"INTERSECTS",fdir_filtered$filename[col])
+        }) %>%
+        paste(collapse = "\n")
+
+      fdir_filtered_years <- fdir_filtered %>%
+        dplyr::group_by(maptype,scale,epsg,fn_sheet) %>%
+        dplyr::summarise(years = paste(fn_year,collapse = ","))
+
+      # fdir_filtered_years <- paste(sort(unique(fdir_filtered$fn_year)),collapse = ",")
+
+
+      message(paste(
+        "Some rasters overlapping (e.g. :",
+        fdir_filtered_intersect_message,") \n",
+        "Maybe multiple years? Printing sheet-years dataframe\n"
+      ))
+      message(paste0(capture.output(fdir_filtered_years), collapse = "\n"))
+      stop()
+
+
+
+    }
+
+  }
+
+
+  # check if some geometries are self overlapping. Stop the function if TRUE
+
+  res_min <- c(min(fdir_filtered$res1),min(fdir_filtered$res2))
+  res_min <- as.integer(round(res_min))
+
+
+
+  rast <- fdir_filtered %>%
+    dplyr::select(file,res1,res2,epsg,nlayers) %>%
+    purrr::pmap(function(file,res1,res2,name,epsg,nlayers){
+      raster <- raster::brick(file)
+      raster::crs(raster) <- sp::CRS(paste0("+init=EPSG:",epsg))
+      raster <- raster::crop(raster,ex$extent[[1]])
+      res_rast <- raster::res(raster)
+      res_rast <- as.integer(round(res_rast))
+      if(res_rast[1] > res_min[1] | res_rast[2] > res_min[2]){
+        warning("Rasters in Extent do not have matching resolutions. Using disaggregate in order to enable merging")
+        fac1 <- res_rast[1]/res_min[1]
+        fac2 <- res_rast[2]/res_min[2]
+        raster <- raster::disaggregate(raster,fact = c(fac1,fac2))
+
+      }
+      raster
+    }) %>%
+    purrr::map(function(x){raster::crop(x,ex$extent[[1]])}) %>%
+    purrr::accumulate(function(x,y){raster::merge(x,y)}) %>%
+    tail(1) %>%
+    magrittr::extract2(1)
+
+  if(turn_greyscale){
+    if(raster::nlayers(rast) == 3){
+      rast <- raster_greyscale(rast)
+    } else if(raster::nlayers(rast) == 1){
+      coltab <- raster::colortable(raster::raster(fdir_filtered)) # colortable_greyscle can probabbly be subsituted to something more generic
+      raster::colortable(rast) <- colortable_greyscale(coltab)
+    } else(warning("Unexpectend number of Layers"))
+
+  }else{ # if raster should not be turned greyscale
+    if(raster::nlayers(rast) == 3){
+      # maybe turn into singleband raster with rgb_raster2singleband??
+    } else if(raster::nlayers(rast) == 1){
+      raster::colortable(rast) <- raster::colortable(raster::brick(fdir_filtered$file[1]))
+    } else(warning("Unexpectend number of Layers"))
+
+  }
+  rast
 }

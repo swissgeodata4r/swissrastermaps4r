@@ -9,7 +9,9 @@ vignette: >
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+### Important notice
 
+I'm currently the only one using this package. Things break freaquently and there is absolutly no backwards compatibility. Please tell me if you are planing to use this package so I will take greater care!
 
 ### Aquire raster data
 
@@ -90,19 +92,21 @@ ls(envir = swissrastermapEnv)
 Now let's look at an example where this package actually comes to some use. Say you want to plot a map of the largest cities in Switzerland. There is a sample dataset included in the package with name, location and size of the 10 largest cities in Switzerland. 
 
 ```{r}
-data("gemeinden_top_centroid")
+data("sample_points")
 
 
-gemeinden_top_centroid
+sample_points
 ```
 
 
 We can plot a simple map using the sample data already demonstrated: 
 
 ```{r}
-tm_shape(landesgebiet) + 
+library(tmap)
+
+tm_shape(switzerland) + 
   tm_polygons() + 
-  tm_shape(gemeinden_top_centroid) + 
+  tm_shape(sample_points) + 
   tm_dots(size = "EINWOHNERZ")
 ```
 
@@ -110,33 +114,33 @@ Now if you would want to include a swiss raster map into this plot you would:
 
 1. first decide on a scale
 2. look for the relevant map numbers based on the [division ("Blatteinteilung")](https://map.geo.admin.ch/?selectedNode=node_ch.swisstopo.pixelkarte-pk50.metadata1&Y=660000&X=190000&zoom=1&bgLayer=ch.swisstopo.pixelkarte-farbe&layers=ch.swisstopo.pixelkarte-pk50.metadata&time_current=latest&lang=de&topic=ech)
-3. find the appropriate raster maps based on the map numbers from the previous step
-4. check raste resolutions and possilby resample all rasters to same resolution
-5. merge all the relevant raster maps into a single file
-6. possilbly reassign `CRS` and `colormap` 
-7. import raster into `R`
+3. find the appropriate raster map _files_ based on the map numbers from the previous step
+4. import raster into `R`
+5. check raster resolutions and possibly resample all rasters to same resolution
+6. merge all the relevant raster maps into a single file
+7. possilbly reassign `CRS` and `colormap` 
 
-This package aims to automate steps 2 - 7 with the function `get_raster()`. The function takes an `sf` object as an input. In addition, scale level (a scale 1:1'000'000 is defined as `scale = 1000`) and method with which the extent is defined (`method = `) need to be specified. Currently, two methods are implemented: `bbox` takes a bounding box while `centroid` calculates the centroid of the sf object. Both methods accept `x_add`/`y_add` with which the extent window is enlarged. Method `centroid` _requires_ `x_add`/`y_add`, since the extent windows would have x/y demensions of Zero.
+This package automates steps 2 - 7 with the function `get_raster()`. The function takes an `sf` object as an input. In addition, scale level (a scale 1:1'000'000 is defined as `scale = 1000`).
+
 
 ```{r}
 
 rastermap <- get_raster(features = landesgebiet,
                         scale_level = 1000,
-                        method = "bbox", 
-                        name = "relief")
+                        method = "bbox")
 
 tm_shape(rastermap) + 
   tm_rgb() + 
-  tm_shape(gemeinden_top_centroid) + 
+  tm_shape(sample_points) + 
   tm_dots(size = "EINWOHNERZ")
 ```
 
 ### Retrieve multiple rasters
 
-In the previouse example, little was gained using the `get_raster` function. The function get's much more useful when multiple raster are needed. Using the same dataset, we can get a raster _per city_ using the option `per_feature = T`.
+In the previous example, little was gained using the `get_raster` function. The function get's much more useful when multiple raster are needed. Using the same dataset, we can get a raster _per city_ using the option `per_feature = T`.
 ```{r}
 
-rastermap <- get_raster(features = gemeinden_top_centroid,
+rastermap <- get_raster(features = sample_points,
                         x_add = 1000,
                         y_add = 1000,
                         per_feature = T,
