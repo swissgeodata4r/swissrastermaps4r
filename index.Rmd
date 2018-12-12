@@ -42,7 +42,7 @@ Currently, using swisstopo rastermaps in `R` is easy if:
 
 ## Does this package provide access to map data?
 
-NO! This package does not give access to any raster maps, by swisstopo or otherwise. Access to this data has to be acquire elsewhere: Either through [swisstopo](https://shop.swisstopo.admin.ch) directly or via third parties such as [geodata4edu](https://www.geodata4edu.ch). In fact, in the current version of the package the data has to be stored locally on your own hard drive (_urgh!_). Our hope is however, that this will change soon so that the data can be hosted on a network folder or on a GIS Server. 
+NO! This package does not give access to any raster maps, by swisstopo or otherwise. Access to this data has to be acquire elsewhere: Either through [swisstopo](https://shop.swisstopo.admin.ch) directly or via third parties such as [geodata4edu](https://www.geodata4edu.ch). In fact, in the current version of the package the data has to be stored locally on your own hard drive (_urgh!_). My hope is however, that this will change soon so that the data can be hosted on a network folder or on a GIS Server. 
 
 ## Who's in the team?
 

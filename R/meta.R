@@ -1,5 +1,5 @@
 
-swissmaprasterEnv <- new.env()
+swissrastermapEnv <- new.env()
 
 
 data.frame(
@@ -15,7 +15,7 @@ data.frame(
                   ),
   stringsAsFactors = F
 ) %>%
-  assign("search_pattern_dict",.,envir = swissmaprasterEnv)
+  assign("search_pattern_dict",.,envir = swissrastermapEnv)
 
 
 #' Gets or set the search pattern nomenklature
@@ -32,12 +32,17 @@ data.frame(
 search_pattern <- function(direction = "get",search_pattern_dict_new = NULL){
   stopifnot(direction %in% c("get","set"))
   if(direction == "get"){
-    search_pattern_dict <- get("search_pattern_dict",envir = swissmaprasterEnv)
+    search_pattern_dict <- get("search_pattern_dict",envir = swissrastermapEnv)
     print(search_pattern_dict)
     } else if(direction == "set"){
+      stop("not implemented yet")
+      # Cant allow this right now, since some metadata is required
+      # (e.g. year and sheet). Maby allow EXTENDING this dataframe
+      # at some point in the future.
+
       stopifnot(is.data.frame(search_pattern_dict_new))
       stopifnot(all(c("placeholder","description") %in% names(search_pattern_dict_new)))
-      assign("search_pattern_dict",search_pattern_dict_new,envir = swissmaprasterEnv)
+      assign("search_pattern_dict",search_pattern_dict_new,envir = swissrastermapEnv)
       print("Assigned new search_pattern_dict. Use search_pattern() to check the new
             search pattern nomenklature. Remember to update all '.pattern' files and
             rememeber also that the changes are only applied this session.")
@@ -60,7 +65,7 @@ metainfo_from_filename <- function(filename,pattern,search_pattern_dict = NULL){
   stopifnot(is.data.frame(search_pattern_dict) | is.null(search_pattern_dict))
 
   if(is.null(search_pattern_dict)){
-    search_pattern_dict <- get("search_pattern_dict",envir = swissmaprasterEnv)
+    search_pattern_dict <- get("search_pattern_dict",envir = swissrastermapEnv)
   }
 
   filename %>% purrr::map_dfr(function(filename_i){
@@ -106,8 +111,12 @@ geom_from_boundary <- function(df, epsg, add = T){
   # epsg: if not set to null, the epsg code will be set as
   #       the new geom's CRS.
 
-  stopifnot(all(c("xmin","xmax","ymin","xmax") %in% names(df)))
-  stopifnot(length(epsg) == 1)
+  if(!all(c("xmin","xmax","ymin","xmax") %in% names(df))){
+    stop("df must contain all of the following columns:
+         xmin, xmax, ymin, ymax")
+  }
+  if(length(epsg) != 1){stop("Can only add Gemetry if only
+                             one EPSG is provided")}
 
   geo <- df %>%
     dplyr::select(xmin,ymin,xmax,ymax) %>%
@@ -134,7 +143,7 @@ geom_from_boundary <- function(df, epsg, add = T){
 #' Scans all folders in the root dirctory corresponding to the folders given by
 #' \code{folders = }. OR: Makes an existing fdir object (either a variable or
 #' an .Rda File) the current fdir file by writing it to the Environment
-#' 'swissmaprasterEnv'. If stored as an Rda File, the associated variable name
+#' 'swissrastermapEnv'. If stored as an Rda File, the associated variable name
 #' must be \code{fdir}
 #'
 #' This command creates a "File Directory" in the package environment by scanning
@@ -151,13 +160,13 @@ geom_from_boundary <- function(df, epsg, add = T){
 #'   \item{\code{index}}{Needed when multiple folders with same maptype, scale and epsg code exist, but different naming patterns.}
 #' }
 #' @param rootdir Character string specifying the directory where the folders are stored OR
-#' character string pointing to an .Rda file from a previous init_fdir() run OR an fdir variable.
+#' character string pointing to an .Rda file from a previous fdir_init() run OR an fdir variable.
 #' @param maxfiles Integer limiting the number of files to be scanned. For testing purposes only.
 #' @param add_geometry Should the bounding box of each file be added as a geometry to \code{fdir}?
 #' @param maptypes Names of the maptypes to look for. Only folders containing at least one of the
 #' the character strings noted here are included in the search.
 
-init_fdir <- function(rootdir,
+fdir_init <- function(rootdir,
                       maxfiles = Inf,
                       add_geometry = T,
                       maptypes = c("PK","SMR","LK","TA")
@@ -165,14 +174,7 @@ init_fdir <- function(rootdir,
 
   start <- Sys.time()
 
-  if(is.data.frame(rootdir)){
-    fdir <- rootdir
-    # maby do some checks on the neccessary columns?
-  } else if(endsWith(tolower(rootdir),".rda")){
-    load(rootdir)
-    # maby do some checks on the neccessary columns?
 
-  } else {
     dirs <- list.dirs(rootdir,recursive = F,full.names = F)
     dirs <- purrr::map(maptypes,~dirs[grepl(.x,dirs)]) %>% unlist()
 
@@ -274,8 +276,8 @@ init_fdir <- function(rootdir,
     }
 
 
-    }
-  assign("fdir",fdir,envir = swissmaprasterEnv)
+
+  assign("fdir",fdir,envir = swissrastermapEnv)
   mb <- format(sum(fdir$size_mb),big.mark = "'")
   duration_minutes <- difftime(Sys.time(),start,units = "mins") %>%
     as.numeric() %>%
@@ -302,13 +304,13 @@ init_fdir <- function(rootdir,
 #' @param method The method with which to visualize the data: \code{ggplot2} or \code{tmap}
 #' Wrap the output in \code{ggplotly()} to get an interactive ggplot output or set \code{tmap_mode}
 #' to "view" go get an interactive tmap.
-#' @param filedirectory The file directory aquired by \code{\link{init_fdir()}}. If left as
+#' @param filedirectory The file directory aquired by \code{\link{fdir_init()}}. If left as
 #' \code{NULL}, the \code{fdir} from the package Environment is taken.
 
 show_extents <- function(method = "ggplot2",fdir = NULL){
 
   if(is.null(fdir)){
-    fdir <- get("fdir",envir = swissmaprasterEnv)
+    fdir <- get("fdir",envir = swissrastermapEnv)
 
     fdir$res1 <- as.factor(fdir$res1)
   }
@@ -339,6 +341,49 @@ show_extents <- function(method = "ggplot2",fdir = NULL){
   }
   return(plotoutput)
 }
+
+#' Import an existing fdir
+#'
+#' Avoid rescanning all your files (\code{fdir_init}) by
+#' exporting an existing \{fdir} (with \code{fdir_export})
+#' after initializing and importing it again in the next session
+#'
+#' The function enables importing an existing "File Directory"
+#' (\code{fdir}) from an ".Rda" File after running \code{fdir_init}
+#' and \code{fdir_export}.
+#' This avoids having to rescan all the files with \code{fdir_init}.
+#' Handle with care, changes in the source files are not registered with
+#' this method. Use \code{init_fdir} if unsure.
+
+#' @param name Path to an .Rda File
+fdir_import <- function(path){
+    fdir <- get(load(path))
+    assign("fdir",fdir,envir = swissrastermapEnv)
+  }
+
+#' Export an existing fdir to an Rda-File
+#'
+#' Avoid rescanning all your files (\code{fdir_init}) by
+#' exporting an existing \{fdir} (with \code{fdir_export})
+#' after initializing and importing it again (with \code{fdir_import})
+#' in the next session
+#'
+#' The function enables exporting an existing "File Directory"
+#' (\code{fdir}) to an ".Rda" File after running \code{fdir_init}.
+#' This avoids having to rescan all the files with \code{fdir_init}.
+#' Handle with care, changes in the source files are not registered with
+#' this method. Use \code{init_fdir} if unsure.
+
+fdir_export <- function(path){
+    if(exists("fdir", envir = swissrastermapEnv)){
+      fdir <- get("fdir",envir = swissrastermapEnv)
+      save(fdir,file = path)
+    } else{
+      stop("Please run fdir_init() first.")
+    }
+  }
+
+
 
 
 #' Recalculate extent values from a given aspect ratio

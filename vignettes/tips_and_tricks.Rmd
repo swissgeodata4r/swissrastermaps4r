@@ -1,0 +1,35 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### Show available raster extents
+
+In order to view the available extents, call the function `show_extents()`. The default method is `ggplot2`.
+
+```{r}
+
+library(ggplot2)
+show_extents()
+
+```
+
+
+Use `method = "tmap"` to show the extents in combination with other spatial data. For example, the [boundary of switzerland](https://opendata.swiss/en/dataset/swissboundaries3d-landesgrenzen) is included in the package. Load this dataset with `data("landesgebiet")`
+
+```{r}
+
+data("landesgebiet")
+
+
+library(tmap)
+
+tm_shape(landesgebiet) + 
+   tm_polygons() + 
+  show_extents("tmap")
+```
+

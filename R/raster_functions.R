@@ -271,7 +271,7 @@ get_extent <- function(features,x_add = 0,y_add = 0,method = "centroid",per_feat
 #' @param method A character string specifying the method with which the extent should be calculated. \code{centroid} calculates the centroid of the object(s), \code{bbox} calculates the bounding box of the object.
 #' @param turn_greyscale Should the output rastermaps be turned into greyscale?
 #' @param name If muliple, different maps are available with overlapping extents, \code{name} can be used to differentiate between different maptypes. Default is an empty sting.
-#' @param fdir By default, the \code{fdir} is retrieved from the package Environment (named \code{swissmaprasterEnv}). Override this with \code{fdir = }
+#' @param fdir By default, the \code{fdir} is retrieved from the package Environment (named \code{swissrastermapEnv}). Override this with \code{fdir = }
 #' @param limit For testing puposes only: Limits the number of rasters returned per object. Defaults to \code{Inf}
 #'
 get_raster <- function(features,
@@ -295,8 +295,8 @@ get_raster <- function(features,
 
 
   if(is.null(fdir)){
-    if(exists("fdir", envir = swissmaprasterEnv)){
-      fdir <- get("fdir",envir = swissmaprasterEnv)
+    if(exists("fdir", envir = swissrastermapEnv)){
+      fdir <- get("fdir",envir = swissrastermapEnv)
     } else{
       stop("Please run init_fdir() first.")
     }

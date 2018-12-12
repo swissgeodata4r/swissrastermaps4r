@@ -129,7 +129,7 @@ zuerich <- gemeinden_top_poly[gemeinden_top_poly$NAME == "Zürich",]
 --
 
 ```{r}
-init_fdir("C:/Users/rata/Geodata/01_Switzerland/01_Maps")
+fdir_init("C:/Users/rata/Geodata/01_Switzerland/01_Maps")
 ```
 
 --

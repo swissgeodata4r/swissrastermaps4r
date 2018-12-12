@@ -13,9 +13,37 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ### Aquire raster data
 
-First of all, the raster maps need to be acquired and stored in a folder. The package is developed with a focus on [SwissMapRaster](https://shop.swisstopo.admin.ch/de/products/maps/national/digital/), but probably other raster maps will work as well. Currently only [CRS 2056](https://epsg.io/2056) is implemented. We might also include [CRS 21781](https://epsg.io/21781) at some point but that's probably it. 
+In a firs step, the raster maps need to be acquired and stored in a folder. Unfortunately, most of the swisstopo raster maps are behind a paywall if you aren't part of [geodata4edu](https://geodata4edu.ch/).  Two scales are available publicly for free (see #1):
 
-The raster maps should be sorted in a folder per scale. See `init_fdir` to check the requirements for naming the folders.
+- [1:500'000](https://shop.swisstopo.admin.ch/en/products/maps/national/digital/srm500)
+- [1:100'000](https://shop.swisstopo.admin.ch/en/products/maps/national/digital/srm1000)
+
+
+The package is developed with a strong focus on the  [swisstopo](https://shop.swisstopo.admin.ch/de/products/maps/national/digital/) raster maps and hasn't been tested with other data. Therefore, only [CRS 2056](https://epsg.io/2056) and [CRS 21781](https://epsg.io/21781) are implemented.
+
+
+### Data structure
+
+Create one folder for each maptype, scale and projection. Each folder is then named `MAPTYPE_SCALE_PROJECTION` (e.g. `PK_25_2056`). Check the function `fdir_init` to get more details on the requirements for naming the folders.
+
+Some metadata must be derived from the filename. In order to achieve this, create a text file in each folder and change the file name of that textfile to match the naming pattern on the files within the folder. For example, the 1:500'000 raster map has the filename: 'PK500_LV95_KGRS_500_2016_1.tif'. The filestructure and the corresponding ".pattern"-File should therefore look as follows:
+
+```
+Geodata/
+├── PK_500_2056/
+│   ├── PK500_LV95_KGRS_500_2016_1.tif
+│   ├── AABBB_CCCC_DDDD_EEE_FFFF_G.pattern
+```
+Call `search_pattern()` to see the associated naming schema (i.e. the placeholders and their meanings). The function `metainfo_from_filename` is called on the filenames.
+
+**Note:**
+
+- if different naming patterns exist in a single folder, the files need to be seperated into different (parent) folders. E.G. 'PK_500_2056_1', ' PK_500_2056_2' etc. (this is ugly and should be resolved sometime in the future)
+- The naming pattern currently can't handle variable lenghts
+- The naming pattern currently can't handle different representations of the same map 
+
+
+
 
 ### Download package
 
@@ -23,8 +51,7 @@ Download and load the package. It is currently only available on github.
 
 
 ```{r}
-
-devtools::install_git("https://github.engineering.zhaw.ch/rata/swissmapraster.git",upgrade = F,quiet = T)
+# devtools::install_git("https://github.engineering.zhaw.ch/rata/swissmapraster.git",upgrade = F,quiet = T)
 ```
 
 
@@ -35,51 +62,27 @@ library(dplyr)
 
 ### Scan Folder
 
-Next, run the command `init_fdir()` pointing to the location (parent folder) of this maps. This command creates a "File Directory" in the package environment by scanning all folders recursively and analyzing the content. All files ending with "tif" are checked for extent, number of layers and resolution. All the mentioned attributes of each raster file, along with the file path and the extent as a geometry, are stored in the variable `fdir` of the package environment.
-```{r}
+Next, run the command `fdir_init()` pointing to the location (parent folder) of these maps. This command creates a "File Directory" in the package environment by scanning all folders recursively and analyzing the content. All files ending with "tif" are checked for extent, number of layers and resolution. All the mentioned attributes of each raster file, along with the file path and the extent as a geometry, are stored in the variable `fdir` of the package environment.
 
+```{r, eval=F,include=F}
+# fdir_init("C:/Users/rata/Geodata/01_Switzerland/01_Maps",add_geometry = F)
+# fdir_export("C:/Users/rata/Geodata/01_Switzerland/01_Maps/fdir.Rda")
 ```
 
-
-```{r}
-init_fdir("C:/Users/rata/Geodata/01_Switzerland/01_Maps")
+```{r, eval = F}
+fdir_init("C:/Users/rata/Geodata/01_Switzerland/01_Maps",add_geometry = F)
 ```
 
+```{r, include=F}
+fdir_import("C:/Users/rata/Geodata/01_Switzerland/01_Maps/fdir.Rda")
+```
 
-`init_fdir` stored an `sf` object in the package's own environment (called `packageEnv`). It's a list of all raster files, stored with their extent, scale, resolution and other information (see `init_fdir()`).
+`fdir_init` stored an `sf` object in the package's own environment (called `packageEnv`). It's a list of all raster files, stored with their extent, scale, resolution and other information (see `fdir_init()`).
 
 
 ```{r}
-ls(envir = packageEnv)
+ls(envir = swissrastermapEnv)
 ```
-
-
-### Show available raster extents
-
-In order to view the available extents, call the function `show_extents()`. The default method is `ggplot2`.
-
-```{r}
-
-library(ggplot2)
-show_extents()
-
-```
-
-
-Use `method = "tmap"` to show the extents in combination with other spatial data. For example, the [boundary of switzerland](https://opendata.swiss/en/dataset/swissboundaries3d-landesgrenzen) is included in the package. Load this dataset with `data("landesgebiet")`
-
-```{r}
-
-data("landesgebiet")
-
-
-library(tmap)
-
-tm_shape(landesgebiet) + 
-   tm_polygons() + 
-  show_extents("tmap")
-```
-
 
 
 ### Retrieve single raster

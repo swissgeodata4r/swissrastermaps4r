@@ -20,9 +20,11 @@ reference:
     desc: >
       The most important functions
     contents:
-      - init_fdir
+      - fdir_init
       - get_raster
       - show_extents
+      - fdir_export
+      - fdir_import
   - title: "Data"
     desc: >
       Some vector data stored in as `sf` Objects

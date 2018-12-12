@@ -30,7 +30,7 @@ library(grid)
 Initialize the file directory and load the dataset `gemeinden_top_poly` containing the largest 10 municipalities in Switzerland.
 
 ```{r,warning=F,message=F}
-init_fdir("C:/Users/rata/Geodata/01_Switzerland/01_Maps")
+fdir_init("C:/Users/rata/Geodata/01_Switzerland/01_Maps")
 
 data("gemeinden_top_poly")
 ```
