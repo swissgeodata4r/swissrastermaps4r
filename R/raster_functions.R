@@ -244,6 +244,37 @@ get_extent <- function(features,x_add = 0,y_add = 0,method = "centroid",per_feat
 }
 
 
+#' Filter fdir to find the required raster files
+#'
+#' Filters an \code{fdir} object to find the required raster files
+#' Only used in \code{get_raster()}. Outsorced it to a function in order to
+#' modularize \code{get_raster()} and make it easier to debug.
+#'
+#' @param fdir A dataframe or \pkg{sf} object from \code{fdir_init}
+#' @param scale level integer specyfing the scale level of the raster
+#' @param xmin,xmax,ymin,ymax Integers specyfing the extent of the desired raster
+#' @param year Optional integer specyfing the year from which data is needed
+fdir_filter <- function(fdir,epsg,scale_level,xmin,xmax,ymin,ymax,year = NULL){
+  if("sf" %in% class(fdir)){
+    fdir <- sf::st_set_geometry(fdir,NULL)
+  }
+
+  fdir <- fdir[fdir$epsg == epsg &
+                 fdir$scale == scale_level &
+                 fdir$xmin <= xmax &
+                 fdir$xmax >= xmin &
+                 fdir$ymin <= ymax &
+                 fdir$ymax >= ymin,]
+
+  if(!is.null(year)){
+    fdir <- fdir[fdir$fn_year_start <= year &
+                   fdir$fn_year_end >= year,]
+  }
+  return(fdir)
+}
+
+
+
 #' Get corresponding raster maps to feature
 #'
 #' Specify \pkg{sf} Object an some additional parameters to get corresponding raster maps
@@ -260,7 +291,6 @@ get_extent <- function(features,x_add = 0,y_add = 0,method = "centroid",per_feat
 #'   \item warning if nlayers != 3 and turn greyscale = T
 #'   \item Add colortable options
 #'   \item "x/y_add" should have a nicer name.. something with distance maybe?
-#'   \item implement other was to get the extent (bounding box w/ or w/o buffer)
 #'   \item add failsafes: e.g check if "features" is really an \pkg{sf}  object
 #'   \item make this a lazy function: at the moment, all raster files are downloaded into memory.
 #' }
@@ -292,7 +322,7 @@ get_raster <- function(features,
 
 
 
-
+  stopifnot("sf" %in% class(features))
 
   if(is.null(fdir)){
     if(exists("fdir", envir = swissrastermapEnv)){
@@ -316,42 +346,36 @@ get_raster <- function(features,
   name_i <- name
   year_i <- year
 
-  fdir_filtered <- fdir %>%
-    data.frame(stringsAsFactors = F) %>%
-    dplyr::filter(epsg == ex$epsg) %>%
-    dplyr::filter(scale == scale_level) %>%
-    dplyr::filter(xmin <= ex$xmax & xmax >= ex$xmin) %>%
-    dplyr::filter(ymin <= ex$ymax & ymax >= ex$ymin) %>%
-    # dplyr::filter(name == name_i) %>%
-    purrr::when(
-      !is.null(year_i)~dplyr::filter(.,fn_year_start <= year_i,fn_year_end >= year_i),
-      TRUE~.
-    )
+  fdir_filtered <- fdir_filter(fdir,
+                               epsg = ex$epsg,
+                               scale_level = scale_level,
+                               xmin = ex$xmin,
+                               xmax = ex$xmax,
+                               ymin = ex$ymin,
+                               ymax = ex$ymax,
+                               year = year
+                               )
 
   if(nrow(fdir_filtered) == 0){
-    stop("No raster files found with matching criteria.")}
+    stop("No raster files found with matching criteria.")
+    }
 
 
   if(nrow(fdir_filtered)>1){
     geoms <- geom_from_boundary(fdir_filtered,epsg = ex$epsg,add = T)
 
-    # cover <- sf::st_covers(geoms,sparse = F)
-    # overl <- sf::st_overlaps(geoms,sparse = F)
-
-    inters <- sf::st_intersects(geoms,sparse = F)
-    touch <- sf::st_touches(geoms,sparse = F)
+    do_intersect <- sf::st_intersects(geoms,sparse = F)
+    do_touch <- sf::st_touches(geoms,sparse = F)
 
     # since intersections includes instances where geometries just touch,
     # I'm trying to remove these by applying !st_touches(). Since I dont know
     # the operaions that well, I'm not sure if this can break at some point
-    pure_intersection <- inters & !touch
+    pure_intersection <- do_intersect & !do_touch
 
     pure_intersection[lower.tri(pure_intersection,diag = T)] <- NA
 
-    # fdir_filtered_intersect <- sf::st_intersects(geoms,sparse = F)
-
-
     if(any(pure_intersection,na.rm = T)){
+      # This part just runs if some of the geometries intersect
       fdir_filtered_intersect_message <- pure_intersection %>%
         which(arr.ind = T) %>%
         head(1) %>%
