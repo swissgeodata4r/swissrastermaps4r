@@ -93,6 +93,7 @@ Now let's look at an example where this package actually comes to some use. Say 
 
 ```{r}
 data("sample_points")
+data("switzerland")
 
 
 sample_points
@@ -125,7 +126,7 @@ This package automates steps 2 - 7 with the function `get_raster()`. The functio
 
 ```{r}
 
-rastermap <- get_raster(features = landesgebiet,
+rastermap <- get_raster(features = switzerland,
                         scale_level = 1000,
                         method = "bbox")
 
@@ -140,23 +141,20 @@ tm_shape(rastermap) +
 In the previous example, little was gained using the `get_raster` function. The function get's much more useful when multiple raster are needed. Using the same dataset, we can get a raster _per city_ using the option `per_feature = T`.
 ```{r}
 
-rastermap <- get_raster(features = sample_points,
+rastermap <- get_raster(features = sample_points[1,],
                         x_add = 1000,
                         y_add = 1000,
-                        per_feature = T,
                         scale_level = 25,
                         method = "centroid",
                         limit = 4)
 
 ```
 
-If multiple rasters are returned, the output is a `list()` of rasters with a length corresponding to the number of featuers (i.e. rows) in the input features. To access the first map in the list, we use the double parenthese `[[]]`.
-
 
 ```{r}
 credits <- "Geodata \u00A9 Swisstopo"
 
-tm_shape(rastermap[[1]]) + 
+tm_shape(rastermap) + 
   tm_rgb() + 
   tm_credits(credits,bg.color = "white",bg.alpha = 0.8)
 

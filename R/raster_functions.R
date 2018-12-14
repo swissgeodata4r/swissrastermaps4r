@@ -255,9 +255,6 @@ get_extent <- function(features,x_add = 0,y_add = 0,method = "centroid",per_feat
 #' @param xmin,xmax,ymin,ymax Integers specyfing the extent of the desired raster
 #' @param year Optional integer specyfing the year from which data is needed
 fdir_filter <- function(fdir,epsg,scale_level,xmin,xmax,ymin,ymax,year = NULL){
-  if("sf" %in% class(fdir)){
-    fdir <- sf::st_set_geometry(fdir,NULL)
-  }
 
   fdir <- fdir[fdir$epsg == epsg &
                  fdir$scale == scale_level &
@@ -267,11 +264,121 @@ fdir_filter <- function(fdir,epsg,scale_level,xmin,xmax,ymin,ymax,year = NULL){
                  fdir$ymax >= ymin,]
 
   if(!is.null(year)){
-    fdir <- fdir[fdir$fn_year_start <= year &
-                   fdir$fn_year_end >= year,]
+    fdir <- fdir[fdir$year_start <= year &
+                   fdir$year_end >= year,]
   }
   return(fdir)
 }
+
+
+
+#' Check Raster Overlaps
+#'
+#' Takes an \code{fdir} object \strong{with} geometries and checks if any of the
+#' features overlap. This function is only in \code{get_raster()} after filtering
+#' and before merging.
+#'
+#' @param fdir_filtered An \code{fdir} dataframe / sf object
+#' @param epsg Only necessary if \code{fdir} is not an sf object
+check_raster_overlaps <- function(fdir_filtered,epsg = NULL){
+  if(!"sf" %in% class(fdir_filtered)){
+    fdir_filtered <- geom_from_boundary(fdir_filtered,epsg = epsg,add = T)
+  }
+
+  do_intersect <- sf::st_intersects(fdir_filtered,sparse = F)
+  do_touch <- sf::st_touches(fdir_filtered,sparse = F)
+
+  # since intersections includes instances where geometries just touch,
+  # I'm trying to remove these by applying !st_touches(). Since I dont know
+  # the operaions that well, I'm not sure if this can break at some point
+  pure_intersection <- do_intersect & !do_touch
+
+  pure_intersection[lower.tri(pure_intersection,diag = T)] <- NA
+
+  if(any(pure_intersection,na.rm = T)){
+    # This part just runs if some of the geometries intersect
+    pure_intersection %>%
+      which(arr.ind = T) %>%
+      as.data.frame() %>%
+      purrr::pmap_dfr(function(row,col){
+        row <- as.integer(row)
+        col <- as.integer(col)
+        data.frame(
+          file1 = fdir_filtered$filename[row],
+          file2 = fdir_filtered$filename[col],
+          stringsAsFactors = F
+        )
+      }) %>%
+      assign(x = "self_overlaps",value = .,envir = swissrastermapEnv)
+
+    fdir_filtered %>%
+      dplyr::group_by(maptype,scale,epsg,sheet) %>%
+      dplyr::summarise(years = paste(year,collapse = ",")) %>%
+      assign(x = "self_overlaps2",value = .,envir = swissrastermapEnv)
+
+    message(paste(
+      "Some of the selected rasters overlap. Run get_srm4r('self_overlaps')",
+      "to get a dataframe with all the overlapping objects.",
+      "Run get_srm4r('self_overlaps2') to get an overview of all rasters in the extent"
+    ))
+    stop()
+  }
+}
+
+#' Get swissmapraster4r Environment data
+#'
+#' Gets data stored in the package's own environment
+#'
+#' Simply a wrapper around \code{get()} where \code{envir = } is set to the package's
+#' default environment, \code{swissrastermapEnv}.
+
+get_srm4r <- function(x){
+  get(x = x, envir = swissrastermapEnv)
+}
+
+
+#' Harmonize Rasters
+#'
+#' Harmonizes all the raster files from \{code{fdir_filtered}} to one single raster
+#' This process includes
+#' \enumerate{
+#'   \item Crop rasters to right size
+#'   \item Checking all resolutions
+#'   \item Resample (disaggregate) all rasters low res -> high res (warning issued)
+#'   \item Merge rasters into one raster
+#' }
+raster_harmonize <- function(fdir_filtered,extent){
+  res_min <- c(min(fdir_filtered$res1),min(fdir_filtered$res2)) %>%
+    round() %>%
+    as.integer()
+
+  rast <- fdir_filtered %>%
+    dplyr::select(file,res1,res2,epsg,nlayers) %>%
+    purrr::pmap(function(file,res1,res2,name,epsg,nlayers){
+      raster <- raster::brick(file)
+      raster::crs(raster) <- sp::CRS(paste0("+init=EPSG:",epsg))
+      raster <- raster::crop(raster,extent)
+      res_rast <- as.integer(round(raster::res(raster)))
+      if(res_rast[1] > res_min[1] | res_rast[2] > res_min[2]){
+        warning(
+          paste(
+            "Rasters in extent do not have matching resolutions.",
+            "Applying disaggregate on the following raster to enable merging:",
+            file))
+        fac1 <- res_rast[1]/res_min[1]
+        fac2 <- res_rast[2]/res_min[2]
+        raster <- raster::disaggregate(raster,fact = c(fac1,fac2))
+      }
+      raster
+    }) %>%
+    purrr::map(function(x){raster::crop(x,extent)}) %>%
+    purrr::accumulate(function(x,y){raster::merge(x,y)}) %>%
+    tail(1) %>%
+    magrittr::extract2(1)
+}
+
+
+
 
 
 
@@ -308,7 +415,6 @@ get_raster <- function(features,
                        scale_level,
                        x_add = 0,
                        y_add = 0,
-                       # per_feature = F,
                        method = "centroid",
                        turn_greyscale = F,
                        name = "",
@@ -316,12 +422,8 @@ get_raster <- function(features,
                        limit = Inf,
                        asp = NULL,
                        year = NULL
-){
-
-
-
-
-
+                       ){
+  # If needed, features could also be extents or objects with x/y coordinates
   stopifnot("sf" %in% class(features))
 
   if(is.null(fdir)){
@@ -332,8 +434,6 @@ get_raster <- function(features,
     }
   }
 
-
-
   ex <- get_extent(features = features,
                    x_add = x_add,
                    y_add = y_add,
@@ -342,9 +442,6 @@ get_raster <- function(features,
                    asp = asp
   )
 
-  # to avoid conflicts with columns of the same name
-  name_i <- name
-  year_i <- year
 
   fdir_filtered <- fdir_filter(fdir,
                                epsg = ex$epsg,
@@ -358,85 +455,15 @@ get_raster <- function(features,
 
   if(nrow(fdir_filtered) == 0){
     stop("No raster files found with matching criteria.")
-    }
-
-
-  if(nrow(fdir_filtered)>1){
-    geoms <- geom_from_boundary(fdir_filtered,epsg = ex$epsg,add = T)
-
-    do_intersect <- sf::st_intersects(geoms,sparse = F)
-    do_touch <- sf::st_touches(geoms,sparse = F)
-
-    # since intersections includes instances where geometries just touch,
-    # I'm trying to remove these by applying !st_touches(). Since I dont know
-    # the operaions that well, I'm not sure if this can break at some point
-    pure_intersection <- do_intersect & !do_touch
-
-    pure_intersection[lower.tri(pure_intersection,diag = T)] <- NA
-
-    if(any(pure_intersection,na.rm = T)){
-      # This part just runs if some of the geometries intersect
-      fdir_filtered_intersect_message <- pure_intersection %>%
-        which(arr.ind = T) %>%
-        head(1) %>%
-        as.data.frame() %>%
-        purrr::pmap_chr(function(row,col){
-          row <- as.integer(row)
-          col <- as.integer(col)
-          paste(fdir_filtered$filename[row],"INTERSECTS",fdir_filtered$filename[col])
-        }) %>%
-        paste(collapse = "\n")
-
-      fdir_filtered_years <- fdir_filtered %>%
-        dplyr::group_by(maptype,scale,epsg,fn_sheet) %>%
-        dplyr::summarise(years = paste(fn_year,collapse = ","))
-
-      # fdir_filtered_years <- paste(sort(unique(fdir_filtered$fn_year)),collapse = ",")
-
-
-      message(paste(
-        "Some rasters overlapping (e.g. :",
-        fdir_filtered_intersect_message,") \n",
-        "Maybe multiple years? Printing sheet-years dataframe\n"
-      ))
-      message(paste0(capture.output(fdir_filtered_years), collapse = "\n"))
-      stop()
-
-
-
-    }
-
   }
 
 
-  # check if some geometries are self overlapping. Stop the function if TRUE
+  if(nrow(fdir_filtered)>1){
+    check_raster_overlaps(fdir_filtered,epsg = ex$epsg)
+  }
 
-  res_min <- c(min(fdir_filtered$res1),min(fdir_filtered$res2))
-  res_min <- as.integer(round(res_min))
-
-
-
-  rast <- fdir_filtered %>%
-    dplyr::select(file,res1,res2,epsg,nlayers) %>%
-    purrr::pmap(function(file,res1,res2,name,epsg,nlayers){
-      raster <- raster::brick(file)
-      raster::crs(raster) <- sp::CRS(paste0("+init=EPSG:",epsg))
-      raster <- raster::crop(raster,ex$extent[[1]])
-      res_rast <- raster::res(raster)
-      res_rast <- as.integer(round(res_rast))
-      if(res_rast[1] > res_min[1] | res_rast[2] > res_min[2]){
-        warning("Rasters in Extent do not have matching resolutions. Using disaggregate in order to enable merging")
-        fac1 <- res_rast[1]/res_min[1]
-        fac2 <- res_rast[2]/res_min[2]
-        raster <- raster::disaggregate(raster,fact = c(fac1,fac2))
-
-      }
-      raster
-    }) %>%
-    purrr::map(function(x){raster::crop(x,ex$extent[[1]])}) %>%
-    purrr::accumulate(function(x,y){raster::merge(x,y)}) %>%
-    tail(1) %>%
-    magrittr::extract2(1)
+  rast <- raster_harmonize(fdir_filtered = fdir_filtered,
+                           extent = ex$extent[[1]])
 
   if(turn_greyscale){
     if(raster::nlayers(rast) == 3){

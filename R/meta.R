@@ -4,7 +4,7 @@ swissrastermapEnv <- new.env()
 
 data.frame(
   placeholder = c("A","B","C","D","E","F","G"),
-  name = paste("fn",c("maptype","scale","CRS","format","sheet", "year","index"),sep = "_"),
+  name = paste(c("maptype_fn","scale_fn","CRS","format","sheet", "year","index"),sep = "_"),
   description = c("Name of the map (LK,PK, SMR, TA)",
                   "Scale, usually in two digits",
                   "Projection, usually either LV95 or LV03",
@@ -27,26 +27,9 @@ data.frame(
 #' \code{search_pattern_dict} will be ignored in the '.pattern' file.
 #'
 
-# Todo: dont allow overwriting of placeholder / filenames, only allow adding addition number
-# with NEW placeholes and NEW names (where "fn_" is automatically prepended)
-search_pattern <- function(direction = "get",search_pattern_dict_new = NULL){
-  stopifnot(direction %in% c("get","set"))
-  if(direction == "get"){
+search_pattern <- function(){
     search_pattern_dict <- get("search_pattern_dict",envir = swissrastermapEnv)
     print(search_pattern_dict)
-    } else if(direction == "set"){
-      stop("not implemented yet")
-      # Cant allow this right now, since some metadata is required
-      # (e.g. year and sheet). Maby allow EXTENDING this dataframe
-      # at some point in the future.
-
-      stopifnot(is.data.frame(search_pattern_dict_new))
-      stopifnot(all(c("placeholder","description") %in% names(search_pattern_dict_new)))
-      assign("search_pattern_dict",search_pattern_dict_new,envir = swissrastermapEnv)
-      print("Assigned new search_pattern_dict. Use search_pattern() to check the new
-            search pattern nomenklature. Remember to update all '.pattern' files and
-            rememeber also that the changes are only applied this session.")
-  }
 }
 
 #' Get Metadata from filename
@@ -60,29 +43,23 @@ search_pattern <- function(direction = "get",search_pattern_dict_new = NULL){
 #' specified in a dataframe (in the argument \code{search_pattern_dict}). Run \code{search_pattern}
 #' to see what these argument currently are.
 #'
-metainfo_from_filename <- function(filename,pattern,search_pattern_dict = NULL){
+metainfo_from_filename <- function(filename,pattern){
 
-  stopifnot(is.data.frame(search_pattern_dict) | is.null(search_pattern_dict))
+  filename <- strsplit(filename,"\\.") %>% map_chr(~.x[1])
+  search_pattern_dict <- get("search_pattern_dict",envir = swissrastermapEnv)
 
-  if(is.null(search_pattern_dict)){
-    search_pattern_dict <- get("search_pattern_dict",envir = swissrastermapEnv)
-  }
-
-  filename %>% purrr::map_dfr(function(filename_i){
-    search_pattern_dict %>%
-      dplyr::select(placeholder,name) %>%
-      purrr::pmap_dfr(function(placeholder,name){
+  search_pattern_dict %>%
+    dplyr::select(placeholder,name) %>%
+    purrr::pmap_dfr(function(placeholder,name){
       ints <- gregexpr(placeholder,pattern)[[1]]
-      star <- min(ints)
-      sto <- max(ints)
-      su <- substr(filename_i,star,sto)
+      su <- substr(filename,min(ints),max(ints))
       data.frame(name = name,
                  val = su,
-                 filename = filename_i,
+                 filename = filename,
                  stringsAsFactors = F)
     }) %>%
-      tidyr::spread(name,val)
-  })
+    tidyr::spread(name,val,) %>%
+    dplyr::select(-filename)
 }
 
 
@@ -138,6 +115,19 @@ geom_from_boundary <- function(df, epsg, add = T){
 }
 
 
+#' Extent as dataframe
+#'
+#' Get extant of a raster object and return a dataframe
+#'
+#' @param raster A raster / rasterbrick object
+extent_as_df <- function(raster){
+  raster_i %>%
+    raster::extent() %>%
+    matrix(nrow = 1) %>%
+    as.data.frame() %>%
+    magrittr::set_colnames(c("xmin","xmax","ymin","ymax"))}
+
+
 #' Initialize File Directory
 #'
 #' Scans all folders in the root dirctory corresponding to the folders given by
@@ -178,6 +168,7 @@ fdir_init <- function(rootdir,
     dirs <- list.dirs(rootdir,recursive = F,full.names = F)
     dirs <- purrr::map(maptypes,~dirs[grepl(.x,dirs)]) %>% unlist()
 
+    # dirs <- dirs[grepl("SMR_25_2056",dirs)]
 
     folders_df <- strsplit(dirs,"_") %>%
       purrr::map_dfr(function(x){
@@ -191,11 +182,12 @@ fdir_init <- function(rootdir,
       dplyr::mutate(
         folder = dirs
       )
+    # library(zeallot)
     # Creates a data_frame by going through all the maptypes and their
     # corresponding folders, reading in all raster files (only "tifs" at the moment)
     fdir <- folders_df %>%
-      # head(1) %->% c(maptype,scale,epsg,folder) # use only to debugg pmap_dfr()
-      purrr::pmap_dfr(function(maptype,scale,epsg,name,folder){
+      # slice(1) %->% c(maptype,scale,epsg,folder) # use only to debugg pmap_dfr()
+      purrr::pmap_dfr(function(maptype,scale,epsg,folder){
         folderpath <- file.path(rootdir,folder)
         pattern <- list.files(folderpath,".pattern",full.names = F)
         if(length(pattern)>1){
@@ -209,63 +201,55 @@ fdir_init <- function(rootdir,
           # head(1) -> x
           head(maxfiles) %>% # this can be used to test and debug the function
           purrr::map_dfr(function(x){
+
             folderfile <- file.path(folderpath,x)
             raster_i <- raster::brick(folderfile)
             size_mb <- file.info(folderfile)$size/1e+6
-            n_layers <- raster::nlayers(raster_i)
             reso <- raster::res(raster_i)
 
-            # This function is called on a per file basis. The function can be called on multiple files
-            # call this function one loop-level up, on a folder basis to speed up the
-            # process
-            name_dissection <- metainfo_from_filename(x,pattern)
-
-            raster_i %>%
-              raster::extent() %>%
-              matrix(nrow = 1) %>%
-              as.data.frame() %>%
-              magrittr::set_colnames(c("xmin","xmax","ymin","ymax")) %>%
+            extent_as_df(raster_i) %>%
               dplyr::mutate(
-                maptype = maptype,
-                scale = scale,
-                epsg = epsg,
                 file = folderfile,
-                nlayers = n_layers,
+                nlayers = raster::nlayers(raster_i),
                 res1 = reso[1],
                 res2 = reso[2],
-                size_mb = size_mb
-              ) %>%
-              cbind(name_dissection) %>%
-              # the following lines break if user changed search_pattern_dict
-              # todo: make this more generic / flexible
-              dplyr::mutate(
-                fn_year = as.integer(fn_year),
-                fn_scale = as.integer(fn_scale)
+                size_mb = size_mb,
+                filename = x
               )
-          })
+          }) %>%
+          cbind(metainfo_from_filename(.$filename,pattern))# %>% # somthing broke here
+          # dplyr::mutate(
+          #   epsg = epsg,
+          #   maptype = maptype,
+          #   scale = scale,
+          # )
       })
+
 
     # Added this to solve an ad hoc problem. Don't know if this works in this works
     # generically.
     #In addition: Should probbably not use max(row) but the index to sort out the duplicates
-    fdir <- fdir %>%
-      dplyr::group_by(maptype,fn_sheet,fn_year) %>%
-      dplyr::mutate(row = dplyr::row_number()) %>%
-      dplyr::filter(row == max(row)) %>%
-      dplyr::ungroup() %>%
-      dplyr::select(-row)
+    # fdir <- fdir %>%
+    #   dplyr::group_by(maptype,sheet,year) %>%
+    #   dplyr::mutate(row = dplyr::row_number()) %>%
+    #   dplyr::filter(row == max(row)) %>%
+    #   dplyr::ungroup() %>%
+    #   dplyr::select(-row)
+
 
     # Not sure if this is going to work.. test it
     fdir <- fdir %>%
-      dplyr::group_by(fn_sheet) %>%
-      dplyr::arrange(fn_sheet,fn_year) %>%
+      dplyr::group_by(sheet) %>%
+      dplyr::arrange(sheet,year) %>%
       dplyr::mutate(
-        fn_year_start = as.integer(fn_year - floor((fn_year-dplyr::lag(fn_year))/2)),
-        fn_year_start = dplyr::if_else(is.na(fn_year_start),as.integer(fn_year-5),as.integer(fn_year_start)),
-        fn_year_end = as.integer(fn_year + ceiling((dplyr::lead(fn_year)-fn_year)/2))-1,
-        fn_year_end = dplyr::if_else(is.na(fn_year_end),as.integer(fn_year+5),as.integer(fn_year_end)),
+        year_start = year - floor((year-dplyr::lag(year))/2),
+        year_start = ifelse(is.na(year_start),-Inf,year_start),
+        year_end = (year + ceiling((dplyr::lead(year)-year)/2))-1,
+        year_end = ifelse(is.na(year_end),Inf,year_end),
       ) %>%
       dplyr::ungroup()
+
+    message(paste("Number of rows (3)"),nrow(fdir))
 
 
     epsgs <- unique(fdir$epsg)
@@ -274,7 +258,6 @@ fdir_init <- function(rootdir,
     if(add_geometry){
       fdir <- geom_from_boundary(fdir, epsgs, add = T)
     }
-
 
 
   assign("fdir",fdir,envir = swissrastermapEnv)
