@@ -4,7 +4,7 @@ swissrastermapEnv <- new.env()
 
 data.frame(
   placeholder = c("A","B","C","D","E","F","G","H","Z"),
-  name = paste(c("maptype_fn","scale_fn","CRS","format","sheet", "year","index","Name","Ignore"),sep = "_"),
+  name = paste(c("maptype_fn","scale_fn","CRS","format","sheet", "year","index","name","Ignore"),sep = "_"),
   description = c("Name of the map (LK,PK, SMR, TA)",
                   "Scale, usually in two digits",
                   "Projection, usually either LV95 or LV03",
@@ -59,16 +59,24 @@ metainfo_from_filename <- function(filename,pattern){
 
   search_pattern_dict %>%
     dplyr::select(placeholder,name) %>%
+    # slice(1) %->% c(placeholder,name)
     purrr::pmap_dfr(function(placeholder,name){
-      ints <- gregexpr(placeholder,pattern)[[1]]
-      su <- substr(filename,min(ints),max(ints))
+      # ints <- gregexpr(placeholder,pattern)[[1]]
+      ints <- gregexpr(placeholder,pattern) %>% map(~c(.x[1],.x[length(.x)]))
+      su <- pmap_chr(list(ints,filename),function(ints,filename){substr(filename,min(ints),max(ints))})
+      # su <- substr(filename,min(ints),max(ints))
       data.frame(name = name,
                  val = su,
                  filename = filename,
                  stringsAsFactors = F)
     }) %>%
     tidyr::spread(name,val) %>%
-    dplyr::select(-filename)
+    dplyr::select(-filename) %>%
+    mutate(
+      year = as.integer(year),
+      year = ifelse(is.na(year),Inf,year),
+      sheet = ifelse(sheet == "","0",sheet)
+    )
 }
 
 
@@ -218,14 +226,11 @@ fdir_init <- function(rootdir,
       filename <- list.files(folderpath,".tif$",full.names = F)
       filename <- gsub(".tif","",filename)
 
-
-
       out <- cbind(out,metainfo_from_filename(filename,pattern))
       out
     })
 
   fdir <- fdir %>%
-    mutate(year = as.integer(year)) %>%
     dplyr::group_by(epsg,sheet) %>%
     dplyr::arrange(epsg,sheet,year) %>%
     dplyr::mutate(

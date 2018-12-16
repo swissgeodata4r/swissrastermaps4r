@@ -254,14 +254,15 @@ get_extent <- function(features,x_add = 0,y_add = 0,method = "centroid",per_feat
 #' @param scale level integer specyfing the scale level of the raster
 #' @param xmin,xmax,ymin,ymax Integers specyfing the extent of the desired raster
 #' @param year Optional integer specyfing the year from which data is needed
-fdir_filter <- function(fdir,epsg,scale_level,xmin,xmax,ymin,ymax,year = NULL){
+fdir_filter <- function(fdir,epsg,scale_level,xmin,xmax,ymin,ymax,year = NULL,name = ""){
 
   fdir <- fdir[fdir$epsg == epsg &
                  fdir$scale == scale_level &
                  fdir$xmin <= xmax &
                  fdir$xmax >= xmin &
                  fdir$ymin <= ymax &
-                 fdir$ymax >= ymin,]
+                 fdir$ymax >= ymin &
+                 fdir$name == name,]
 
   if(!is.null(year)){
     fdir <- fdir[fdir$year_start <= year &
@@ -450,7 +451,8 @@ get_raster <- function(features,
                                xmax = ex$xmax,
                                ymin = ex$ymin,
                                ymax = ex$ymax,
-                               year = year
+                               year = year,
+                               name = name
                                )
 
   if(nrow(fdir_filtered) == 0){

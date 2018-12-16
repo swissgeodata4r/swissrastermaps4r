@@ -128,7 +128,8 @@ This package automates steps 2 - 7 with the function `get_raster()`. The functio
 
 rastermap <- get_raster(features = switzerland,
                         scale_level = 1000,
-                        method = "bbox")
+                        method = "bbox",
+                        name = "relief")
 
 tm_shape(rastermap) + 
   tm_rgb() + 
@@ -138,7 +139,7 @@ tm_shape(rastermap) +
 
 ### Retrieve multiple rasters
 
-In the previous example, little was gained using the `get_raster` function. The function get's much more useful when multiple raster are needed. Using the same dataset, we can get a raster _per city_ using the option `per_feature = T`.
+In the previous example, little was gained using the `get_raster` function. The function get's much more useful when multiple raster are needed. 
 ```{r}
 
 rastermap <- get_raster(features = sample_points[1,],
@@ -155,29 +156,10 @@ rastermap <- get_raster(features = sample_points[1,],
 credits <- "Geodata \u00A9 Swisstopo"
 
 tm_shape(rastermap) + 
-  tm_rgb() + 
+  tm_raster() + 
   tm_credits(credits,bg.color = "white",bg.alpha = 0.8)
 
 ```
-
-
-We can of course now add all of our vector data stored in the input feature. To keep things simple, we'll refrain from doing this in this example. Just one last thing: Having the maps in lists lets us wield the power of `purrr`. (`map()` is wrapped in `invisible()` to suppress item index)
-
-```{r,results='asis'}
-library(purrr)
-
-invisible(
-  map(rastermap,function(x){
-  print(
-    tm_shape(x) + 
-    tm_rgb() +
-    tm_credits(credits,bg.color = "white",bg.alpha = 0.8)
-  )
-})
-)
-```
-
-
 
 
 
