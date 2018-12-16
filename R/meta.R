@@ -3,33 +3,35 @@ swissrastermapEnv <- new.env()
 
 
 data.frame(
-  placeholder = c("A","B","C","D","E","F","G"),
-  name = paste(c("maptype_fn","scale_fn","CRS","format","sheet", "year","index"),sep = "_"),
+  placeholder = c("A","B","C","D","E","F","G","H","Z"),
+  name = paste(c("maptype_fn","scale_fn","CRS","format","sheet", "year","index","Name","Ignore"),sep = "_"),
   description = c("Name of the map (LK,PK, SMR, TA)",
                   "Scale, usually in two digits",
                   "Projection, usually either LV95 or LV03",
                   "Format of the data (usually KREL or KOMB)",
                   "A character or number specifying the sheet name/number",
                   "An integer, specifying the year of publication (4 digits)",
-                  "An index usually at the end of the filename, specifying some sort of map index"
-                  ),
+                  "An index usually at the end of the filename, specifying some sort of map index",
+                  "A name to distinguish between different representations of the same map",
+                  "Parts of the name that can be ignored"
+  ),
   stringsAsFactors = F
 ) %>%
   assign("search_pattern_dict",.,envir = swissrastermapEnv)
 
 
-#' Gets or set the search pattern nomenklature
+#' Prints the search pattern nomenklature
 #'
-#' Gets or sets the search pattern nomenklature
+#' Prints the search pattern nomenklature
 #'
-#' Retrieves ('get') or specifies ('set') the \code{search_pattern_dict} which is used in the
+#' Retrieves the \code{search_pattern_dict} which is used in the
 #' function \code{metainfo_from_filename}. Any characters not specified in
 #' \code{search_pattern_dict} will be ignored in the '.pattern' file.
 #'
 
 search_pattern <- function(){
-    search_pattern_dict <- get("search_pattern_dict",envir = swissrastermapEnv)
-    print(search_pattern_dict)
+  search_pattern_dict <- get("search_pattern_dict",envir = swissrastermapEnv)
+  print(search_pattern_dict)
 }
 
 #' Get Metadata from filename
@@ -46,7 +48,14 @@ search_pattern <- function(){
 metainfo_from_filename <- function(filename,pattern){
 
   filename <- strsplit(filename,"\\.") %>% map_chr(~.x[1])
-  search_pattern_dict <- get("search_pattern_dict",envir = swissrastermapEnv)
+
+  pattern <- filename %>% map_chr(function(x){
+    pattern[nchar(x) == nchar(pattern)]
+    })
+
+
+  search_pattern_dict <- get("search_pattern_dict",envir = swissrastermapEnv) %>%
+    filter(placeholder != "Z")
 
   search_pattern_dict %>%
     dplyr::select(placeholder,name) %>%
@@ -58,7 +67,7 @@ metainfo_from_filename <- function(filename,pattern){
                  filename = filename,
                  stringsAsFactors = F)
     }) %>%
-    tidyr::spread(name,val,) %>%
+    tidyr::spread(name,val) %>%
     dplyr::select(-filename)
 }
 
@@ -115,17 +124,24 @@ geom_from_boundary <- function(df, epsg, add = T){
 }
 
 
-#' Extent as dataframe
-#'
-#' Get extant of a raster object and return a dataframe
-#'
-#' @param raster A raster / rasterbrick object
-extent_as_df <- function(raster){
-  raster_i %>%
-    raster::extent() %>%
-    matrix(nrow = 1) %>%
-    as.data.frame() %>%
-    magrittr::set_colnames(c("xmin","xmax","ymin","ymax"))}
+
+raster_metadata <- function(rasterpath){
+  map_dfr(rasterpath,function(rasterpath_i){
+    rast <- raster::brick(rasterpath_i)
+    reso <- raster::res(rast)
+    ex <- matrix(raster::extent(rast))
+    data.frame(
+      nlayers = raster::nlayers(rast),
+      res1 = reso[1],
+      res2 = reso[2],
+      xmin = ex[1],
+      xmax = ex[2],
+      ymin = ex[3],
+      ymax = ex[4],
+      stringsAsFactors = F
+    )
+  })
+}
 
 
 #' Initialize File Directory
@@ -153,122 +169,92 @@ extent_as_df <- function(raster){
 #' character string pointing to an .Rda file from a previous fdir_init() run OR an fdir variable.
 #' @param maxfiles Integer limiting the number of files to be scanned. For testing purposes only.
 #' @param add_geometry Should the bounding box of each file be added as a geometry to \code{fdir}?
-#' @param maptypes Names of the maptypes to look for. Only folders containing at least one of the
-#' the character strings noted here are included in the search.
+#' @param filter Names of the folders to look for. Only folders containing the character strings
+#' specified here are included in the search.
 
 fdir_init <- function(rootdir,
                       maxfiles = Inf,
                       add_geometry = T,
-                      maptypes = c("PK","SMR","LK","TA")
-                      ){
+                      filter = c("PK","SMR","LK","TA")
+){
 
   start <- Sys.time()
 
+  if(maxfiles != Inf){warning("maxfiles currently not implemented")}
 
-    dirs <- list.dirs(rootdir,recursive = F,full.names = F)
-    dirs <- purrr::map(maptypes,~dirs[grepl(.x,dirs)]) %>% unlist()
 
-    # dirs <- dirs[grepl("SMR_25_2056",dirs)]
+  dirs <- list.dirs(rootdir,recursive = F,full.names = F)
+  dirs <- purrr::map(filter,~dirs[grepl(.x,dirs)]) %>% unlist()
 
-    folders_df <- strsplit(dirs,"_") %>%
-      purrr::map_dfr(function(x){
-        data.frame(
-          maptype = x[1],
-          scale = as.integer(x[2]),
-          epsg = as.integer(x[3]),
-          stringsAsFactors = F
-        )
-      }) %>%
-      dplyr::mutate(
-        folder = dirs
+  folders_df <- strsplit(dirs,"_") %>%
+    purrr::map_dfr(function(x){
+      data.frame(
+        maptype = x[1],
+        scale = as.integer(x[2]),
+        epsg = as.integer(x[3]),
+        stringsAsFactors = F
       )
-    # library(zeallot)
-    # Creates a data_frame by going through all the maptypes and their
-    # corresponding folders, reading in all raster files (only "tifs" at the moment)
-    fdir <- folders_df %>%
-      # slice(1) %->% c(maptype,scale,epsg,folder) # use only to debugg pmap_dfr()
-      purrr::pmap_dfr(function(maptype,scale,epsg,folder){
-        folderpath <- file.path(rootdir,folder)
-        pattern <- list.files(folderpath,".pattern",full.names = F)
-        if(length(pattern)>1){
-          warning("Found more than one file with the ending '.pattern'. Using only first one")
-        } else if(length(pattern) == 1){
-          pattern <- strsplit(pattern,"\\.")[[1]][1]
-        } else(
-          pattern <- ""
-        )
-        list.files(folderpath,".tif$",full.names = F) %>%
-          # head(1) -> x
-          head(maxfiles) %>% # this can be used to test and debug the function
-          purrr::map_dfr(function(x){
+    }) %>%
+    dplyr::mutate(
+      folder = dirs
+    )
+  # library(zeallot)
+  fdir <- folders_df %>%
+    mutate(folderpath = file.path(rootdir,folder)) %>%
+    # slice(1) %->% c(maptype,scale,epsg,folder,folderpath) # use only to debugg pmap_dfr()
+    purrr::pmap_dfr(function(maptype,scale,epsg,folder,folderpath){
+      pattern <- list.files(folderpath,".pattern",full.names = F)
+      pattern <- strsplit(pattern,"\\.") %>% map_chr(~.x[1])
+      out <- data.frame(
+        file = list.files(folderpath,".tif$",full.names = T),
+        stringsAsFactors = F)
+      out$size_mb <- file.info(out$file)$size/1e+6
+      out$epsg <- epsg
+      out$maptype <- maptype
+      out$scale <- scale
 
-            folderfile <- file.path(folderpath,x)
-            raster_i <- raster::brick(folderfile)
-            size_mb <- file.info(folderfile)$size/1e+6
-            reso <- raster::res(raster_i)
+      out <- cbind(out,raster_metadata(out$file))
 
-            extent_as_df(raster_i) %>%
-              dplyr::mutate(
-                file = folderfile,
-                nlayers = raster::nlayers(raster_i),
-                res1 = reso[1],
-                res2 = reso[2],
-                size_mb = size_mb,
-                filename = x
-              )
-          }) %>%
-          cbind(metainfo_from_filename(.$filename,pattern))# %>% # somthing broke here
-          # dplyr::mutate(
-          #   epsg = epsg,
-          #   maptype = maptype,
-          #   scale = scale,
-          # )
-      })
+      filename <- list.files(folderpath,".tif$",full.names = F)
+      filename <- gsub(".tif","",filename)
 
 
-    # Added this to solve an ad hoc problem. Don't know if this works in this works
-    # generically.
-    #In addition: Should probbably not use max(row) but the index to sort out the duplicates
-    # fdir <- fdir %>%
-    #   dplyr::group_by(maptype,sheet,year) %>%
-    #   dplyr::mutate(row = dplyr::row_number()) %>%
-    #   dplyr::filter(row == max(row)) %>%
-    #   dplyr::ungroup() %>%
-    #   dplyr::select(-row)
+
+      out <- cbind(out,metainfo_from_filename(filename,pattern))
+      out
+    })
+
+  fdir <- fdir %>%
+    mutate(year = as.integer(year)) %>%
+    dplyr::group_by(epsg,sheet) %>%
+    dplyr::arrange(epsg,sheet,year) %>%
+    dplyr::mutate(
+      year_start = year - floor((year-dplyr::lag(year))/2),
+      year_start = ifelse(is.na(year_start),-Inf,year_start),
+      year_end = (year + ceiling((dplyr::lead(year)-year)/2))-1,
+      year_end = ifelse(is.na(year_end),Inf,year_end),
+    ) %>%
+    dplyr::ungroup()
 
 
-    # Not sure if this is going to work.. test it
-    fdir <- fdir %>%
-      dplyr::group_by(sheet) %>%
-      dplyr::arrange(sheet,year) %>%
-      dplyr::mutate(
-        year_start = year - floor((year-dplyr::lag(year))/2),
-        year_start = ifelse(is.na(year_start),-Inf,year_start),
-        year_end = (year + ceiling((dplyr::lead(year)-year)/2))-1,
-        year_end = ifelse(is.na(year_end),Inf,year_end),
-      ) %>%
-      dplyr::ungroup()
+  epsgs <- unique(fdir$epsg)
+  epsgs <- epsgs[!is.na(epsgs)]
 
-    message(paste("Number of rows (3)"),nrow(fdir))
-
-
-    epsgs <- unique(fdir$epsg)
-    epsgs <- epsgs[!is.na(epsgs)]
-
-    if(add_geometry){
-      fdir <- geom_from_boundary(fdir, epsgs, add = T)
-    }
+  if(add_geometry){
+    fdir <- geom_from_boundary(fdir, epsgs, add = T)
+  }
 
 
   assign("fdir",fdir,envir = swissrastermapEnv)
   mb <- format(sum(fdir$size_mb),big.mark = "'")
-  duration_minutes <- difftime(Sys.time(),start,units = "mins") %>%
+  duration <- difftime(Sys.time(),start)
+  duration_units <- attr(duration,"units")
+  duration <- duration%>%
     as.numeric() %>%
     round(2) %>%
     format(nsmall = 2)
 
-  # if passing on a variable or Rda file, this next message is not quite right ("scanned")
-  print(paste0("Done. Scanned ",nrow(fdir), " Files", " (",mb," MB) in ",duration_minutes," minutes. "," All metadata stored in fdir."))
+  print(paste0("Done. Scanned ",nrow(fdir), " Files", " (",mb," MB) in ",duration," (",duration_units,"). -> All metadata stored in fdir."))
 }
 
 
@@ -336,13 +322,13 @@ show_extents <- function(method = "ggplot2",fdir = NULL){
 #' and \code{fdir_export}.
 #' This avoids having to rescan all the files with \code{fdir_init}.
 #' Handle with care, changes in the source files are not registered with
-#' this method. Use \code{init_fdir} if unsure.
+#' this method. Use \code{fdir_init} if unsure.
 
 #' @param name Path to an .Rda File
 fdir_import <- function(path){
-    fdir <- get(load(path))
-    assign("fdir",fdir,envir = swissrastermapEnv)
-  }
+  fdir <- get(load(path))
+  assign("fdir",fdir,envir = swissrastermapEnv)
+}
 
 #' Export an existing fdir to an Rda-File
 #'
@@ -355,16 +341,16 @@ fdir_import <- function(path){
 #' (\code{fdir}) to an ".Rda" File after running \code{fdir_init}.
 #' This avoids having to rescan all the files with \code{fdir_init}.
 #' Handle with care, changes in the source files are not registered with
-#' this method. Use \code{init_fdir} if unsure.
+#' this method. Use \code{fdir_init} if unsure.
 
 fdir_export <- function(path){
-    if(exists("fdir", envir = swissrastermapEnv)){
-      fdir <- get("fdir",envir = swissrastermapEnv)
-      save(fdir,file = path)
-    } else{
-      stop("Please run fdir_init() first.")
-    }
+  if(exists("fdir", envir = swissrastermapEnv)){
+    fdir <- get("fdir",envir = swissrastermapEnv)
+    save(fdir,file = path)
+  } else{
+    stop("Please run fdir_init() first.")
   }
+}
 
 
 
@@ -404,6 +390,6 @@ asp2extent <- function(xmin,xmax,ymin,ymax,asp = 1){
 
 credits <- function(who){
   if(who == "swisstopo"){
-  "Geodata \u00A9 Swisstopo"
+    "Geodata \u00A9 Swisstopo"
   }
 }
