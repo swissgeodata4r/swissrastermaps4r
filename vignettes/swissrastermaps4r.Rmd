@@ -123,8 +123,6 @@ This package automates steps 2 - 7 with the function `get_raster()`. The functio
 ```{r}
 
 rastermap <- get_raster(features = switzerland,
-                        scale_level = 1000,
-                        method = "bbox",
                         name = "relief")
 
 tm_shape(rastermap) + 

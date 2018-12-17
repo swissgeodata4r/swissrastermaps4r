@@ -10,6 +10,4 @@ I'm currently the only one using this package. Things break freaquently and ther
 
 # ToDos / Plans
 
-- Resolve the issue with naming the 1:1'000'000 files (also allow different representations of the same map)
-- allow different patterns in a single folder (with multiple .pattern Files)
  

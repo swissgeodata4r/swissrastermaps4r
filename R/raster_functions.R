@@ -261,13 +261,41 @@ fdir_filter <- function(fdir,epsg,scale_level,xmin,xmax,ymin,ymax,year = NULL,na
                  fdir$xmin <= xmax &
                  fdir$xmax >= xmin &
                  fdir$ymin <= ymax &
-                 fdir$ymax >= ymin &
-                 fdir$name == name,]
+                 fdir$ymax >= ymin, ]
 
   if(!is.null(year)){
     fdir <- fdir[fdir$year_start <= year &
                    fdir$year_end >= year,]
   }
+
+
+  if(name != ""){
+    fdir <- fdir[fdir$name == name,]
+  }
+
+  pure_overlaps <- check_raster_overlaps(fdir,epsg = epsg)
+
+  if(any(isTRUE(pure_overlaps))){
+    message("Selected rasters overlap at least partially. Attempting filter further:")
+    years <- unique(fdir$year)
+    if(length(years)>1){
+      year = max(years,na.rm = T)
+      years <- paste(years,collapse = ",")
+      message(paste0("-- Multiple years found. Only using year: ",year, " (Available years: ",years,")"))
+      fdir <- fdir[fdir$year_start <= year &
+                     fdir$year_end >= year,]
+    }
+    names <- unique(fdir$name)
+    if(length(names)>1){
+      name <- names[1]
+      names <- paste(names,collapse = ",")
+      message(paste("-- Multiple names found. Only using name: ",name, " (Available names: ",names,")"))
+
+      fdir <- fdir[fdir$name == name,]
+    }
+  }
+
+
   return(fdir)
 }
 
@@ -281,7 +309,7 @@ fdir_filter <- function(fdir,epsg,scale_level,xmin,xmax,ymin,ymax,year = NULL,na
 #'
 #' @param fdir_filtered An \code{fdir} dataframe / sf object
 #' @param epsg Only necessary if \code{fdir} is not an sf object
-check_raster_overlaps <- function(fdir_filtered,epsg = NULL){
+check_raster_overlaps <- function(fdir_filtered,epsg = NULL,action = "stop"){
   if(!"sf" %in% class(fdir_filtered)){
     fdir_filtered <- geom_from_boundary(fdir_filtered,epsg = epsg,add = T)
   }
@@ -296,34 +324,7 @@ check_raster_overlaps <- function(fdir_filtered,epsg = NULL){
 
   pure_intersection[lower.tri(pure_intersection,diag = T)] <- NA
 
-  if(any(pure_intersection,na.rm = T)){
-    # This part just runs if some of the geometries intersect
-    pure_intersection %>%
-      which(arr.ind = T) %>%
-      as.data.frame() %>%
-      purrr::pmap_dfr(function(row,col){
-        row <- as.integer(row)
-        col <- as.integer(col)
-        data.frame(
-          file1 = fdir_filtered$filename[row],
-          file2 = fdir_filtered$filename[col],
-          stringsAsFactors = F
-        )
-      }) %>%
-      assign(x = "self_overlaps",value = .,envir = swissrastermapEnv)
-
-    fdir_filtered %>%
-      dplyr::group_by(maptype,scale,epsg,sheet) %>%
-      dplyr::summarise(years = paste(year,collapse = ",")) %>%
-      assign(x = "self_overlaps2",value = .,envir = swissrastermapEnv)
-
-    message(paste(
-      "Some of the selected rasters overlap. Run get_srm4r('self_overlaps')",
-      "to get a dataframe with all the overlapping objects.",
-      "Run get_srm4r('self_overlaps2') to get an overview of all rasters in the extent"
-    ))
-    stop()
-  }
+  pure_intersection
 }
 
 #' Get swissmapraster4r Environment data
@@ -405,7 +406,7 @@ guess_scale <- function(extent,available_scales,factor = 1,outsize = NULL){
 
   if(is.null(outsize)){outsize <- dev.size("cm")}
   outsize_real <- c(extent$xmax-extent$xmin,extent$ymax-extent$ymin)*100
-  scale_real <- (mean((outsize_real/outsize_plot)/1000))/factor
+  scale_real <- (mean((outsize_real/outsize)/1000))/factor
   scale_closest <- available_scales[which.min(abs(scale_real-available_scales))]
   message(paste("Using scale level: ",scale_closest))
   scale_closest
@@ -453,7 +454,6 @@ get_raster <- function(features,
                        year = NULL,
                        scale_factor = 1
                        ){
-  # If needed, features could also be extents or objects with x/y coordinates
   stopifnot("sf" %in% class(features))
 
   if(is.null(fdir)){
@@ -464,29 +464,6 @@ get_raster <- function(features,
     }
   }
 
-
-
-  # Maybe it would convinient to automatically choose a extent method based on the geomety type?:
-  # if(is.null(method)){
-  #   features_type <- unique(sf::st_geometry_type(features))
-  #   if(length(features_type)>1){+
-  #       warning(paste0("Multiple Geometry Types found. Using the first one (",
-  #                     features_type[1],") to determin the extent method"))
-  #     features_type <- features_type[1]
-  #     }
-  #
-  #   if(grepl("POINT",features_type)){
-  #     method <- "centroid"
-  #   }
-  #   if(grepl("LINE",features_type) | grepl("POLYGON",features_type)){
-  #     method <- "bbox"
-  #   } else{
-  #     stop(paste("Cannot guess method for geometry type",features_type))
-  #   }
-  #   message(paste("Using Method",method, "to determin extent"))
-  # }
-
-
   ex <- get_extent(features = features,
                    x_add = x_add,
                    y_add = y_add,
@@ -496,13 +473,6 @@ get_raster <- function(features,
   )
 
   scale_level <- guess_scale(extent = ex,available_scales = unique(fdir$scale),factor = scale_factor)
-
-
-
-
-
-
-
 
   fdir_filtered <- fdir_filter(fdir,
                                epsg = ex$epsg,
