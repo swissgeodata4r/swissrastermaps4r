@@ -42,8 +42,8 @@ reference:
       - rgb_raster2singleband
       - ysrgb
       - colortable_greyscale
-      - rgb_brick_count
       - raster_harmonize
+      - raster_greyscale
   - title: "Other functions"
     desc: >
       Some more auxiliary functions. These are mostly needed for backend and have little use for front end users.

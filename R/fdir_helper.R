@@ -247,7 +247,7 @@ asp2extent <- function(xmin,xmax,ymin,ymax,asp = 1){
 credits <- function(who){
   if(who == "swisstopo"){
     "Geodata \u00A9 Swisstopo"
-  } else if{
+  } else{
     stop("Dont know ",who)
   }
 }

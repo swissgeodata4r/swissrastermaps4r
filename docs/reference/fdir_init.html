@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Initialize File Directory — fdir_init • swissrastermaps4r</title>
+<title>Initialize a "File Directory" by scanning all raster files — fdir_init • swissrastermaps4r</title>
 
 <!-- jquery -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
@@ -30,13 +30,10 @@
 
 
 
-<meta property="og:title" content="Initialize File Directory — fdir_init" />
+<meta property="og:title" content="Initialize a "File Directory" by scanning all raster files — fdir_init" />
 
-<meta property="og:description" content="Scans all folders in the root dirctory corresponding to the folders given by
-folders = . OR: Makes an existing fdir object (either a variable or
-an .Rda File) the current fdir file by writing it to the Environment
-'swissrastermapEnv'. If stored as an Rda File, the associated variable name
-must be fdir" />
+<meta property="og:description" content="This function creates a &quot;file directory&quot; by scanning all available raster files
+and extracting relevant metadata." />
 <meta name="twitter:card" content="summary" />
 
 
@@ -121,35 +118,27 @@ must be fdir" />
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Initialize File Directory</h1>
-    <small class="dont-index">Source: <a href='https://github.com/swissgeodata4r/swissrastermaps4r/blob/master/R/meta.R'><code>R/meta.R</code></a></small>
+    <h1>Initialize a "File Directory" by scanning all raster files</h1>
+    <small class="dont-index">Source: <a href='https://github.com/swissgeodata4r/swissrastermaps4r/blob/master/R/fdir.R'><code>R/fdir.R</code></a></small>
     <div class="hidden name"><code>fdir_init.Rd</code></div>
     </div>
 
     <div class="ref-description">
     
-    <p>Scans all folders in the root dirctory corresponding to the folders given by
-<code>folders = </code>. OR: Makes an existing fdir object (either a variable or
-an .Rda File) the current fdir file by writing it to the Environment
-'swissrastermapEnv'. If stored as an Rda File, the associated variable name
-must be <code>fdir</code></p>
+    <p>This function creates a "file directory" by scanning all available raster files
+and extracting relevant metadata.</p>
     
     </div>
 
-    <pre class="usage"><span class='fu'>fdir_init</span>(<span class='no'>rootdir</span>, <span class='kw'>maxfiles</span> <span class='kw'>=</span> <span class='fl'>Inf</span>, <span class='kw'>add_geometry</span> <span class='kw'>=</span> <span class='no'>T</span>, <span class='kw'>filter</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"PK"</span>,
-  <span class='st'>"SMR"</span>, <span class='st'>"LK"</span>, <span class='st'>"TA"</span>))</pre>
+    <pre class="usage"><span class='fu'>fdir_init</span>(<span class='no'>rootdir</span>, <span class='kw'>add_geometry</span> <span class='kw'>=</span> <span class='no'>T</span>, <span class='kw'>filter</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"PK"</span>, <span class='st'>"SMR"</span>, <span class='st'>"LK"</span>,
+  <span class='st'>"TA"</span>))</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>rootdir</th>
-      <td><p>Character string specifying the directory where the folders are stored OR
-character string pointing to an .Rda file from a previous fdir_init() run OR an fdir variable.</p></td>
-    </tr>
-    <tr>
-      <th>maxfiles</th>
-      <td><p>Integer limiting the number of files to be scanned. For testing purposes only.</p></td>
+      <td><p>Character string specifying the directory where the folders are stored</p></td>
     </tr>
     <tr>
       <th>add_geometry</th>
@@ -164,17 +153,19 @@ specified here are included in the search.</p></td>
     
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
-    <p>This command creates a "File Directory" in the package environment by scanning
-all folders specified by <code>folders</code> within the <code>rootdir</code> and analyzing the content.
-All files ending with "tif" are checked for extent, number of layers and resolution.
-All the mentioned attributes of each raster file, along with the file path and the extent as a
-geometry, are stoerd in the variable <code>fdir</code> of the package environment.
-Parent folders containing the rasterdata require a specific structure:
+    <p>This function scans all folders in the root dirctory corresponding to the folders given by
+<code>folders = </code>. It saves this directory in the package environment, and and
+can later use this info to determin which rasters to import when running the
+command <code>get_raster()</code>.</p>
+<p>Currently, only files ending with "tif" are checked for extent, number of layers
+and resolution and other informatin.</p>
+<p>Parent folders (subfolders of <code>rootdir =</code>) are scanned non recursively for
+raster data with the extention ".tif". These folders must adhere a specific structure:
 <code>TYPE_Scale_EPSG_index</code></p><dl class='dl-horizontal'>
   <dt><code>TYPE</code></dt><dd><p>corresponds to the maptype. IN Switzerland this is typically <code>SMR</code>, <code>PK</code>, <code>LK</code> or <code>TA</code>. <strong>Must</strong> be followed by a <code>_</code></p></dd>
   <dt><code>Scale</code></dt><dd><p>defines the map scale as x in 1:1'000x. <strong>Must</strong> be followed by a <code>_</code></p></dd>
   <dt><code>EPSG</code></dt><dd><p>specifies the CRS of the containing raster data <strong>Must</strong> be followed by a <code>_</code> <strong>only</strong> if <code>name</code> is specified</p></dd>
-  <dt><code>index</code></dt><dd><p>Needed when multiple folders with same maptype, scale and epsg code exist, but different naming patterns.</p></dd>
+  <dt><code>index</code></dt><dd><p>Optional</p></dd>
 </dl>
     
 

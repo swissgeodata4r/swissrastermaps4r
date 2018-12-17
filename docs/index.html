@@ -89,9 +89,6 @@
       
       </header><div class="row">
   <div class="contents col-md-9">
-<!-- ## What's the idea behind swissmapraster 4 R? -->
-<!-- This Package is meant as a Bridge between Swissmapraster Data (SMR) and R. It is the hope of the package developer(s) that this Package will prove to be necessary for a short time period, just so long till SwissMapRaster Data is freely and openly available to the public,  along with an appropriate R-interface. Unfortunately, since the SMR Data is still behind a paywall, this package does not provide access to this data. It simply provides an interface for cases where the data is already available to the user. -->
-<!-- ### Creating maps in `R` -->
 <!-- Some things are easy, others are hard. -->
 <!-- - **Easy** ↔ **hard** -->
 <!-- - Vector data ↔ Raster data -->
@@ -103,28 +100,17 @@
 <div id="what-is-this-package-about" class="section level2">
 <h2 class="hasAnchor">
 <a href="#what-is-this-package-about" class="anchor"></a>What is this package about?</h2>
-<p>I want to simplify access to swisstopo geodata from within <code>R</code>.</p>
-<p>Currently, using swisstopo rastermaps in <code>R</code> is easy if:</p>
-<ul>
-<li>the map only incldes <em>one single</em> file<br>
-</li>
-<li>you know exactly where to find that file</li>
-</ul>
-<p><strong>BUT:</strong></p>
-<ul>
-<li>Smaller scale maps are split into multiple tiles.</li>
-<li>For example, the 1:25’000 map consists of 260 individual Tiles</li>
-</ul>
+<p>It simplifies access to swisstopo geodata within <code>R</code>. Currently, using swisstopo rastermaps in <code>R</code> is easy if: The map only incldes <em>one single</em> file and you know exactly what file this is. <strong>BUT:</strong> Smaller scale maps are split into multiple tiles. For example, the 1:25’000 map consists of 260 individual Tiles</p>
 </div>
 <div id="does-this-package-provide-access-to-map-data" class="section level2">
 <h2 class="hasAnchor">
 <a href="#does-this-package-provide-access-to-map-data" class="anchor"></a>Does this package provide access to map data?</h2>
-<p>NO! This package does not give access to any raster maps, by swisstopo or otherwise. Access to this data has to be acquire elsewhere: Either through <a href="https://shop.swisstopo.admin.ch">swisstopo</a> directly or via third parties such as <a href="https://www.geodata4edu.ch">geodata4edu</a>. In fact, in the current version of the package the data has to be stored locally on your own hard drive (<em>urgh!</em>). My hope is however, that this will change soon so that the data can be hosted on a network folder or on a GIS Server.</p>
+<p>Regrettably, no. This package does not give access to any raster maps, by swisstopo or otherwise. Access to this data has to be acquire elsewhere: Either through <a href="https://shop.swisstopo.admin.ch">swisstopo</a> directly or via third parties such as <a href="https://www.geodata4edu.ch">geodata4edu</a> (see <a href="https://github.com/swissgeodata4r/swissrastermaps4r/issues/1">#1</a>). In fact, in the current version of the package, the data has to be stored locally on your own hard drive (<em>urgh!</em>). My hope is however, that this will change soon so that the data can be hosted on a network folder or on a GIS Server.</p>
 </div>
 <div id="whos-in-the-team" class="section level2">
 <h2 class="hasAnchor">
 <a href="#whos-in-the-team" class="anchor"></a>Who’s in the team?</h2>
-<p>Currently, it’s just <a href="https://www.zhaw.ch/de/ueber-uns/person/rata/">me</a>. But I’m hoping for some people to collaborate with and maybe we can level this up!</p>
+<p>Currently, it’s just <a href="https://www.zhaw.ch/de/ueber-uns/person/rata/">me</a>, but I’m very open to colaboration.</p>
 </div>
   </div>
 

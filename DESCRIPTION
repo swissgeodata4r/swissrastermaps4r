@@ -26,7 +26,7 @@ Imports:
   sf,
   tidyr
 Suggests:
-  tmap
+  tmap,
   ggplot
 RoxygenNote: 6.1.1
 
