@@ -196,6 +196,12 @@ check_raster_overlaps <- function(fdir_filtered,epsg = NULL,action = "stop"){
 #'
 #' Simply a wrapper around \code{get()} where \code{envir = } is set to the package's
 #' default environment, \code{swissrastermapEnv}.
+#'  \describe{
+#'   \item{search_pattern_dict}{See \{metainfo_from_filename()}}
+#'   \item{fdir}{See \code{fdir_init()}}
+#' }
+#'
+#' @param A character string specifying the object to retrieve from the environment.
 
 get_srm4r <- function(x){
   get(x = x, envir = swissrastermapEnv)

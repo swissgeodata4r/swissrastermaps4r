@@ -19,20 +19,6 @@ data.frame(
 ) %>%
   assign("search_pattern_dict",.,envir = swissrastermapEnv)
 
-
-#' Prints the search pattern nomenclature
-#'
-#' Prints the search pattern nomenclature
-#'
-#' Retrieves the \code{search_pattern_dict} which is used in the
-#' function \code{metainfo_from_filename}. Any characters not specified in
-#' \code{search_pattern_dict} will be ignored in the '.pattern' file.
-#'
-search_pattern <- function(){
-  search_pattern_dict <- get("search_pattern_dict",envir = swissrastermapEnv)
-  print(search_pattern_dict)
-}
-
 #' Get Metadata from filename
 #'
 #' Retrieves metadata from filename with the help of a predefined 'pattern'

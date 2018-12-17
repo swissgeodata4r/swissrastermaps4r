@@ -52,7 +52,6 @@ reference:
       - asp2extent
       - geom_from_boundary
       - metainfo_from_filename
-      - search_pattern
       - guess_scale
       - get_srm4r
       - fdir_filter

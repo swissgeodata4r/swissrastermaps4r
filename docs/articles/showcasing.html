@@ -136,7 +136,7 @@
 <div id="prepare-figure-captions" class="section level2">
 <h2 class="hasAnchor">
 <a href="#prepare-figure-captions" class="anchor"></a>Prepare Figure Captions</h2>
-<p>Create a (text) caption per municipality which can later be included in <code>fig.cap =</code> of the markdown chunk (not visible in the output document).</p>
+<p>Create a (text) caption per municipality which can later be included as a caption.</p>
 <div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" data-line-number="1">caption &lt;-<span class="st"> </span><span class="kw">st_set_geometry</span>(sample_polygons,<span class="ot">NULL</span>) <span class="op">%&gt;%</span></a>
 <a class="sourceLine" id="cb5-2" data-line-number="2"><span class="st">  </span><span class="kw">pmap_chr</span>(<span class="cf">function</span>(NAME,EINWOHNERZ,area_km2,dichte,rank){</a>
 <a class="sourceLine" id="cb5-3" data-line-number="3">    <span class="kw">glue</span>(<span class="st">"Die Gemeindegrenze von {NAME} umfasst ein Fläche von {area_km2} km2. In diesem Gebiet leben {formatC(EINWOHNERZ,big.mark = "</span>,<span class="st">")} Einwohner, was eine Einwohnerdichte von {as.integer(dichte)}</span></a>

@@ -73,7 +73,7 @@ ext_inv <- exts %>%
 
 ## Prepare Figure Captions
 
-Create a (text) caption per municipality which can later be included in `fig.cap =` of the markdown chunk (not visible in the output document).
+Create a (text) caption per municipality which can later be included as a caption.
 ```{r}
 caption <- st_set_geometry(sample_polygons,NULL) %>%
   pmap_chr(function(NAME,EINWOHNERZ,area_km2,dichte,rank){

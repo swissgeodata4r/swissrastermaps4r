@@ -33,7 +33,7 @@ Geodata/
 │   ├── PK500_LV95_KGRS_500_2016_1.tif
 │   ├── AABBB_CCCC_DDDD_EEE_FFFF_G.pattern
 ```
-Call `search_pattern()` to see the associated naming schema (i.e. the place-holders and their meanings). The function `metainfo_from_filename` is called on the file names.
+Call `get_srm4r("search_pattern_dict")` to see the associated naming schema (i.e. the place-holders and their meanings). The function `metainfo_from_filename` is called on the file names.
 
 **Note:**
 

@@ -6,10 +6,9 @@
 \usage{
 get_srm4r(x)
 }
+\arguments{
+\item{A}{character string specifying the object to retrieve from the environment.}
+}
 \description{
 Gets data stored in the package's own environment
-}
-\details{
-Simply a wrapper around \code{get()} where \code{envir = } is set to the package's
-default environment, \code{swissrastermapEnv}.
 }
