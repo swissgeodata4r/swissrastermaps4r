@@ -13,15 +13,12 @@ Here's a little showcase on how this package can be used. Just some code, with n
 
 ```{r, include=F}
 remove.packages("swissrastermaps4r")
-devtools::install_git("https://github.engineering.zhaw.ch/rata/swissmapraster.git",upgrade = F,quiet = T,ref = "master")
+devtools::install_github("swissgeodata4r/swissrastermaps4r",upgrade = F)
 
 ```
 
 
 ```{r,warning=F,message=F}
-
-
-
 library(swissrastermaps4r)
 library(sf)
 library(purrr)
@@ -56,7 +53,7 @@ sample_polygons <- sample_polygons %>%
     )
 ```
 
-Create an cookiecutter shape for each feature.  
+Create an cookiecutter shape for each feature.
 ```{r}
 
 exts <- sample_polygons %>%
@@ -73,7 +70,7 @@ ext_inv <- exts %>%
 
 ## Prepare Figure Captions
 
-Create a (text) caption per municipality which can later be included in `fig.cap =` of the markdown chunk (not visible in the output document). 
+Create a (text) caption per municipality which can later be included in `fig.cap =` of the markdown chunk (not visible in the output document).
 ```{r}
 caption <- st_set_geometry(sample_polygons,NULL) %>%
   pmap_chr(function(NAME,EINWOHNERZ,area_km2,dichte,rank){
@@ -85,27 +82,27 @@ caption <- st_set_geometry(sample_polygons,NULL) %>%
 
 ## Create plots
 
-Run a loop over each feature calling `get_raster()` within the plot. This avoids saving 
+Run a loop over each feature calling `get_raster()` within the plot. This avoids saving
 all the rasters in a huge list.
 
 ```{r,results='asis'}
 data("switzerland")
 
 for(i in 1:nrow(sample_polygons)){
-  extent_indicator <- tm_shape(switzerland) + 
-    tm_polygons() + 
-    tm_shape(get_extent(exts[i,],x_add = 1000,y_add = 1000)) + 
+  extent_indicator <- tm_shape(switzerland) +
+    tm_polygons() +
+    tm_shape(get_extent(exts[i,],x_add = 1000,y_add = 1000)) +
     tm_polygons(col = "red", alpha = 0.5) +
     tm_layout(frame = F) +
     tm_view(alpha = 0)
-  mainmap <- tm_shape(get_raster(exts[i,],100)) + 
-    tm_rgb() + 
-    tm_shape(ext_inv[i])+ 
+  mainmap <- tm_shape(get_raster(exts[i,],100)) +
+    tm_rgb() +
+    tm_shape(ext_inv[i])+
     tm_polygons(alpha = 0.8,fill = "white") +
     tm_scale_bar(position = c("left","bottom")) +
     tm_credits(credits("swisstopo"),bg.color = "white",bg.alpha = 0.8) +
     tm_compass(position = c("right","top")) +
-    tm_layout(frame = F) 
+    tm_layout(frame = F)
   grid.newpage()
   print(mainmap, vp=viewport(0,0,0.7,1,just = c("left","bottom")))
   print(extent_indicator, vp=viewport(1,1,0.3,0.3,just = c("right","top")))

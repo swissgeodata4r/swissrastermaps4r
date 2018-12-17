@@ -47,9 +47,12 @@ Call `search_pattern()` to see the associated naming schema (i.e. the placeholde
 
 Download and load the package. It is currently only available on github. 
 
+```{r,include=F}
+remove.packages("swissrastermaps4r")
+```
 
 ```{r}
-# devtools::install_git("https://github.engineering.zhaw.ch/rata/swissmapraster.git",upgrade = F,quiet = T)
+devtools::install_github("swissgeodata4r/swissrastermaps4r",upgrade = F)
 ```
 
 
