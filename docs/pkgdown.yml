@@ -1,5 +1,7 @@
 pandoc: 2.3.1
 pkgdown: 1.2.0
 pkgdown_sha: ~
-articles: []
+articles:
+  showcasing: showcasing.html
+  swissrastermaps4r: swissrastermaps4r.html
 
