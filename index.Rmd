@@ -8,43 +8,26 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-<!-- ## What's the idea behind swissmapraster 4 R? -->
+<!-- Some things are easy, others are hard. -->
 
-<!-- This Package is meant as a Bridge between Swissmapraster Data (SMR) and R. It is the hope of the package developer(s) that this Package will prove to be necessary for a short time period, just so long till SwissMapRaster Data is freely and openly available to the public,  along with an appropriate R-interface. Unfortunately, since the SMR Data is still behind a paywall, this package does not provide access to this data. It simply provides an interface for cases where the data is already available to the user. -->
-
-<!-- <!-- ### Creating maps in `R` --> -->
-
-<!-- <!-- Some things are easy, others are hard. --> -->
-
-<!-- <!-- - **Easy** ↔ **hard** --> -->
-<!-- <!-- - Vector data ↔ Raster data --> -->
-<!-- <!-- - Open data ↔ Custom data --> -->
-<!-- <!-- - single map ↔ map series --> -->
-<!-- <!-- - whole extent ↔ custom extent --> -->
-<!-- <!-- - single map tile ↔ multiple map tiles --> -->
-<!-- <!-- - single resolution ↔ multiple resolutions --> -->
+<!-- - **Easy** ↔ **hard** -->
+<!-- - Vector data ↔ Raster data -->
+<!-- - Open data ↔ Custom data -->
+<!-- - single map ↔ map series -->
+<!-- - whole extent ↔ custom extent -->
+<!-- - single map tile ↔ multiple map tiles -->
+<!-- - single resolution ↔ multiple resolutions -->
 
 ## What is this package about?
 
-I want to simplify access to swisstopo geodata from within `R`. 
-
-Currently, using swisstopo rastermaps in `R` is easy if: 
-
-* the map only incldes _one single_ file  
-* you know exactly where to find that file
-
-**BUT:** 
-
-- Smaller scale maps are split into multiple tiles. 
-- For example, the 1:25'000 map consists of 260 individual Tiles
-
+It simplifies access to swisstopo geodata within `R`. Currently, using swisstopo rastermaps in `R` is easy if: The map only incldes _one single_ file and you know exactly what file this is. **BUT:** Smaller scale maps are split into multiple tiles. For example, the 1:25'000 map consists of 260 individual Tiles
 
 
 ## Does this package provide access to map data?
 
-NO! This package does not give access to any raster maps, by swisstopo or otherwise. Access to this data has to be acquire elsewhere: Either through [swisstopo](https://shop.swisstopo.admin.ch) directly or via third parties such as [geodata4edu](https://www.geodata4edu.ch). In fact, in the current version of the package the data has to be stored locally on your own hard drive (_urgh!_). My hope is however, that this will change soon so that the data can be hosted on a network folder or on a GIS Server. 
+Regrettably, no. This package does not give access to any raster maps, by swisstopo or otherwise. Access to this data has to be acquire elsewhere: Either through [swisstopo](https://shop.swisstopo.admin.ch) directly or via third parties such as [geodata4edu](https://www.geodata4edu.ch) (see [#1](https://github.com/swissgeodata4r/swissrastermaps4r/issues/1)). In fact, in the current version of the package, the data has to be stored locally on your own hard drive (_urgh!_). My hope is however, that this will change soon so that the data can be hosted on a network folder or on a GIS Server. 
 
 ## Who's in the team?
 
-Currently, it's just [me](https://www.zhaw.ch/de/ueber-uns/person/rata/). But I'm hoping for some people to collaborate with and maybe we can level this up!
+Currently, it's just [me](https://www.zhaw.ch/de/ueber-uns/person/rata/), but I'm very open to colaboration.
 

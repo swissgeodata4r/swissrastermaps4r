@@ -25,6 +25,8 @@ Imports:
   raster,
   sf,
   tidyr
-Suggests: 
+Suggests:
+  tmap
+  ggplot
 RoxygenNote: 6.1.1
 

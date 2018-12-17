@@ -12,9 +12,8 @@ Here's a little showcase on how this package can be used. Just some code, with n
 ## Prepare Environment
 
 ```{r, include=F}
-remove.packages("swissrastermaps4r")
-devtools::install_github("swissgeodata4r/swissrastermaps4r",upgrade = F)
-
+# remove.packages("swissrastermaps4r")
+# devtools::install_github("swissgeodata4r/swissrastermaps4r",upgrade = F)
 ```
 
 

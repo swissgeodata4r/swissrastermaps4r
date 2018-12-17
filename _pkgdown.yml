@@ -36,7 +36,6 @@ reference:
     desc: >
       Some auxiliary functions for raster manipulation. These are mostly needed for backend and have little use for front end users.
     contents:
-      - raster_greyscale
       - rgb_grey_mean
       - rgb_grey_weighted
       - rgb_grey_ysrgb

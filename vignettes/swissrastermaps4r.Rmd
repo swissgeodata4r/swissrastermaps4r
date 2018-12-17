@@ -1,8 +1,5 @@
 ---
 title: "How is this package used?"
-vignette: >
-  %\VignetteIndexEntry{Introduction to pkgdown}
-  %\VignetteEngine{knitr::rmarkdown}
 ---
 
 ```{r setup, include=FALSE}
@@ -11,11 +8,11 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ### Important notice
 
-I'm currently the only one using this package. Things break freaquently and there is absolutly no backwards compatibility. Please tell me if you are planing to use this package so I will take greater care!
+I'm currently the only one using this package. Things break frequently and there is absolutely no backwards compatibility. Please tell me if you are planing to use this package so I will take greater care!
 
-### Aquire raster data
+### Acquire raster data
 
-In a firs step, the raster maps need to be acquired and stored in a folder. Unfortunately, most of the swisstopo raster maps are behind a paywall if you aren't part of [geodata4edu](https://geodata4edu.ch/).  Two scales are available publicly for free (see #1):
+In a first step, the raster maps need to be acquired and stored in a folder. Unfortunately, most of the swisstopo raster maps are behind a paywall if you aren't part of [geodata4edu](https://geodata4edu.ch/).  Two scales are available publicly for free (see [#1](https://github.com/swissgeodata4r/swissrastermaps4r/issues/1)):
 
 - [1:500'000](https://shop.swisstopo.admin.ch/en/products/maps/national/digital/srm500)
 - [1:100'000](https://shop.swisstopo.admin.ch/en/products/maps/national/digital/srm1000)
@@ -26,9 +23,9 @@ The package is developed with a strong focus on the  [swisstopo](https://shop.sw
 
 ### Data structure
 
-Create one folder for each maptype, scale and projection. Each folder is then named `MAPTYPE_SCALE_PROJECTION` (e.g. `PK_25_2056`). Check the function `fdir_init` to get more details on the requirements for naming the folders.
+Create one folder for each maptype, scale and projection. Each folder is then named `MAPTYPE_SCALE_PROJECTION` (e.g. `PK_25_2056`). Check the function `fdir_init()` to get more details on the requirements for naming the folders.
 
-Some metadata must be derived from the filename. In order to achieve this, create a text file in each folder and change the file name of that textfile to match the naming pattern on the files within the folder. For example, the 1:500'000 raster map has the filename: 'PK500_LV95_KGRS_500_2016_1.tif'. The filestructure and the corresponding ".pattern"-File should therefore look as follows:
+Some metadata must be derived from the filename. In order to achieve this, create a text file in each folder and change the file name of that textfile to match the naming pattern on the files within the folder. For example, the 1:500'000 raster map has the filename: 'PK500_LV95_KGRS_500_2016_1.tif'. The file structure and the corresponding ".pattern"-File should therefore look as follows:
 
 ```
 Geodata/
@@ -36,12 +33,12 @@ Geodata/
 │   ├── PK500_LV95_KGRS_500_2016_1.tif
 │   ├── AABBB_CCCC_DDDD_EEE_FFFF_G.pattern
 ```
-Call `search_pattern()` to see the associated naming schema (i.e. the placeholders and their meanings). The function `metainfo_from_filename` is called on the filenames.
+Call `search_pattern()` to see the associated naming schema (i.e. the place-holders and their meanings). The function `metainfo_from_filename` is called on the file names.
 
 **Note:**
 
 - The character length of the naming pattern *must* match the length of the filename. In this way, different naming patterns can exist within a single folder.
-- The naming pattern currently can't handle variable lenghts
+- The naming pattern currently can't handle variable lengths
 
 ### Download package
 
@@ -67,7 +64,7 @@ library(dplyr)
 
 ### Scan Folder
 
-Next, run the command `fdir_init()` pointing to the location (parent folder) of these maps. This command creates a "File Directory" in the package environment by scanning all folders recursively and analyzing the content. All files ending with "tif" are checked for extent, number of layers and resolution. All the mentioned attributes of each raster file, along with the file path and the extent as a geometry, are stored in the variable `fdir` of the package environment.
+Next, run the command `fdir_init()` pointing to the location (parent folder) of these maps. This command creates a "File Directory" in the package environment by scanning all folders recursively and analysing the content. All files ending with "tif" are checked for extent, number of layers and resolution. All the mentioned attributes of each raster file, along with the file path and the extent as a geometry, are stored in the variable `fdir` of the package environment.
 
 ```{r, eval=F,include=F}
 # fdir_init("C:/Users/rata/Geodata/01_Switzerland/01_Maps",add_geometry = F)
@@ -82,7 +79,7 @@ fdir_init("C:/Users/rata/Geodata/01_Switzerland/01_Maps",add_geometry = F)
 fdir_import("C:/Users/rata/Geodata/01_Switzerland/01_Maps/fdir.Rda")
 ```
 
-`fdir_init` stored an `sf` object in the package's own environment (called `packageEnv`). It's a list of all raster files, stored with their extent, scale, resolution and other information (see `fdir_init()`).
+`fdir_init()` stored an `sf` object in the package's own environment (called `packageEnv`). It's a list of all raster files, stored with their extent, scale, resolution and other information (see `fdir_init()`).
 
 
 ```{r}
@@ -122,7 +119,7 @@ Now if you would want to include a swiss raster map into this plot you would:
 4. import raster into `R`
 5. check raster resolutions and possibly resample all rasters to same resolution
 6. merge all the relevant raster maps into a single file
-7. possilbly reassign `CRS` and `colormap` 
+7. possibly reassign `CRS` and `colormap` 
 
 This package automates steps 2 - 7 with the function `get_raster()`. The function takes an `sf` object as an input. In addition, scale level (a scale 1:1'000'000 is defined as `scale = 1000`).
 
@@ -138,23 +135,15 @@ tm_shape(rastermap) +
   tm_dots(size = "EINWOHNERZ")
 ```
 
-### Retrieve multiple rasters
+### Retrieve custom extent
 
-In the previous example, little was gained using the `get_raster` function. The function get's much more useful when multiple raster are needed. 
+In the previous example, the function `get_raster()` basically called the whole raster file of the [1:100'000](https://shop.swisstopo.admin.ch/en/products/maps/national/digital/srm1000) raster map. The function is not particularly useful for such a use case. It becomes very useful however, when we want a custom extent possibly spanning over multiple rasters. This case is illustrated in the next example:
 ```{r}
-
 rastermap <- get_raster(sample_points[1,],x_add = 1000,y_add = 1000)
-
-```
-
-
-```{r}
-credits <- "Geodata \u00A9 Swisstopo"
 
 tm_shape(rastermap) + 
   tm_raster() + 
-  tm_credits(credits,bg.color = "white",bg.alpha = 0.8)
-
+  tm_credits(credits("swisstopo"),bg.color = "white",bg.alpha = 0.8)
 ```
 
 

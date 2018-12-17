@@ -20,9 +20,9 @@ data.frame(
   assign("search_pattern_dict",.,envir = swissrastermapEnv)
 
 
-#' Prints the search pattern nomenklature
+#' Prints the search pattern nomenclature
 #'
-#' Prints the search pattern nomenklature
+#' Prints the search pattern nomenclature
 #'
 #' Retrieves the \code{search_pattern_dict} which is used in the
 #' function \code{metainfo_from_filename}. Any characters not specified in
@@ -151,121 +151,12 @@ raster_metadata <- function(rasterpath){
 }
 
 
-#' Initialize File Directory
-#'
-#' Scans all folders in the root dirctory corresponding to the folders given by
-#' \code{folders = }. OR: Makes an existing fdir object (either a variable or
-#' an .Rda File) the current fdir file by writing it to the Environment
-#' 'swissrastermapEnv'. If stored as an Rda File, the associated variable name
-#' must be \code{fdir}
-#'
-#' This command creates a "File Directory" in the package environment by scanning
-#' all folders specified by \code{folders} within the \code{rootdir} and analyzing the content.
-#' All files ending with "tif" are checked for extent, number of layers and resolution.
-#' All the mentioned attributes of each raster file, along with the file path and the extent as a
-#' geometry, are stoerd in the variable \code{fdir} of the package environment.
-#' Parent folders containing the rasterdata require a specific structure:
-#' \code{TYPE_Scale_EPSG_index}
-#' \describe{
-#'   \item{\code{TYPE}}{corresponds to the maptype. IN Switzerland this is typically \code{SMR}, \code{PK}, \code{LK} or \code{TA}. \strong{Must} be followed by a \code{_}}
-#'   \item{\code{Scale}}{defines the map scale as x in 1:1'000x. \strong{Must} be followed by a \code{_}}
-#'   \item{\code{EPSG}}{specifies the CRS of the containing raster data \strong{Must} be followed by a \code{_} \strong{only} if \code{name} is specified}
-#'   \item{\code{index}}{Needed when multiple folders with same maptype, scale and epsg code exist, but different naming patterns.}
-#' }
-#' @param rootdir Character string specifying the directory where the folders are stored OR
-#' character string pointing to an .Rda file from a previous fdir_init() run OR an fdir variable.
-#' @param maxfiles Integer limiting the number of files to be scanned. For testing purposes only.
-#' @param add_geometry Should the bounding box of each file be added as a geometry to \code{fdir}?
-#' @param filter Names of the folders to look for. Only folders containing the character strings
-#' specified here are included in the search.
-
-fdir_init <- function(rootdir,
-                      maxfiles = Inf,
-                      add_geometry = T,
-                      filter = c("PK","SMR","LK","TA")
-){
-
-  start <- Sys.time()
-
-  if(maxfiles != Inf){warning("maxfiles currently not implemented")}
-
-
-  dirs <- list.dirs(rootdir,recursive = F,full.names = F)
-  dirs <- purrr::map(filter,~dirs[grepl(.x,dirs)]) %>% unlist()
-
-  folders_df <- strsplit(dirs,"_") %>%
-    purrr::map_dfr(function(x){
-      data.frame(
-        maptype = x[1],
-        scale = as.integer(x[2]),
-        epsg = as.integer(x[3]),
-        stringsAsFactors = F
-      )
-    }) %>%
-    dplyr::mutate(
-      folder = dirs
-    )
-  # library(zeallot)
-  fdir <- folders_df %>%
-    dplyr::mutate(folderpath = file.path(rootdir,folder)) %>%
-    # slice(1) %->% c(maptype,scale,epsg,folder,folderpath) # use only to debugg pmap_dfr()
-    purrr::pmap_dfr(function(maptype,scale,epsg,folder,folderpath){
-      pattern <- list.files(folderpath,".pattern",full.names = F)
-      pattern <- strsplit(pattern,"\\.") %>% purrr::map_chr(~.x[1])
-      out <- data.frame(
-        file = list.files(folderpath,".tif$",full.names = T),
-        stringsAsFactors = F)
-      out$size_mb <- file.info(out$file)$size/1e+6
-      out$epsg <- epsg
-      out$maptype <- maptype
-      out$scale <- scale
-
-      out <- cbind(out,raster_metadata(out$file))
-
-      filename <- list.files(folderpath,".tif$",full.names = F)
-      filename <- gsub(".tif","",filename)
-
-      out <- cbind(out,metainfo_from_filename(filename,pattern))
-      out
-    })
-
-  fdir <- fdir %>%
-    dplyr::group_by(epsg,sheet) %>%
-    dplyr::arrange(epsg,sheet,year) %>%
-    dplyr::mutate(
-      year_start = year - floor((year-dplyr::lag(year))/2),
-      year_start = ifelse(is.na(year_start),-Inf,year_start),
-      year_end = (year + ceiling((dplyr::lead(year)-year)/2))-1,
-      year_end = ifelse(is.na(year_end),Inf,year_end),
-    ) %>%
-    dplyr::ungroup()
-
-
-  epsgs <- unique(fdir$epsg)
-  epsgs <- epsgs[!is.na(epsgs)]
-
-  if(add_geometry){
-    fdir <- geom_from_boundary(fdir, epsgs, add = T)
-  }
-
-
-  assign("fdir",fdir,envir = swissrastermapEnv)
-  mb <- format(sum(fdir$size_mb),big.mark = "'")
-  duration <- difftime(Sys.time(),start)
-  duration_units <- attr(duration,"units")
-  duration <- duration%>%
-    as.numeric() %>%
-    round(2) %>%
-    format(nsmall = 2)
-
-  print(paste0("Done. Scanned ",nrow(fdir), " Files", " (",mb," MB) in ",duration," (",duration_units,"). -> All metadata stored in fdir."))
-}
 
 
 
 
 
-#' Show extents of Available Raste Files
+#' Show extents of available raster Files
 #'
 #' This function visualizes the extents of all available rasters. The plots are
 #' faceted by scale and the area is colorized by resolution. The extents have an
@@ -315,46 +206,7 @@ show_extents <- function(method = "ggplot2",fdir = NULL){
   return(plotoutput)
 }
 
-#' Import an existing fdir
-#'
-#' Avoid rescanning all your files (\code{fdir_init}) by
-#' exporting an existing \{fdir} (with \code{fdir_export})
-#' after initializing and importing it again in the next session
-#'
-#' The function enables importing an existing "File Directory"
-#' (\code{fdir}) from an ".Rda" File after running \code{fdir_init}
-#' and \code{fdir_export}.
-#' This avoids having to rescan all the files with \code{fdir_init}.
-#' Handle with care, changes in the source files are not registered with
-#' this method. Use \code{fdir_init} if unsure.
 
-#' @param name Path to an .Rda File
-fdir_import <- function(path){
-  fdir <- get(load(path))
-  assign("fdir",fdir,envir = swissrastermapEnv)
-}
-
-#' Export an existing fdir to an Rda-File
-#'
-#' Avoid rescanning all your files (\code{fdir_init}) by
-#' exporting an existing \{fdir} (with \code{fdir_export})
-#' after initializing and importing it again (with \code{fdir_import})
-#' in the next session
-#'
-#' The function enables exporting an existing "File Directory"
-#' (\code{fdir}) to an ".Rda" File after running \code{fdir_init}.
-#' This avoids having to rescan all the files with \code{fdir_init}.
-#' Handle with care, changes in the source files are not registered with
-#' this method. Use \code{fdir_init} if unsure.
-
-fdir_export <- function(path){
-  if(exists("fdir", envir = swissrastermapEnv)){
-    fdir <- get("fdir",envir = swissrastermapEnv)
-    save(fdir,file = path)
-  } else{
-    stop("Please run fdir_init() first.")
-  }
-}
 
 
 
@@ -395,5 +247,7 @@ asp2extent <- function(xmin,xmax,ymin,ymax,asp = 1){
 credits <- function(who){
   if(who == "swisstopo"){
     "Geodata \u00A9 Swisstopo"
+  } else if{
+    stop("Dont know ",who)
   }
 }
