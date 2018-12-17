@@ -40,12 +40,8 @@ Call `search_pattern()` to see the associated naming schema (i.e. the placeholde
 
 **Note:**
 
-- if different naming patterns exist in a single folder, the files need to be seperated into different (parent) folders. E.G. 'PK_500_2056_1', ' PK_500_2056_2' etc. (this is ugly and should be resolved sometime in the future)
+- The character length of the naming pattern *must* match the length of the filename. In this way, different naming patterns can exist within a single folder.
 - The naming pattern currently can't handle variable lenghts
-- The naming pattern currently can't handle different representations of the same map 
-
-
-
 
 ### Download package
 

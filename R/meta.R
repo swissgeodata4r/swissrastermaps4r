@@ -47,23 +47,23 @@ search_pattern <- function(){
 #'
 metainfo_from_filename <- function(filename,pattern){
 
-  filename <- strsplit(filename,"\\.") %>% map_chr(~.x[1])
+  filename <- strsplit(filename,"\\.") %>% purrr::map_chr(~.x[1])
 
-  pattern <- filename %>% map_chr(function(x){
+  pattern <- filename %>% purrr::map_chr(function(x){
     pattern[nchar(x) == nchar(pattern)]
     })
 
 
   search_pattern_dict <- get("search_pattern_dict",envir = swissrastermapEnv) %>%
-    filter(placeholder != "Z")
+    dplyr::filter(placeholder != "Z")
 
   search_pattern_dict %>%
     dplyr::select(placeholder,name) %>%
     # slice(1) %->% c(placeholder,name)
     purrr::pmap_dfr(function(placeholder,name){
       # ints <- gregexpr(placeholder,pattern)[[1]]
-      ints <- gregexpr(placeholder,pattern) %>% map(~c(.x[1],.x[length(.x)]))
-      su <- pmap_chr(list(ints,filename),function(ints,filename){substr(filename,min(ints),max(ints))})
+      ints <- gregexpr(placeholder,pattern) %>% purrr::map(~c(.x[1],.x[length(.x)]))
+      su <- purrr::pmap_chr(list(ints,filename),function(ints,filename){substr(filename,min(ints),max(ints))})
       # su <- substr(filename,min(ints),max(ints))
       data.frame(name = name,
                  val = su,
@@ -72,7 +72,7 @@ metainfo_from_filename <- function(filename,pattern){
     }) %>%
     tidyr::spread(name,val) %>%
     dplyr::select(-filename) %>%
-    mutate(
+    dplyr::mutate(
       year = as.integer(year),
       year = ifelse(is.na(year),Inf,year),
       sheet = ifelse(sheet == "","0",sheet)
@@ -134,7 +134,7 @@ geom_from_boundary <- function(df, epsg, add = T){
 
 
 raster_metadata <- function(rasterpath){
-  map_dfr(rasterpath,function(rasterpath_i){
+  purrr::map_dfr(rasterpath,function(rasterpath_i){
     rast <- raster::brick(rasterpath_i)
     reso <- raster::res(rast)
     ex <- matrix(raster::extent(rast))
@@ -208,11 +208,11 @@ fdir_init <- function(rootdir,
     )
   # library(zeallot)
   fdir <- folders_df %>%
-    mutate(folderpath = file.path(rootdir,folder)) %>%
+    dplyr::mutate(folderpath = file.path(rootdir,folder)) %>%
     # slice(1) %->% c(maptype,scale,epsg,folder,folderpath) # use only to debugg pmap_dfr()
     purrr::pmap_dfr(function(maptype,scale,epsg,folder,folderpath){
       pattern <- list.files(folderpath,".pattern",full.names = F)
-      pattern <- strsplit(pattern,"\\.") %>% map_chr(~.x[1])
+      pattern <- strsplit(pattern,"\\.") %>% purrr::map_chr(~.x[1])
       out <- data.frame(
         file = list.files(folderpath,".tif$",full.names = T),
         stringsAsFactors = F)

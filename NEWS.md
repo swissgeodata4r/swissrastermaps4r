@@ -3,11 +3,12 @@
 
 * Added the possibility of adding ".pattern"-Files in each folder to get metadata from each filename
 * `init_fdir()` now reads file size
-* Fixed a lot of bugs
 * Added `fn_year_start` and `fn_year_end`
 * Can now handle different EPSG-Codes
 * Renamed sample data
 * Breaking change: Removed the `per_feature` option
+* started modularizing the code
+* Fixed a lot of bugs
 
 
 # swissrastermaps4r 0.1.1

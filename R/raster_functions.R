@@ -380,8 +380,36 @@ raster_harmonize <- function(fdir_filtered,extent){
 
 
 
+#' Guess scale
+#'
+#' Guess map scale based on the extent and the output window
+#'
+#' This function takes an extent object (with \code{xmin}, \code{xmax},
+#' \code{ymin} and \code{ymax} values)
+#' as well as a set of available scales to determin the best suited scale.
+#' The extent object (\code{xmin}, \code{xmax}, \code{ymin} and \code{ymax} values)
+#' are expected in Meters while the available scales are expected to be the the
+#' x in 1:1'000x (e.g. 25 in 1:25'000).
+#'
+#' @param extent A dataframe containing \code{xmin}, \code{xmax}, \code{ymin} and
+#' \code{ymax} values
+#' @param available_cales An integer vector containing the available scales in the
+#' format x in 1:1'000x (e.g. 25 in 1:25'000).
+#' @param factor Usually, the scale is overestimated and smaller scales are desired.
+#' This factor enables correction by dividing the calculated scale by the factor.
+#' (e.g. a \code{factor = 2} returns a 1:25'000 scale when 1:50'000 has been calculated)
+#' @param outsize An integer vector of the dimensions of the output window size in cm.
+#' If left at \code{NULL} (default), the output window size is determined by
+#' \code{dev.size("cm")}
+guess_scale <- function(extent,available_scales,factor = 1,outsize = NULL){
 
-
+  if(is.null(outsize)){outsize <- dev.size("cm")}
+  outsize_real <- c(extent$xmax-extent$xmin,extent$ymax-extent$ymin)*100
+  scale_real <- (mean((outsize_real/outsize_plot)/1000))/factor
+  scale_closest <- available_scales[which.min(abs(scale_real-available_scales))]
+  message(paste("Using scale level: ",scale_closest))
+  scale_closest
+}
 
 #' Get corresponding raster maps to feature
 #'
@@ -413,16 +441,17 @@ raster_harmonize <- function(fdir_filtered,extent){
 #' @param limit For testing puposes only: Limits the number of rasters returned per object. Defaults to \code{Inf}
 #'
 get_raster <- function(features,
-                       scale_level,
+                       scale_level = NULL,
                        x_add = 0,
                        y_add = 0,
-                       method = "centroid",
+                       method = "bbox",
                        turn_greyscale = F,
                        name = "",
                        fdir = NULL,
                        limit = Inf,
                        asp = NULL,
-                       year = NULL
+                       year = NULL,
+                       scale_factor = 1
                        ){
   # If needed, features could also be extents or objects with x/y coordinates
   stopifnot("sf" %in% class(features))
@@ -435,6 +464,29 @@ get_raster <- function(features,
     }
   }
 
+
+
+  # Maybe it would convinient to automatically choose a extent method based on the geomety type?:
+  # if(is.null(method)){
+  #   features_type <- unique(sf::st_geometry_type(features))
+  #   if(length(features_type)>1){+
+  #       warning(paste0("Multiple Geometry Types found. Using the first one (",
+  #                     features_type[1],") to determin the extent method"))
+  #     features_type <- features_type[1]
+  #     }
+  #
+  #   if(grepl("POINT",features_type)){
+  #     method <- "centroid"
+  #   }
+  #   if(grepl("LINE",features_type) | grepl("POLYGON",features_type)){
+  #     method <- "bbox"
+  #   } else{
+  #     stop(paste("Cannot guess method for geometry type",features_type))
+  #   }
+  #   message(paste("Using Method",method, "to determin extent"))
+  # }
+
+
   ex <- get_extent(features = features,
                    x_add = x_add,
                    y_add = y_add,
@@ -442,6 +494,14 @@ get_raster <- function(features,
                    per_feature = F,
                    asp = asp
   )
+
+  scale_level <- guess_scale(extent = ex,available_scales = unique(fdir$scale),factor = scale_factor)
+
+
+
+
+
+
 
 
   fdir_filtered <- fdir_filter(fdir,
