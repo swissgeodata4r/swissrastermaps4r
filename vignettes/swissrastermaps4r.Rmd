@@ -136,12 +136,7 @@ tm_shape(rastermap) +
 In the previous example, little was gained using the `get_raster` function. The function get's much more useful when multiple raster are needed. 
 ```{r}
 
-rastermap <- get_raster(features = sample_points[1,],
-                        x_add = 1000,
-                        y_add = 1000,
-                        scale_level = 25,
-                        method = "centroid",
-                        limit = 4)
+rastermap <- get_raster(sample_points[1,],x_add = 1000,y_add = 1000)
 
 ```
 

@@ -32,7 +32,7 @@ Initialize the file directory and load the dataset `gemeinden_top_poly` containi
 ```{r,warning=F,message=F}
 fdir_init("C:/Users/rata/Geodata/01_Switzerland/01_Maps")
 
-data("gemeinden_top_poly")
+data("sample_polygons")
 ```
 
 
@@ -41,9 +41,9 @@ data("gemeinden_top_poly")
 
 Calculate area and population density per municipality:
 ```{r}
-gemeinden_top_poly <- gemeinden_top_poly %>%
+sample_polygons <- sample_polygons %>%
   mutate(
-    area_km2 = as.integer(st_area(gemeinden_top_poly)/1000000),
+    area_km2 = as.integer(st_area(sample_polygons)/1000000),
     dichte = EINWOHNERZ/area_km2
     )
 ```
@@ -51,12 +51,12 @@ gemeinden_top_poly <- gemeinden_top_poly %>%
 Create an cookiecutter shape for each feature.  
 ```{r}
 
-exts <- gemeinden_top_poly %>%
+exts <- sample_polygons %>%
   get_extent(.,x_add = 0,y_add = 0,method = "bbox",per_feature = T,asp = 1)
 
 ext_inv <- exts %>%
   st_geometry() %>%
-  map2(st_geometry(gemeinden_top_poly),~st_difference(.x,.y)) %>%
+  map2(st_geometry(sample_polygons),~st_difference(.x,.y)) %>%
   st_sfc() %>%
   st_set_crs(2056)
 
@@ -67,7 +67,7 @@ ext_inv <- exts %>%
 
 Create a (text) caption per municipality which can later be included in `fig.cap =` of the markdown chunk (not visible in the output document). 
 ```{r}
-caption <- st_set_geometry(gemeinden_top_poly,NULL) %>%
+caption <- st_set_geometry(sample_polygons,NULL) %>%
   pmap_chr(function(NAME,EINWOHNERZ,area_km2,dichte,rank){
     glue("Die Gemeindegrenze von {NAME} umfasst ein Fläche von {area_km2} km2. In diesem Gebiet leben {formatC(EINWOHNERZ,big.mark = ",")} Einwohner, was eine Einwohnerdichte von {as.integer(dichte)}
          Menschen pro km2 bedeutet.")
@@ -81,16 +81,16 @@ Run a loop over each feature calling `get_raster()` within the plot. This avoids
 all the rasters in a huge list.
 
 ```{r,results='asis'}
-data("landesgebiet")
+data("switzerland")
 
 for(i in 1:nrow(gemeinden_top_poly)){
-  extent_indicator <- tm_shape(landesgebiet) + 
+  extent_indicator <- tm_shape(switzerland) + 
     tm_polygons() + 
-    tm_shape(get_extent(exts[i,],x_add = 1000,y_add = 1000,method = "bbox")) + 
+    tm_shape(get_extent(exts[i,],x_add = 1000,y_add = 1000)) + 
     tm_polygons(col = "red", alpha = 0.5) +
     tm_layout(frame = F) +
     tm_view(alpha = 0)
-  mainmap <- tm_shape(get_raster(exts[i,],100,method = "bbox")) + 
+  mainmap <- tm_shape(get_raster(exts[i,],100)) + 
     tm_rgb() + 
     tm_shape(ext_inv[i])+ 
     tm_polygons(alpha = 0.8,fill = "white") +

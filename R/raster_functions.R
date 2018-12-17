@@ -295,6 +295,44 @@ fdir_filter <- function(fdir,epsg,scale_level,xmin,xmax,ymin,ymax,year = NULL,na
     }
   }
 
+  pure_overlaps <- check_raster_overlaps(fdir,epsg = epsg)
+
+  if(any(isTRUE(pure_overlaps))){
+    stop("Filtering automatically failed. Please filter yourself")
+
+    # Maybe add the following code agein:
+    # if(action == "stop" & any(pure_intersection,na.rm = T)){
+    #   # This part just runs if some of the geometries intersect
+    #   pure_intersection %>%
+    #     which(arr.ind = T) %>%
+    #     as.data.frame() %>%
+    #     purrr::pmap_dfr(function(row,col){
+    #       row <- as.integer(row)
+    #       col <- as.integer(col)
+    #       data.frame(
+    #         file1 = fdir_filtered$filename[row],
+    #         file2 = fdir_filtered$filename[col],
+    #         stringsAsFactors = F
+    #       )
+    #     }) %>%
+    #     assign(x = "self_overlaps",value = .,envir = swissrastermapEnv)
+    #
+    #   fdir_filtered %>%
+    #     dplyr::group_by(maptype,scale,epsg,sheet) %>%
+    #     dplyr::summarise(years = paste(year,collapse = ",")) %>%
+    #     assign(x = "self_overlaps2",value = .,envir = swissrastermapEnv)
+    #
+    #   message(paste(
+    #     "Some of the selected rasters overlap. Run get_srm4r('self_overlaps')",
+    #     "to get a dataframe with all the overlapping objects.",
+    #     "Run get_srm4r('self_overlaps2') to get an overview of all rasters in the extent"
+    #   ))
+    #   stop()
+    # } else if(action == "correct" & any(pure_intersection,na.rm = T)){
+    #   unique(fdir_filtered$year)
+    # }
+    }
+
 
   return(fdir)
 }
@@ -490,20 +528,17 @@ get_raster <- function(features,
   }
 
 
-  if(nrow(fdir_filtered)>1){
-    check_raster_overlaps(fdir_filtered,epsg = ex$epsg)
-  }
-
   rast <- raster_harmonize(fdir_filtered = fdir_filtered,
                            extent = ex$extent[[1]])
 
+  # Todo: modularize and clean the following code
   if(turn_greyscale){
     if(raster::nlayers(rast) == 3){
       rast <- raster_greyscale(rast)
     } else if(raster::nlayers(rast) == 1){
       coltab <- raster::colortable(raster::raster(fdir_filtered)) # colortable_greyscle can probabbly be subsituted to something more generic
       raster::colortable(rast) <- colortable_greyscale(coltab)
-    } else(warning("Unexpectend number of Layers"))
+    } else(warning("Unexpected number of Layers"))
 
   }else{ # if raster should not be turned greyscale
     if(raster::nlayers(rast) == 3){
