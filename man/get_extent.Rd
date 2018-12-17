@@ -8,11 +8,16 @@ get_extent(features, x_add = 0, y_add = 0, method = "centroid",
   per_feature = T, asp = NULL)
 }
 \arguments{
-\item{param}{desc}
+\item{features}{an object of type sf}
+
+\item{x_add, yadd:}{the distances from the centeroid, with which the extent window should be drawn}
+
+\item{per_feature}{per feature: should raster be returned PER FEATURE part or for the whole sf object?}
 }
 \description{
 Get extent of \pkg{sf}  object
 }
 \details{
-Long Desc
+gets the centeroid of feature(s), adds the x, and y distances and returns a
+matrix with x/y min/max plus and extent-object.
 }

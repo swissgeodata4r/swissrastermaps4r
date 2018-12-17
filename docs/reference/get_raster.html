@@ -91,7 +91,13 @@
     <li>
       <a href="../articles/showcasing.html">Showcasing</a>
     </li>
+    <li>
+      <a href="../articles/tips_and_tricks.html">Untitled</a>
+    </li>
   </ul>
+</li>
+<li>
+  <a href="../news/index.html">Changelog</a>
 </li>
       </ul>
       
@@ -125,9 +131,9 @@
     
     </div>
 
-    <pre class="usage"><span class='fu'>get_raster</span>(<span class='no'>features</span>, <span class='no'>scale_level</span>, <span class='kw'>x_add</span> <span class='kw'>=</span> <span class='fl'>0</span>, <span class='kw'>y_add</span> <span class='kw'>=</span> <span class='fl'>0</span>,
-  <span class='kw'>per_feature</span> <span class='kw'>=</span> <span class='no'>F</span>, <span class='kw'>method</span> <span class='kw'>=</span> <span class='st'>"centroid"</span>, <span class='kw'>turn_greyscale</span> <span class='kw'>=</span> <span class='no'>F</span>,
-  <span class='kw'>name</span> <span class='kw'>=</span> <span class='st'>""</span>, <span class='kw'>fdir</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>limit</span> <span class='kw'>=</span> <span class='fl'>Inf</span>, <span class='kw'>asp</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)</pre>
+    <pre class="usage"><span class='fu'>get_raster</span>(<span class='no'>features</span>, <span class='kw'>scale_level</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>x_add</span> <span class='kw'>=</span> <span class='fl'>0</span>, <span class='kw'>y_add</span> <span class='kw'>=</span> <span class='fl'>0</span>,
+  <span class='kw'>method</span> <span class='kw'>=</span> <span class='st'>"bbox"</span>, <span class='kw'>turn_greyscale</span> <span class='kw'>=</span> <span class='no'>F</span>, <span class='kw'>name</span> <span class='kw'>=</span> <span class='st'>""</span>, <span class='kw'>fdir</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>limit</span> <span class='kw'>=</span> <span class='fl'>Inf</span>, <span class='kw'>asp</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>year</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>scale_factor</span> <span class='kw'>=</span> <span class='fl'>1</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -145,10 +151,6 @@
       <td><p>Depending on method, x and y will be added to the centeroid or to the bounding box</p></td>
     </tr>
     <tr>
-      <th>per_feature</th>
-      <td><p>A TRUE/FALSE value specifying if one raster map should be returend for the entire <span class="pkg">sf</span>  object or if one map should be returned per feature</p></td>
-    </tr>
-    <tr>
       <th>method</th>
       <td><p>A character string specifying the method with which the extent should be calculated. <code>centroid</code> calculates the centroid of the object(s), <code>bbox</code> calculates the bounding box of the object.</p></td>
     </tr>
@@ -162,11 +164,15 @@
     </tr>
     <tr>
       <th>fdir</th>
-      <td><p>By default, the <code>fdir</code> is retrieved from the package Environment (named <code>packageEnv</code>). Override this with <code>fdir = </code></p></td>
+      <td><p>By default, the <code>fdir</code> is retrieved from the package Environment (named <code>swissrastermapEnv</code>). Override this with <code>fdir = </code></p></td>
     </tr>
     <tr>
       <th>limit</th>
       <td><p>For testing puposes only: Limits the number of rasters returned per object. Defaults to <code>Inf</code></p></td>
+    </tr>
+    <tr>
+      <th>per_feature</th>
+      <td><p>A TRUE/FALSE value specifying if one raster map should be returend for the entire <span class="pkg">sf</span>  object or if one map should be returned per feature</p></td>
     </tr>
     </table>
     

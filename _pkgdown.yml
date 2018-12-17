@@ -44,7 +44,8 @@ reference:
       - ysrgb
       - colortable_greyscale
       - rgb_brick_count
-  - title: "Other functions."
+      - raster_harmonize
+  - title: "Other functions"
     desc: >
       Some more auxiliary functions. These are mostly needed for backend and have little use for front end users.
     contents:
@@ -53,4 +54,14 @@ reference:
       - geom_from_boundary
       - metainfo_from_filename
       - search_pattern
+      - guess_scale
+      - get_srm4r
+      - fdir_filter
+  - title: "Data"
+    desc: >
+      Sample Data to play with
+    contents:
+     - switzerland
+     - sample_polygons
+     - sample_points
 

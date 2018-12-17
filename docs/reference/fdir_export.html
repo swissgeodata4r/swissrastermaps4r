@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Recalculate extent values from a given aspect ratio — asp2extent • swissrastermaps4r</title>
+<title>Export an existing fdir to an Rda-File — fdir_export • swissrastermaps4r</title>
 
 <!-- jquery -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
@@ -30,11 +30,9 @@
 
 
 
-<meta property="og:title" content="Recalculate extent values from a given aspect ratio — asp2extent" />
+<meta property="og:title" content="Export an existing fdir to an Rda-File — fdir_export" />
 
-<meta property="og:description" content="Takes four vectors (xmin, xmax, ymin and ymax) and returns the new values based on a given aspect ratio
-Aspect ratio is calculated as \(\frac{\Delta y\ }{\Delta x\ }\). Values &amp;gt; 1 therefore means portrait,
-values &amp;lt; 1 means landscape." />
+<meta property="og:description" content="Export an existing fdir to an Rda-File" />
 <meta name="twitter:card" content="summary" />
 
 
@@ -122,50 +120,32 @@ values &amp;lt; 1 means landscape." />
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Recalculate extent values from a given aspect ratio</h1>
+    <h1>Export an existing fdir to an Rda-File</h1>
     <small class="dont-index">Source: <a href='https://github.com/swissgeodata4r/swissrastermaps4r/blob/master/R/meta.R'><code>R/meta.R</code></a></small>
-    <div class="hidden name"><code>asp2extent.Rd</code></div>
+    <div class="hidden name"><code>fdir_export.Rd</code></div>
     </div>
 
     <div class="ref-description">
     
-    <p>Takes four vectors (xmin, xmax, ymin and ymax) and returns the new values based on a given aspect ratio
-Aspect ratio is calculated as \(\frac{\Delta y\ }{\Delta x\ }\). Values &gt; 1 therefore means portrait,
-values &lt; 1 means landscape.</p>
+    <p>Export an existing fdir to an Rda-File</p>
     
     </div>
 
-    <pre class="usage"><span class='fu'>asp2extent</span>(<span class='no'>xmin</span>, <span class='no'>xmax</span>, <span class='no'>ymin</span>, <span class='no'>ymax</span>, <span class='kw'>asp</span> <span class='kw'>=</span> <span class='fl'>1</span>)</pre>
-    
-    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
-    <table class="ref-arguments">
-    <colgroup><col class="name" /><col class="desc" /></colgroup>
-    <tr>
-      <th>xmin, xmax, ymin, ymax</th>
-      <td><p>Numeric Vectors of the same length specifying the x/y extents</p></td>
-    </tr>
-    <tr>
-      <th>aps</th>
-      <td><p>Aspect ratio calculated as specified in the description. A single numeric value or a vector in the
-same length as xmin etc.</p></td>
-    </tr>
-    <tr>
-      <th>return</th>
-      <td><p>Returns a dataframe with four columns named <code>xmin</code>, <code>xmax</code>, <code>ymin</code>, <code>ymax</code></p></td>
-    </tr>
-    </table>
-    
+    <pre class="usage"><span class='fu'>fdir_export</span>(<span class='no'>path</span>)</pre>
+        
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
-    <p>At the moment, this function can only enlargen the extent in order to match the aspect ratio. At one point,
-it might be neccessary to add the option to shrink the extent accordingly.</p>
+    <p>The function enables exporting an existing "File Directory"
+(<code>fdir</code>) to an ".Rda" File after running <code>fdir_init</code>.
+This avoids having to rescan all the files with <code>fdir_init</code>.
+Handle with care, changes in the source files are not registered with
+this method. Use <code>fdir_init</code> if unsure.</p>
     
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
     <ul class="nav nav-pills nav-stacked">
-      <li><a href="#arguments">Arguments</a></li>
       
       <li><a href="#details">Details</a></li>
           </ul>

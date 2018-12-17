@@ -91,7 +91,13 @@
     <li>
       <a href="../articles/showcasing.html">Showcasing</a>
     </li>
+    <li>
+      <a href="../articles/tips_and_tricks.html">Untitled</a>
+    </li>
   </ul>
+</li>
+<li>
+  <a href="../news/index.html">Changelog</a>
 </li>
       </ul>
       
@@ -132,14 +138,23 @@
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>param</th>
-      <td><p>desc</p></td>
+      <th>features</th>
+      <td><p>an object of type sf</p></td>
+    </tr>
+    <tr>
+      <th>x_add, yadd:</th>
+      <td><p>the distances from the centeroid, with which the extent window should be drawn</p></td>
+    </tr>
+    <tr>
+      <th>per_feature</th>
+      <td><p>per feature: should raster be returned PER FEATURE part or for the whole sf object?</p></td>
     </tr>
     </table>
     
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
-    <p>Long Desc</p>
+    <p>gets the centeroid of feature(s), adds the x, and y distances and returns a
+matrix with x/y min/max plus and extent-object.</p>
     
 
   </div>

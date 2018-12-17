@@ -4,9 +4,9 @@
 \alias{get_raster}
 \title{Get corresponding raster maps to feature}
 \usage{
-get_raster(features, scale_level, x_add = 0, y_add = 0,
-  per_feature = F, method = "centroid", turn_greyscale = F,
-  name = "", fdir = NULL, limit = Inf, asp = NULL)
+get_raster(features, scale_level = NULL, x_add = 0, y_add = 0,
+  method = "bbox", turn_greyscale = F, name = "", fdir = NULL,
+  limit = Inf, asp = NULL, year = NULL, scale_factor = 1)
 }
 \arguments{
 \item{features}{The \pkg{sf}  object to derive the raster data from}
@@ -15,17 +15,17 @@ get_raster(features, scale_level, x_add = 0, y_add = 0,
 
 \item{x_add, y_add}{Depending on method, x and y will be added to the centeroid or to the bounding box}
 
-\item{per_feature}{A TRUE/FALSE value specifying if one raster map should be returend for the entire \pkg{sf}  object or if one map should be returned per feature}
-
 \item{method}{A character string specifying the method with which the extent should be calculated. \code{centroid} calculates the centroid of the object(s), \code{bbox} calculates the bounding box of the object.}
 
 \item{turn_greyscale}{Should the output rastermaps be turned into greyscale?}
 
 \item{name}{If muliple, different maps are available with overlapping extents, \code{name} can be used to differentiate between different maptypes. Default is an empty sting.}
 
-\item{fdir}{By default, the \code{fdir} is retrieved from the package Environment (named \code{packageEnv}). Override this with \code{fdir = }}
+\item{fdir}{By default, the \code{fdir} is retrieved from the package Environment (named \code{swissrastermapEnv}). Override this with \code{fdir = }}
 
 \item{limit}{For testing puposes only: Limits the number of rasters returned per object. Defaults to \code{Inf}}
+
+\item{per_feature}{A TRUE/FALSE value specifying if one raster map should be returend for the entire \pkg{sf}  object or if one map should be returned per feature}
 }
 \description{
 Specify \pkg{sf} Object an some additional parameters to get corresponding raster maps

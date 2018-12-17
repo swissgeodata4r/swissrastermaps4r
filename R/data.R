@@ -1,4 +1,4 @@
-#' landesgebiet
+#' switzerland
 #'
 #' Swissboundries3D Country data .
 #'
@@ -9,7 +9,7 @@
 
 #' }
 #' @source \url{https://shop.swisstopo.admin.ch/de/products/landscape/boundaries3D}
-"landesgebiet"
+"switzerland"
 
 
 #' Sample Polygons
@@ -24,7 +24,7 @@
 
 #' }
 #' @source \url{https://shop.swisstopo.admin.ch/de/products/landscape/boundaries3D}
-"gemeinden_top_poly"
+"sample_polygons"
 
 
 

@@ -11,7 +11,7 @@ show_extents(method = "ggplot2", fdir = NULL)
 Wrap the output in \code{ggplotly()} to get an interactive ggplot output or set \code{tmap_mode}
 to "view" go get an interactive tmap.}
 
-\item{filedirectory}{The file directory aquired by \code{\link{init_fdir()}}. If left as
+\item{filedirectory}{The file directory aquired by \code{\link{fdir_init()}}. If left as
 \code{NULL}, the \code{fdir} from the package Environment is taken.}
 }
 \description{

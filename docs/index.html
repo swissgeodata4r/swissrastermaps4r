@@ -65,7 +65,13 @@
 <li>
       <a href="articles/showcasing.html">Showcasing</a>
     </li>
+    <li>
+      <a href="articles/tips_and_tricks.html">Untitled</a>
+    </li>
   </ul>
+</li>
+<li>
+  <a href="news/index.html">Changelog</a>
 </li>
       </ul>
 <ul class="nav navbar-nav navbar-right">
@@ -86,15 +92,34 @@
       
       </header><div class="row">
   <div class="contents col-md-9">
-<div id="whats-the-idea-behind-swissmapraster-4-r" class="section level2">
+<!-- ## What's the idea behind swissmapraster 4 R? -->
+<!-- This Package is meant as a Bridge between Swissmapraster Data (SMR) and R. It is the hope of the package developer(s) that this Package will prove to be necessary for a short time period, just so long till SwissMapRaster Data is freely and openly available to the public,  along with an appropriate R-interface. Unfortunately, since the SMR Data is still behind a paywall, this package does not provide access to this data. It simply provides an interface for cases where the data is already available to the user. -->
+<!-- <!-- ### Creating maps in `R` -->
+<p>–&gt;</p>
+<!-- <!-- Some things are easy, others are hard. -->
+<p>–&gt;</p>
+<!-- <!-- - **Easy** ↔ **hard** -->
+<p>–&gt; <!-- <!-- - Vector data ↔ Raster data --> –&gt; <!-- <!-- - Open data ↔ Custom data --> –&gt; <!-- <!-- - single map ↔ map series --> –&gt; <!-- <!-- - whole extent ↔ custom extent --> –&gt; <!-- <!-- - single map tile ↔ multiple map tiles --> –&gt; <!-- <!-- - single resolution ↔ multiple resolutions --> –&gt;</p>
+<div id="what-is-this-package-about" class="section level2">
 <h2 class="hasAnchor">
-<a href="#whats-the-idea-behind-swissmapraster-4-r" class="anchor"></a>What’s the idea behind swissmapraster 4 R?</h2>
-<p>This Package is meant as a Bridge between Swissmapraster Data (SMR) and R. It is the hope of the package developer(s) that this Package will prove to be necessary for a short time period, just so long till SwissMapRaster Data is freely and openly available to the public, along with an appropriate R-interface. Unfortunately, since the SMR Data is still behind a paywall, this package does not provide access to this data. It simply provides an interface for cases where the data is already available to the user.</p>
+<a href="#what-is-this-package-about" class="anchor"></a>What is this package about?</h2>
+<p>I want to simplify access to swisstopo geodata from within <code>R</code>.</p>
+<p>Currently, using swisstopo rastermaps in <code>R</code> is easy if:</p>
+<ul>
+<li>the map only incldes <em>one single</em> file<br>
+</li>
+<li>you know exactly where to find that file</li>
+</ul>
+<p><strong>BUT:</strong></p>
+<ul>
+<li>Smaller scale maps are split into multiple tiles.</li>
+<li>For example, the 1:25’000 map consists of 260 individual Tiles</li>
+</ul>
 </div>
 <div id="does-this-package-provide-access-to-map-data" class="section level2">
 <h2 class="hasAnchor">
 <a href="#does-this-package-provide-access-to-map-data" class="anchor"></a>Does this package provide access to map data?</h2>
-<p>NO! This package does not give access to any raster maps, by swisstopo or otherwise. Access to this data has to be acquire elsewhere: Either through <a href="https://shop.swisstopo.admin.ch">swisstopo</a> directly or via third parties such as <a href="https://www.geodata4edu.ch">geodata4edu</a>. In fact, in the current version of the package the data has to be stored locally on your own hard drive (<em>urgh!</em>). Our hope is however, that this will change soon so that the data can be hosted on a network folder or on a GIS Server.</p>
+<p>NO! This package does not give access to any raster maps, by swisstopo or otherwise. Access to this data has to be acquire elsewhere: Either through <a href="https://shop.swisstopo.admin.ch">swisstopo</a> directly or via third parties such as <a href="https://www.geodata4edu.ch">geodata4edu</a>. In fact, in the current version of the package the data has to be stored locally on your own hard drive (<em>urgh!</em>). My hope is however, that this will change soon so that the data can be hosted on a network folder or on a GIS Server.</p>
 </div>
 <div id="whos-in-the-team" class="section level2">
 <h2 class="hasAnchor">

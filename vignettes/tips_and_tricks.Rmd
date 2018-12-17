@@ -23,12 +23,12 @@ Use `method = "tmap"` to show the extents in combination with other spatial data
 
 ```{r}
 
-data("landesgebiet")
+data("switzerland")
 
 
 library(tmap)
 
-tm_shape(landesgebiet) + 
+tm_shape(switzerland) + 
    tm_polygons() + 
   show_extents("tmap")
 ```

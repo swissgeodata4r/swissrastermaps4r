@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Recalculate extent values from a given aspect ratio — asp2extent • swissrastermaps4r</title>
+<title>Guess scale — guess_scale • swissrastermaps4r</title>
 
 <!-- jquery -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
@@ -30,11 +30,9 @@
 
 
 
-<meta property="og:title" content="Recalculate extent values from a given aspect ratio — asp2extent" />
+<meta property="og:title" content="Guess scale — guess_scale" />
 
-<meta property="og:description" content="Takes four vectors (xmin, xmax, ymin and ymax) and returns the new values based on a given aspect ratio
-Aspect ratio is calculated as \(\frac{\Delta y\ }{\Delta x\ }\). Values &amp;gt; 1 therefore means portrait,
-values &amp;lt; 1 means landscape." />
+<meta property="og:description" content="Guess map scale based on the extent and the output window" />
 <meta name="twitter:card" content="summary" />
 
 
@@ -122,43 +120,54 @@ values &amp;lt; 1 means landscape." />
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Recalculate extent values from a given aspect ratio</h1>
-    <small class="dont-index">Source: <a href='https://github.com/swissgeodata4r/swissrastermaps4r/blob/master/R/meta.R'><code>R/meta.R</code></a></small>
-    <div class="hidden name"><code>asp2extent.Rd</code></div>
+    <h1>Guess scale</h1>
+    <small class="dont-index">Source: <a href='https://github.com/swissgeodata4r/swissrastermaps4r/blob/master/R/raster_functions.R'><code>R/raster_functions.R</code></a></small>
+    <div class="hidden name"><code>guess_scale.Rd</code></div>
     </div>
 
     <div class="ref-description">
     
-    <p>Takes four vectors (xmin, xmax, ymin and ymax) and returns the new values based on a given aspect ratio
-Aspect ratio is calculated as \(\frac{\Delta y\ }{\Delta x\ }\). Values &gt; 1 therefore means portrait,
-values &lt; 1 means landscape.</p>
+    <p>Guess map scale based on the extent and the output window</p>
     
     </div>
 
-    <pre class="usage"><span class='fu'>asp2extent</span>(<span class='no'>xmin</span>, <span class='no'>xmax</span>, <span class='no'>ymin</span>, <span class='no'>ymax</span>, <span class='kw'>asp</span> <span class='kw'>=</span> <span class='fl'>1</span>)</pre>
+    <pre class="usage"><span class='fu'>guess_scale</span>(<span class='no'>extent</span>, <span class='no'>available_scales</span>, <span class='kw'>factor</span> <span class='kw'>=</span> <span class='fl'>1</span>, <span class='kw'>outsize</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>xmin, xmax, ymin, ymax</th>
-      <td><p>Numeric Vectors of the same length specifying the x/y extents</p></td>
+      <th>extent</th>
+      <td><p>A dataframe containing <code>xmin</code>, <code>xmax</code>, <code>ymin</code> and
+<code>ymax</code> values</p></td>
     </tr>
     <tr>
-      <th>aps</th>
-      <td><p>Aspect ratio calculated as specified in the description. A single numeric value or a vector in the
-same length as xmin etc.</p></td>
+      <th>factor</th>
+      <td><p>Usually, the scale is overestimated and smaller scales are desired.
+This factor enables correction by dividing the calculated scale by the factor.
+(e.g. a <code>factor = 2</code> returns a 1:25'000 scale when 1:50'000 has been calculated)</p></td>
     </tr>
     <tr>
-      <th>return</th>
-      <td><p>Returns a dataframe with four columns named <code>xmin</code>, <code>xmax</code>, <code>ymin</code>, <code>ymax</code></p></td>
+      <th>outsize</th>
+      <td><p>An integer vector of the dimensions of the output window size in cm.
+If left at <code>NULL</code> (default), the output window size is determined by
+<code><a href='https://www.rdocumentation.org/packages/grDevices/topics/dev.size'>dev.size("cm")</a></code></p></td>
+    </tr>
+    <tr>
+      <th>available_cales</th>
+      <td><p>An integer vector containing the available scales in the
+format x in 1:1'000x (e.g. 25 in 1:25'000).</p></td>
     </tr>
     </table>
     
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
-    <p>At the moment, this function can only enlargen the extent in order to match the aspect ratio. At one point,
-it might be neccessary to add the option to shrink the extent accordingly.</p>
+    <p>This function takes an extent object (with <code>xmin</code>, <code>xmax</code>,
+<code>ymin</code> and <code>ymax</code> values)
+as well as a set of available scales to determin the best suited scale.
+The extent object (<code>xmin</code>, <code>xmax</code>, <code>ymin</code> and <code>ymax</code> values)
+are expected in Meters while the available scales are expected to be the the
+x in 1:1'000x (e.g. 25 in 1:25'000).</p>
     
 
   </div>

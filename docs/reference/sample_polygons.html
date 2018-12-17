@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Recalculate extent values from a given aspect ratio — asp2extent • swissrastermaps4r</title>
+<title>Sample Polygons — sample_polygons • swissrastermaps4r</title>
 
 <!-- jquery -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
@@ -30,11 +30,9 @@
 
 
 
-<meta property="og:title" content="Recalculate extent values from a given aspect ratio — asp2extent" />
+<meta property="og:title" content="Sample Polygons — sample_polygons" />
 
-<meta property="og:description" content="Takes four vectors (xmin, xmax, ymin and ymax) and returns the new values based on a given aspect ratio
-Aspect ratio is calculated as \(\frac{\Delta y\ }{\Delta x\ }\). Values &amp;gt; 1 therefore means portrait,
-values &amp;lt; 1 means landscape." />
+<meta property="og:description" content="Polygons of the 10 largest muncipalities (&quot;Gemeinden&quot;) in Switzerland." />
 <meta name="twitter:card" content="summary" />
 
 
@@ -122,52 +120,40 @@ values &amp;lt; 1 means landscape." />
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Recalculate extent values from a given aspect ratio</h1>
-    <small class="dont-index">Source: <a href='https://github.com/swissgeodata4r/swissrastermaps4r/blob/master/R/meta.R'><code>R/meta.R</code></a></small>
-    <div class="hidden name"><code>asp2extent.Rd</code></div>
+    <h1>Sample Polygons</h1>
+    <small class="dont-index">Source: <a href='https://github.com/swissgeodata4r/swissrastermaps4r/blob/master/R/data.R'><code>R/data.R</code></a></small>
+    <div class="hidden name"><code>sample_polygons.Rd</code></div>
     </div>
 
     <div class="ref-description">
     
-    <p>Takes four vectors (xmin, xmax, ymin and ymax) and returns the new values based on a given aspect ratio
-Aspect ratio is calculated as \(\frac{\Delta y\ }{\Delta x\ }\). Values &gt; 1 therefore means portrait,
-values &lt; 1 means landscape.</p>
+    <p>Polygons of the 10 largest muncipalities ("Gemeinden") in Switzerland.</p>
     
     </div>
 
-    <pre class="usage"><span class='fu'>asp2extent</span>(<span class='no'>xmin</span>, <span class='no'>xmax</span>, <span class='no'>ymin</span>, <span class='no'>ymax</span>, <span class='kw'>asp</span> <span class='kw'>=</span> <span class='fl'>1</span>)</pre>
-    
-    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
-    <table class="ref-arguments">
-    <colgroup><col class="name" /><col class="desc" /></colgroup>
-    <tr>
-      <th>xmin, xmax, ymin, ymax</th>
-      <td><p>Numeric Vectors of the same length specifying the x/y extents</p></td>
-    </tr>
-    <tr>
-      <th>aps</th>
-      <td><p>Aspect ratio calculated as specified in the description. A single numeric value or a vector in the
-same length as xmin etc.</p></td>
-    </tr>
-    <tr>
-      <th>return</th>
-      <td><p>Returns a dataframe with four columns named <code>xmin</code>, <code>xmax</code>, <code>ymin</code>, <code>ymax</code></p></td>
-    </tr>
-    </table>
-    
-    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
+    <pre class="usage"><span class='no'>sample_polygons</span></pre>
+        
+    <h2 class="hasAnchor" id="format"><a class="anchor" href="#format"></a>Format</h2>
 
-    <p>At the moment, this function can only enlargen the extent in order to match the aspect ratio. At one point,
-it might be neccessary to add the option to shrink the extent accordingly.</p>
+    <p>An <code>sf</code> object containing polygon data</p><dl class='dl-horizontal'>
+  <dt>NAME</dt><dd><p>Name of the muncipality in its main language</p></dd>
+  <dt>EINWOHNERZ</dt><dd><p>Number of inhabitants</p></dd>
+  <dt>geometry</dt><dd><p>sfc_POLYGON  data in EPSG 2056</p></dd>
+</dl>
+    
+    <h2 class="hasAnchor" id="source"><a class="anchor" href="#source"></a>Source</h2>
+
+    <p><a href='https://shop.swisstopo.admin.ch/de/products/landscape/boundaries3D'>https://shop.swisstopo.admin.ch/de/products/landscape/boundaries3D</a></p>
     
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
     <ul class="nav nav-pills nav-stacked">
-      <li><a href="#arguments">Arguments</a></li>
       
-      <li><a href="#details">Details</a></li>
+      <li><a href="#format">Format</a></li>
+
+      <li><a href="#source">Source</a></li>
           </ul>
 
   </div>

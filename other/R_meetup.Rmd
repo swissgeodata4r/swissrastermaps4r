@@ -28,7 +28,7 @@ library(raster,quietly = T)
 
 library(swissboundriesR)
 
-data("landesgebiet")
+data("switzerland")
 
 library(tidyverse)
 ```

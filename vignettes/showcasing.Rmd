@@ -12,7 +12,7 @@ Here's a little showcase on how this package can be used. Just some code, with n
 ## Prepare Environment
 
 ```{r,warning=F,message=F}
-devtools::install_git("https://github.engineering.zhaw.ch/rata/swissmapraster.git",upgrade = F,quiet = T)
+# devtools::install_git("https://github.engineering.zhaw.ch/rata/swissmapraster.git",upgrade = F,quiet = T)
 
 
 library(swissrastermaps4r)
@@ -27,7 +27,7 @@ library(grid)
 
 ## Get Data
 
-Initialize the file directory and load the dataset `gemeinden_top_poly` containing the largest 10 municipalities in Switzerland.
+Initialize the file directory and load the dataset `sample_polygons` containing the largest 10 municipalities in Switzerland.
 
 ```{r,warning=F,message=F}
 fdir_init("C:/Users/rata/Geodata/01_Switzerland/01_Maps")
@@ -83,7 +83,7 @@ all the rasters in a huge list.
 ```{r,results='asis'}
 data("switzerland")
 
-for(i in 1:nrow(gemeinden_top_poly)){
+for(i in 1:nrow(sample_polygons)){
   extent_indicator <- tm_shape(switzerland) + 
     tm_polygons() + 
     tm_shape(get_extent(exts[i,],x_add = 1000,y_add = 1000)) + 
