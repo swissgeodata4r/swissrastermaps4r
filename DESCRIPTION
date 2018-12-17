@@ -1,7 +1,7 @@
 Package: swissrastermaps4r
 Type: Package
 Title: Helps Import, Extract and Plot Swissmapraster Data  
-Version: 0.1.1
+Version: 0.1.2
 Author@r: c(
     person("Nils", "Ratnaweera", , "rata@zhaw.ch", role = c("aut", "cre"))
     )

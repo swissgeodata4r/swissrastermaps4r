@@ -58,6 +58,7 @@ devtools::install_github("swissgeodata4r/swissrastermaps4r",upgrade = F)
 
 ```{r, message=F, warning=F}
 library(swissrastermaps4r)
+
 library(dplyr)
 ```
 
