@@ -33,9 +33,11 @@ library(grid)
 
 Initialize the file directory and load the dataset `sample_polygons` containing the largest 10 municipalities in Switzerland.
 
+<!-- add_geometry = F should not be neccessary -->
+
 ```{r,warning=F,message=F}
 
-fdir_init("C:/Users/rata/Geodata/01_Switzerland/01_Maps")
+fdir_init("C:/Users/rata/Geodata/01_Switzerland/01_Maps",add_geometry = F)
 
 data("sample_polygons")
 ```

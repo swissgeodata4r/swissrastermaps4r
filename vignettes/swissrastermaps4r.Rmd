@@ -49,10 +49,13 @@ Download and load the package. It is currently only available on github.
 
 ```{r,include=F}
 remove.packages("swissrastermaps4r")
+devtools::install_github("swissgeodata4r/swissrastermaps4r",upgrade = F)
+
 ```
 
-```{r}
-devtools::install_github("swissgeodata4r/swissrastermaps4r",upgrade = F)
+```{r, eval = F}
+devtools::install_github("swissgeodata4r/swissrastermaps4r")
+
 ```
 
 

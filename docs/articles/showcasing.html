@@ -30,7 +30,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">swissrastermaps4r</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.2</span>
       </span>
     </div>
 
@@ -57,9 +57,6 @@
   <ul class="dropdown-menu" role="menu">
 <li>
       <a href="../articles/showcasing.html">Showcasing</a>
-    </li>
-    <li>
-      <a href="../articles/tips_and_tricks.html">Untitled</a>
     </li>
   </ul>
 </li>
@@ -96,89 +93,123 @@
 
     
     
-<!-- Here's a little showcase on how this package can be used. Just some code, with not much explaination. -->
-<!-- ## Prepare Environment -->
-<!-- ```{r, include=F} -->
-<!-- remove.packages("swissrastermaps4r") -->
-<!-- devtools::install_git("https://github.engineering.zhaw.ch/rata/swissmapraster.git",upgrade = F,quiet = T,ref = "master") -->
-<!-- ``` -->
-<!-- ```{r,warning=F,message=F} -->
-<!-- library(swissrastermaps4r) -->
-<!-- library(sf) -->
-<!-- library(purrr) -->
-<!-- library(dplyr) -->
-<!-- library(tmap) -->
-<!-- library(glue) -->
-<!-- library(grid) -->
-<!-- ``` -->
-<!-- ## Get Data -->
-<!-- Initialize the file directory and load the dataset `sample_polygons` containing the largest 10 municipalities in Switzerland. -->
-<!-- ```{r,warning=F,message=F} -->
-<!-- fdir_init("C:/Users/rata/Geodata/01_Switzerland/01_Maps") -->
-<!-- data("sample_polygons") -->
-<!-- ``` -->
-<!-- ## Prepare Vector Data -->
-<!-- Calculate area and population density per municipality: -->
-<!-- ```{r} -->
-<!-- sample_polygons <- sample_polygons %>% -->
-<!--   mutate( -->
-<!--     area_km2 = as.integer(st_area(sample_polygons)/1000000), -->
-<!--     dichte = EINWOHNERZ/area_km2 -->
-<!--     ) -->
-<!-- ``` -->
-<!-- Create an cookiecutter shape for each feature.   -->
-<!-- ```{r} -->
-<!-- exts <- sample_polygons %>% -->
-<!--   get_extent(.,x_add = 0,y_add = 0,method = "bbox",per_feature = T,asp = 1) -->
-<!-- ext_inv <- exts %>% -->
-<!--   st_geometry() %>% -->
-<!--   map2(st_geometry(sample_polygons),~st_difference(.x,.y)) %>% -->
-<!--   st_sfc() %>% -->
-<!--   st_set_crs(2056) -->
-<!-- ``` -->
-<!-- ## Prepare Figure Captions -->
-<!-- Create a (text) caption per municipality which can later be included in `fig.cap =` of the markdown chunk (not visible in the output document).  -->
-<!-- ```{r} -->
-<!-- caption <- st_set_geometry(sample_polygons,NULL) %>% -->
-<!--   pmap_chr(function(NAME,EINWOHNERZ,area_km2,dichte,rank){ -->
-<!--     glue("Die Gemeindegrenze von {NAME} umfasst ein Fläche von {area_km2} km2. In diesem Gebiet leben {formatC(EINWOHNERZ,big.mark = ",")} Einwohner, was eine Einwohnerdichte von {as.integer(dichte)} -->
-<!--          Menschen pro km2 bedeutet.") -->
-<!--   }) -->
-<!-- ``` -->
-<!-- ## Create plots -->
-<!-- Run a loop over each feature calling `get_raster()` within the plot. This avoids saving  -->
-<!-- all the rasters in a huge list. -->
-<!-- ```{r,results='asis'} -->
-<!-- data("switzerland") -->
-<!-- for(i in 1:nrow(sample_polygons)){ -->
-<!--   extent_indicator <- tm_shape(switzerland) +  -->
-<!--     tm_polygons() +  -->
-<!--     tm_shape(get_extent(exts[i,],x_add = 1000,y_add = 1000)) +  -->
-<!--     tm_polygons(col = "red", alpha = 0.5) + -->
-<!--     tm_layout(frame = F) + -->
-<!--     tm_view(alpha = 0) -->
-<!--   mainmap <- tm_shape(get_raster(exts[i,],100)) +  -->
-<!--     tm_rgb() +  -->
-<!--     tm_shape(ext_inv[i])+  -->
-<!--     tm_polygons(alpha = 0.8,fill = "white") + -->
-<!--     tm_scale_bar(position = c("left","bottom")) + -->
-<!--     tm_credits(credits("swisstopo"),bg.color = "white",bg.alpha = 0.8) + -->
-<!--     tm_compass(position = c("right","top")) + -->
-<!--     tm_layout(frame = F)  -->
-<!--   grid.newpage() -->
-<!--   print(mainmap, vp=viewport(0,0,0.7,1,just = c("left","bottom"))) -->
-<!--   print(extent_indicator, vp=viewport(1,1,0.3,0.3,just = c("right","top"))) -->
-<!--   grid.text(sapply(strwrap(caption[i],30,simplify = F), paste, collapse = "\n"), -->
-<!--             x = 0.7, -->
-<!--             y = 0.6, -->
-<!--             vjust = 1, -->
-<!--             hjust=0, -->
-<!--             gp=gpar(fontsize=10)) -->
-<!-- } -->
-<!-- ``` -->
+<p>Here’s a little showcase on how this package can be used. Just some code, with not much explaination.</p>
+<div id="prepare-environment" class="section level2">
+<h2 class="hasAnchor">
+<a href="#prepare-environment" class="anchor"></a>Prepare Environment</h2>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(swissrastermaps4r)</a>
+<a class="sourceLine" id="cb1-2" data-line-number="2"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(sf)</a>
+<a class="sourceLine" id="cb1-3" data-line-number="3"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(purrr)</a>
+<a class="sourceLine" id="cb1-4" data-line-number="4"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(dplyr)</a>
+<a class="sourceLine" id="cb1-5" data-line-number="5"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(tmap)</a>
+<a class="sourceLine" id="cb1-6" data-line-number="6"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(glue)</a>
+<a class="sourceLine" id="cb1-7" data-line-number="7"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(grid)</a></code></pre></div>
+</div>
+<div id="get-data" class="section level2">
+<h2 class="hasAnchor">
+<a href="#get-data" class="anchor"></a>Get Data</h2>
+<p>Initialize the file directory and load the dataset <code>sample_polygons</code> containing the largest 10 municipalities in Switzerland.</p>
+<!-- add_geometry = F should not be neccessary -->
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" data-line-number="1"><span class="kw"><a href="../reference/fdir_init.html">fdir_init</a></span>(<span class="st">"C:/Users/rata/Geodata/01_Switzerland/01_Maps"</span>,<span class="dt">add_geometry =</span> F)</a></code></pre></div>
+<pre><code>## [1] "Done. Scanned 632 Files (54'413.56 MB) in 9.23 (secs). -&gt; All metadata stored in fdir."</code></pre>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" data-line-number="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/utils/topics/data">data</a></span>(<span class="st">"sample_polygons"</span>)</a></code></pre></div>
+</div>
+<div id="prepare-vector-data" class="section level2">
+<h2 class="hasAnchor">
+<a href="#prepare-vector-data" class="anchor"></a>Prepare Vector Data</h2>
+<p>Calculate area and population density per municipality:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" data-line-number="1">sample_polygons &lt;-<span class="st"> </span>sample_polygons <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb5-2" data-line-number="2"><span class="st">  </span><span class="kw">mutate</span>(</a>
+<a class="sourceLine" id="cb5-3" data-line-number="3">    <span class="dt">area_km2 =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/integer">as.integer</a></span>(<span class="kw">st_area</span>(sample_polygons)<span class="op">/</span><span class="dv">1000000</span>),</a>
+<a class="sourceLine" id="cb5-4" data-line-number="4">    <span class="dt">dichte =</span> EINWOHNERZ<span class="op">/</span>area_km2</a>
+<a class="sourceLine" id="cb5-5" data-line-number="5">    )</a></code></pre></div>
+<p>Create an cookiecutter shape for each feature.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" data-line-number="1">exts &lt;-<span class="st"> </span>sample_polygons <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb6-2" data-line-number="2"><span class="st">  </span><span class="kw"><a href="../reference/get_extent.html">get_extent</a></span>(.,<span class="dt">x_add =</span> <span class="dv">0</span>,<span class="dt">y_add =</span> <span class="dv">0</span>,<span class="dt">method =</span> <span class="st">"bbox"</span>,<span class="dt">per_feature =</span> T,<span class="dt">asp =</span> <span class="dv">1</span>)</a>
+<a class="sourceLine" id="cb6-3" data-line-number="3"></a>
+<a class="sourceLine" id="cb6-4" data-line-number="4">ext_inv &lt;-<span class="st"> </span>exts <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb6-5" data-line-number="5"><span class="st">  </span><span class="kw">st_geometry</span>() <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb6-6" data-line-number="6"><span class="st">  </span><span class="kw">map2</span>(<span class="kw">st_geometry</span>(sample_polygons),<span class="op">~</span><span class="kw">st_difference</span>(.x,.y)) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb6-7" data-line-number="7"><span class="st">  </span><span class="kw">st_sfc</span>() <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb6-8" data-line-number="8"><span class="st">  </span><span class="kw">st_set_crs</span>(<span class="dv">2056</span>)</a></code></pre></div>
+</div>
+<div id="prepare-figure-captions" class="section level2">
+<h2 class="hasAnchor">
+<a href="#prepare-figure-captions" class="anchor"></a>Prepare Figure Captions</h2>
+<p>Create a (text) caption per municipality which can later be included in <code>fig.cap =</code> of the markdown chunk (not visible in the output document).</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" data-line-number="1">caption &lt;-<span class="st"> </span><span class="kw">st_set_geometry</span>(sample_polygons,<span class="ot">NULL</span>) <span class="op">%&gt;%</span></a>
+<a class="sourceLine" id="cb7-2" data-line-number="2"><span class="st">  </span><span class="kw">pmap_chr</span>(<span class="cf">function</span>(NAME,EINWOHNERZ,area_km2,dichte,rank){</a>
+<a class="sourceLine" id="cb7-3" data-line-number="3">    <span class="kw">glue</span>(<span class="st">"Die Gemeindegrenze von {NAME} umfasst ein Fläche von {area_km2} km2. In diesem Gebiet leben {formatC(EINWOHNERZ,big.mark = "</span>,<span class="st">")} Einwohner, was eine Einwohnerdichte von {as.integer(dichte)}</span></a>
+<a class="sourceLine" id="cb7-4" data-line-number="4"><span class="st">         Menschen pro km2 bedeutet."</span>)</a>
+<a class="sourceLine" id="cb7-5" data-line-number="5">  })</a></code></pre></div>
+</div>
+<div id="create-plots" class="section level2">
+<h2 class="hasAnchor">
+<a href="#create-plots" class="anchor"></a>Create plots</h2>
+<p>Run a loop over each feature calling <code><a href="../reference/get_raster.html">get_raster()</a></code> within the plot. This avoids saving all the rasters in a huge list.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb8-1" data-line-number="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/utils/topics/data">data</a></span>(<span class="st">"switzerland"</span>)</a>
+<a class="sourceLine" id="cb8-2" data-line-number="2"></a>
+<a class="sourceLine" id="cb8-3" data-line-number="3"><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/nrow">nrow</a></span>(sample_polygons)){</a>
+<a class="sourceLine" id="cb8-4" data-line-number="4">  extent_indicator &lt;-<span class="st"> </span><span class="kw">tm_shape</span>(switzerland) <span class="op">+</span></a>
+<a class="sourceLine" id="cb8-5" data-line-number="5"><span class="st">    </span><span class="kw">tm_polygons</span>() <span class="op">+</span></a>
+<a class="sourceLine" id="cb8-6" data-line-number="6"><span class="st">    </span><span class="kw">tm_shape</span>(<span class="kw"><a href="../reference/get_extent.html">get_extent</a></span>(exts[i,],<span class="dt">x_add =</span> <span class="dv">1000</span>,<span class="dt">y_add =</span> <span class="dv">1000</span>)) <span class="op">+</span></a>
+<a class="sourceLine" id="cb8-7" data-line-number="7"><span class="st">    </span><span class="kw">tm_polygons</span>(<span class="dt">col =</span> <span class="st">"red"</span>, <span class="dt">alpha =</span> <span class="fl">0.5</span>) <span class="op">+</span></a>
+<a class="sourceLine" id="cb8-8" data-line-number="8"><span class="st">    </span><span class="kw">tm_layout</span>(<span class="dt">frame =</span> F) <span class="op">+</span></a>
+<a class="sourceLine" id="cb8-9" data-line-number="9"><span class="st">    </span><span class="kw">tm_view</span>(<span class="dt">alpha =</span> <span class="dv">0</span>)</a>
+<a class="sourceLine" id="cb8-10" data-line-number="10">  mainmap &lt;-<span class="st"> </span><span class="kw">tm_shape</span>(<span class="kw"><a href="../reference/get_raster.html">get_raster</a></span>(exts[i,],<span class="dv">100</span>)) <span class="op">+</span></a>
+<a class="sourceLine" id="cb8-11" data-line-number="11"><span class="st">    </span><span class="kw">tm_rgb</span>() <span class="op">+</span></a>
+<a class="sourceLine" id="cb8-12" data-line-number="12"><span class="st">    </span><span class="kw">tm_shape</span>(ext_inv[i])<span class="op">+</span></a>
+<a class="sourceLine" id="cb8-13" data-line-number="13"><span class="st">    </span><span class="kw">tm_polygons</span>(<span class="dt">alpha =</span> <span class="fl">0.8</span>,<span class="dt">fill =</span> <span class="st">"white"</span>) <span class="op">+</span></a>
+<a class="sourceLine" id="cb8-14" data-line-number="14"><span class="st">    </span><span class="kw">tm_scale_bar</span>(<span class="dt">position =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"left"</span>,<span class="st">"bottom"</span>)) <span class="op">+</span></a>
+<a class="sourceLine" id="cb8-15" data-line-number="15"><span class="st">    </span><span class="kw">tm_credits</span>(<span class="kw">credits</span>(<span class="st">"swisstopo"</span>),<span class="dt">bg.color =</span> <span class="st">"white"</span>,<span class="dt">bg.alpha =</span> <span class="fl">0.8</span>) <span class="op">+</span></a>
+<a class="sourceLine" id="cb8-16" data-line-number="16"><span class="st">    </span><span class="kw">tm_compass</span>(<span class="dt">position =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"right"</span>,<span class="st">"top"</span>)) <span class="op">+</span></a>
+<a class="sourceLine" id="cb8-17" data-line-number="17"><span class="st">    </span><span class="kw">tm_layout</span>(<span class="dt">frame =</span> F)</a>
+<a class="sourceLine" id="cb8-18" data-line-number="18">  <span class="kw">grid.newpage</span>()</a>
+<a class="sourceLine" id="cb8-19" data-line-number="19">  <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/print">print</a></span>(mainmap, <span class="dt">vp=</span><span class="kw">viewport</span>(<span class="dv">0</span>,<span class="dv">0</span>,<span class="fl">0.7</span>,<span class="dv">1</span>,<span class="dt">just =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"left"</span>,<span class="st">"bottom"</span>)))</a>
+<a class="sourceLine" id="cb8-20" data-line-number="20">  <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/print">print</a></span>(extent_indicator, <span class="dt">vp=</span><span class="kw">viewport</span>(<span class="dv">1</span>,<span class="dv">1</span>,<span class="fl">0.3</span>,<span class="fl">0.3</span>,<span class="dt">just =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"right"</span>,<span class="st">"top"</span>)))</a>
+<a class="sourceLine" id="cb8-21" data-line-number="21">  <span class="kw">grid.text</span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/lapply">sapply</a></span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/strwrap">strwrap</a></span>(caption[i],<span class="dv">30</span>,<span class="dt">simplify =</span> F), paste, <span class="dt">collapse =</span> <span class="st">"</span><span class="ch">\n</span><span class="st">"</span>),</a>
+<a class="sourceLine" id="cb8-22" data-line-number="22">            <span class="dt">x =</span> <span class="fl">0.7</span>,</a>
+<a class="sourceLine" id="cb8-23" data-line-number="23">            <span class="dt">y =</span> <span class="fl">0.6</span>,</a>
+<a class="sourceLine" id="cb8-24" data-line-number="24">            <span class="dt">vjust =</span> <span class="dv">1</span>,</a>
+<a class="sourceLine" id="cb8-25" data-line-number="25">            <span class="dt">hjust=</span><span class="dv">0</span>,</a>
+<a class="sourceLine" id="cb8-26" data-line-number="26">            <span class="dt">gp=</span><span class="kw">gpar</span>(<span class="dt">fontsize=</span><span class="dv">10</span>))</a>
+<a class="sourceLine" id="cb8-27" data-line-number="27">}</a></code></pre></div>
+<pre><code>## Using scale level:  100</code></pre>
+<pre><code>## Using scale level:  50</code></pre>
+<p><img src="showcasing_files/figure-html/unnamed-chunk-7-1.png" width="700"></p>
+<pre><code>## Using scale level:  50</code></pre>
+<p><img src="showcasing_files/figure-html/unnamed-chunk-7-2.png" width="700"></p>
+<pre><code>## Using scale level:  100</code></pre>
+<p><img src="showcasing_files/figure-html/unnamed-chunk-7-3.png" width="700"></p>
+<pre><code>## Using scale level:  100</code></pre>
+<p><img src="showcasing_files/figure-html/unnamed-chunk-7-4.png" width="700"></p>
+<pre><code>## Using scale level:  100</code></pre>
+<p><img src="showcasing_files/figure-html/unnamed-chunk-7-5.png" width="700"></p>
+<pre><code>## Using scale level:  100</code></pre>
+<p><img src="showcasing_files/figure-html/unnamed-chunk-7-6.png" width="700"></p>
+<pre><code>## Using scale level:  100</code></pre>
+<p><img src="showcasing_files/figure-html/unnamed-chunk-7-7.png" width="700"></p>
+<pre><code>## Using scale level:  100</code></pre>
+<p><img src="showcasing_files/figure-html/unnamed-chunk-7-8.png" width="700"></p>
+<pre><code>## Using scale level:  50</code></pre>
+<p><img src="showcasing_files/figure-html/unnamed-chunk-7-9.png" width="700"></p>
+<pre><code>## Raster object has 11492100 (3390 by 3390) cells, which is larger than 1e+07, the maximum size determined by the option max.raster. Therefore, the raster will be shown at a decreased resolution of 1e+07 cells. Set tmap_options(max.raster = c(plot = 11492100, view = 11492100)) to show the whole raster.</code></pre>
+<p><img src="showcasing_files/figure-html/unnamed-chunk-7-10.png" width="700"></p>
+</div>
   </div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
+        <div id="tocnav">
+      <h2 class="hasAnchor">
+<a href="#tocnav" class="anchor"></a>Contents</h2>
+      <ul class="nav nav-pills nav-stacked">
+<li><a href="#prepare-environment">Prepare Environment</a></li>
+      <li><a href="#get-data">Get Data</a></li>
+      <li><a href="#prepare-vector-data">Prepare Vector Data</a></li>
+      <li><a href="#prepare-figure-captions">Prepare Figure Captions</a></li>
+      <li><a href="#create-plots">Create plots</a></li>
+      </ul>
+</div>
       </div>
 
 </div>

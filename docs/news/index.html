@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Threeband RGB to singleband raster — rgb_raster2singleband • swissrastermaps4r</title>
+<title>Changelog • swissrastermaps4r</title>
 
 <!-- jquery -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
@@ -30,11 +30,7 @@
 
 
 
-<meta property="og:title" content="Threeband RGB to singleband raster — rgb_raster2singleband" />
-
-<meta property="og:description" content="rgb_raster2singleband turns a threeband RGB Raster (brick)
-into a singleband raster with a colortable" />
-<meta name="twitter:card" content="summary" />
+<meta property="og:title" content="Changelog" />
 
 
 
@@ -51,7 +47,7 @@ into a singleband raster with a colortable" />
   </head>
 
   <body>
-    <div class="container template-reference-topic">
+    <div class="container template-news">
       <header>
       <div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
@@ -118,47 +114,58 @@ into a singleband raster with a colortable" />
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Threeband RGB to singleband raster</h1>
-    <small class="dont-index">Source: <a href='https://github.com/swissgeodata4r/swissrastermaps4r/blob/master/R/raster_functions.R'><code>R/raster_functions.R</code></a></small>
-    <div class="hidden name"><code>rgb_raster2singleband.Rd</code></div>
+      <h1>Changelog <small></small></h1>
+      <small>Source: <a href='https://github.com/swissgeodata4r/swissrastermaps4r/blob/master/NEWS.md'><code>NEWS.md</code></a></small>
     </div>
 
-    <div class="ref-description">
-    
-    <p><code>rgb_raster2singleband</code> turns a threeband RGB Raster (<code>brick</code>)
-into a singleband <code>raster</code> with a <code>colortable</code></p>
-    
-    </div>
-
-    <pre class="usage"><span class='fu'>rgb_raster2singleband</span>(<span class='no'>rgb_raster</span>)</pre>
-    
-    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
-    <table class="ref-arguments">
-    <colgroup><col class="name" /><col class="desc" /></colgroup>
-    <tr>
-      <th>rgb_raster</th>
-      <td><p>A character string pointing to a raster brick object or
-an object of class RasterBrick. RBG values are assumed to range from 0-255</p></td>
-    </tr>
-    </table>
-    
-    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
-
-    <p>This function turns a three band RGB Raster Brick (from the Package <code>raster</code>)
-into a singleband raster with an included <code>colortable</code>. The function
-requires the packages:  <code>raster</code>, <code>rgdal</code></p>
-    
-
+    <div id="swissrastermaps4r-0-1-2" class="section level1">
+<h1 class="page-header">
+<a href="#swissrastermaps4r-0-1-2" class="anchor"></a>swissrastermaps4r 0.1.2</h1>
+<ul>
+<li>Added the possibility of adding “.pattern”-Files in each folder to get metadata from each filename</li>
+<li>
+<code>init_fdir()</code> now reads file size</li>
+<li>Added <code>fn_year_start</code> and <code>fn_year_end</code>
+</li>
+<li>Can now handle different EPSG-Codes</li>
+<li>Resolve the issue with naming the 1:1’000’000 files (also allow different representations of the same map)</li>
+<li>added <code><a href="../reference/guess_scale.html">guess_scale()</a></code> function that guesses the scale based on the input</li>
+<li>when overlapping raster exist, the packge tries filtering futher over year and then name</li>
+<li>Renamed sample data</li>
+<li>Breaking change: Removed the <code>per_feature</code> option</li>
+<li>started modularizing the code</li>
+<li>Fixed a lot of bugs</li>
+</ul>
+</div>
+    <div id="swissrastermaps4r-0-1-1" class="section level1">
+<h1 class="page-header">
+<a href="#swissrastermaps4r-0-1-1" class="anchor"></a>swissrastermaps4r 0.1.1</h1>
+<ul>
+<li>Added documentation with pkgdown</li>
+<li>A minimal version now works</li>
+<li>Added a <code>NEWS.md</code> file to track changes to the package.</li>
+</ul>
+</div>
+    <div id="swissrastermaps4r-0-1-0" class="section level1">
+<h1 class="page-header">
+<a href="#swissrastermaps4r-0-1-0" class="anchor"></a>swissrastermaps4r 0.1.0</h1>
+<ul>
+<li>This is the first release of pkgdown. It doesn’t really work yet, but all scripts are now on github</li>
+</ul>
+</div>
   </div>
+
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
-    <h2>Contents</h2>
-    <ul class="nav nav-pills nav-stacked">
-      <li><a href="#arguments">Arguments</a></li>
-      
-      <li><a href="#details">Details</a></li>
-          </ul>
-
+    <div id="tocnav">
+      <h2>Contents</h2>
+      <ul class="nav nav-pills nav-stacked">
+        <li><a href="#swissrastermaps4r-0-1-2">0.1.2</a></li>
+        <li><a href="#swissrastermaps4r-0-1-1">0.1.1</a></li>
+        <li><a href="#swissrastermaps4r-0-1-0">0.1.0</a></li>
+      </ul>
+    </div>
   </div>
+
 </div>
 
       <footer>
