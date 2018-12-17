@@ -28,7 +28,6 @@ data.frame(
 #' function \code{metainfo_from_filename}. Any characters not specified in
 #' \code{search_pattern_dict} will be ignored in the '.pattern' file.
 #'
-
 search_pattern <- function(){
   search_pattern_dict <- get("search_pattern_dict",envir = swissrastermapEnv)
   print(search_pattern_dict)

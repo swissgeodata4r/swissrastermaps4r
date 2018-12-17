@@ -11,8 +11,15 @@ Here's a little showcase on how this package can be used. Just some code, with n
 
 ## Prepare Environment
 
+```{r, include=F}
+remove.packages("swissrastermaps4r")
+devtools::install_git("https://github.engineering.zhaw.ch/rata/swissmapraster.git",upgrade = F,quiet = T,ref = "master")
+
+```
+
+
 ```{r,warning=F,message=F}
-# devtools::install_git("https://github.engineering.zhaw.ch/rata/swissmapraster.git",upgrade = F,quiet = T)
+
 
 
 library(swissrastermaps4r)
@@ -30,6 +37,7 @@ library(grid)
 Initialize the file directory and load the dataset `sample_polygons` containing the largest 10 municipalities in Switzerland.
 
 ```{r,warning=F,message=F}
+
 fdir_init("C:/Users/rata/Geodata/01_Switzerland/01_Maps")
 
 data("sample_polygons")

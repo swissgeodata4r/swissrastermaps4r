@@ -29,9 +29,9 @@ reference:
     desc: >
       Some vector data stored in as `sf` Objects
     contents:
-      - gemeinden_top_poly
-      - gemeinden_top_centroid
-      - landesgebiet
+      - sample_polygons
+      - sample_points
+      - switzerland
   - title: "Raster manipulation"
     desc: >
       Some auxiliary functions for raster manipulation. These are mostly needed for backend and have little use for front end users.
@@ -57,11 +57,5 @@ reference:
       - guess_scale
       - get_srm4r
       - fdir_filter
-  - title: "Data"
-    desc: >
-      Sample Data to play with
-    contents:
-     - switzerland
-     - sample_polygons
-     - sample_points
+      - check_raster_overlaps
 
