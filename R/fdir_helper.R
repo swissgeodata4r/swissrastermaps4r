@@ -1,7 +1,7 @@
 
 swissrastermapEnv <- new.env()
 
-
+# move this to data?
 data.frame(
   placeholder = c("A","B","C","D","E","F","G","H","Z"),
   name = paste(c("maptype_fn","scale_fn","CRS","format","sheet", "year","index","name","Ignore"),sep = "_"),
@@ -27,8 +27,8 @@ data.frame(
 #' by consulting a predefined pattern. The whole process is somewhat similar to
 #' specifying a format of a datetime object (see \code{strftime}). The pattern is
 #' specified by placeholders (in the argument \code{pattern} ), which are in turn
-#' specified in a dataframe (in the argument \code{search_pattern_dict}). Run \code{search_pattern}
-#' to see what these argument currently are.
+#' specified in a dataframe (in the argument \code{search_pattern_dict}). Run
+#' \code{get_srm4r("search_pattern_dict")} to see what these argument currently are.
 #'
 metainfo_from_filename <- function(filename,pattern){
 
