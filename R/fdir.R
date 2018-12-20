@@ -78,7 +78,7 @@ fdir_init <- function(rootdir,
     tidyr::nest() %>%
     dplyr::group_by(epsg,maptype,scale,nlayers) %>%
     dplyr::mutate(
-      data = map(data,~geom_from_boundary(.x,epsg)),
+      data = purrr::map(data,~geom_from_boundary(.x,epsg)),
       year_start = purrr::map_int(data,~min(.x$year)),
       year_end = purrr::map_int(data,~max(.x$year))
     )
