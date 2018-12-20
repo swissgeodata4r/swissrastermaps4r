@@ -32,6 +32,8 @@ data.frame(
 #'
 metainfo_from_filename <- function(filename,pattern){
 
+  this_year <- as.integer(strftime(Sys.Date(),"%Y"))
+
   filename <- strsplit(filename,"\\.") %>% purrr::map_chr(~.x[1])
 
   pattern <- filename %>% purrr::map_chr(function(x){
@@ -59,7 +61,7 @@ metainfo_from_filename <- function(filename,pattern){
     dplyr::select(-filename) %>%
     dplyr::mutate(
       year = as.integer(year),
-      year = ifelse(is.na(year),Inf,year),
+      year = ifelse(is.na(year),this_year,year),
       sheet = ifelse(sheet == "","0",sheet)
     )
 }
@@ -230,10 +232,34 @@ asp2extent <- function(xmin,xmax,ymin,ymax,asp = 1){
 }
 
 
-credits <- function(who){
+#' Return String with credits
+#'
+#' Perticularly swisstopo wants to be credited with the special Copyright character (\u00A9)
+#' Since I need to credit the everytime I make a map, i've prepared a function returing
+#' that exact text.
+#'
+#' @param who Character string specifying whom to credit. Currently only "swisstopo" is implemented.
+credits <- function(who = "swisstopo"){
   if(who == "swisstopo"){
     "Geodata \u00A9 Swisstopo"
   } else{
-    stop("Dont know ",who)
+    stop("Dont know ",who, "(not implemented)")
   }
+}
+
+#' Remove geometry from sf objects
+#'
+#' Funtion to remove geometry, if the object \emph{is} in fact an sf object. Simply
+#' Returns the input object if it isn't. This funtion is only necessary, because
+#' \code{st_set_geometry(x,NULL)} returns an error if the input is not sf, and
+#' \code{data.frame(x)} keep the geometry as a column.
+#'
+#' @param sf Anything.
+#' @return The input, if it was \emph{not} of class \code{sf}. A \code{data.frame},
+#' if it \emph{was}
+sf_remove_geom <- function(sf){
+  if("sf" %in% class(sf)){
+    sf <- st_set_geometry(sf,NULL)
+  }
+  sf
 }

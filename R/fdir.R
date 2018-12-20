@@ -32,6 +32,9 @@ fdir_init <- function(rootdir,
 
   start <- Sys.time()
 
+  if(is.null(year)){year <- as.integer(strftime(Sys.Date(),"%Y"))}
+
+
 
   dirs <- list.dirs(rootdir,recursive = F,full.names = F)
   dirs <- purrr::map(filter,~dirs[grepl(.x,dirs)]) %>% unlist()
@@ -72,17 +75,18 @@ fdir_init <- function(rootdir,
       out
     })
 
-  fdir <- fdir %>%
+  fdir <-  fdir %>%
     group_by(epsg,maptype,scale,nlayers) %>%
     nest() %>%
     group_by(epsg,maptype,scale,nlayers) %>%
     mutate(
-      data = map(data,~geom_from_boundary(.x,epsg))
+      data = map(data,~geom_from_boundary(.x,epsg)),
+      year_start = map_int(data,~min(.x$year)),
+      year_end = map_int(data,~max(.x$year))
     )
 
 
   fdir <- fdir %>%
-    # dplyr::group_by(maptype,epsg,sheet_new) %>%
     mutate(
       data = map(data,function(x){
         x %>%
@@ -127,7 +131,7 @@ fdir_init <- function(rootdir,
     round(2) %>%
     format(nsmall = 2)
 
-  message("Done. Scanned ",n_files, " Files", " (",mb," MB) in ",duration," (",duration_units,"). -> All metadata stored in fdir.")
+  message("Done. Scanned ",n_files, " Files", " (",mb," MB) in ",duration," (",duration_units,"). -> All metadata stored in fdir (@swissrastermapEnv)")
 }
 
 

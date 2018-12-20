@@ -23,7 +23,7 @@ get_extent <- function(features,x_add = 0,y_add = 0,method = "centroid",per_feat
       sf::st_geometry() %>%
       sf::st_centroid() %>%
       sf::st_coordinates() %>%
-      as.data.frame() %>%
+      sf_remove_geom() %>% # swiched from "as.data.frame()"
       dplyr::mutate(
         xmin = X-x_add,
         xmax = X+x_add,
@@ -81,85 +81,82 @@ get_extent <- function(features,x_add = 0,y_add = 0,method = "centroid",per_feat
 #' @param year Optional integer specyfing the year from which data is needed
 fdir_filter <- function(fdir,epsg,scale_level,xmin,xmax,ymin,ymax,year = NULL,name = ""){
 
-  fdir <- fdir[fdir$epsg == epsg &
-                 fdir$scale == scale_level &
-                 fdir$xmin <= xmax &
-                 fdir$xmax >= xmin &
-                 fdir$ymin <= ymax &
-                 fdir$ymax >= ymin, ]
+  fdir_filtered <- fdir[fdir$epsg == epsg &
+         fdir$scale == scale_level,]
 
   if(!is.null(year)){
-    fdir <- fdir[fdir$year_start <= year &
-                   fdir$year_end >= year,]
+    fdir_filtered <- fdir_filtered[fdir_filtered$year_start <= year &
+                                     fdir_filtered$year_end >= year,]
   }
 
+  if(nrow(fdir_filtered) < 1){
+    stop("No dataset matching this criteria")
+  } else if(nrow(fdir_filtered) > 1){
+    warning("More than one dataset matching this criteria. Using the newest one")
+  }
+
+  fdir_filtered <- fdir_filtered %>%
+    mutate(
+      data = map(data,function(x){x %>%   # this is only neccessary because
+          mutate(epsg = epsg,             # unnest does not work with sf()
+                 maptype = maptype,
+                 scale = scale,
+                 nlayers = nlayers
+          )})
+    ) %>%
+    arrange(year_end) %>%
+    pull(data) %>%
+    magrittr::extract2(1)
+
+
+  fdir_filtered <- fdir_filtered[fdir_filtered$xmin <= xmax &
+                                   fdir_filtered$xmax >= xmin &
+                                   fdir_filtered$ymin <= ymax &
+                                   fdir_filtered$ymax >= ymin, ]
+
+  if(!is.null(year)){
+    fdir_filtered <- fdir_filtered[fdir_filtered$year_start <= year &
+                                     fdir_filtered$year_end >= year,]
+  }
 
   if(name != ""){
     fdir <- fdir[fdir$name == name,]
   }
 
-  pure_overlaps <- check_raster_overlaps(fdir,epsg = epsg)
-
-  if(any(isTRUE(pure_overlaps))){
-    message("Selected rasters overlap at least partially. Attempting filter further:")
-    years <- unique(fdir$year)
-    if(length(years)>1){
-      year = max(years,na.rm = T)
-      years <- paste(years,collapse = ",")
-      message(paste0("-- Multiple years found. Only using year: ",year, " (Available years: ",years,")"))
-      fdir <- fdir[fdir$year_start <= year &
-                     fdir$year_end >= year,]
-    }
-    names <- unique(fdir$name)
-    if(length(names)>1){
-      name <- names[1]
-      names <- paste(names,collapse = ",")
-      message(paste("-- Multiple names found. Only using name: ",name, " (Available names: ",names,")"))
-
-      fdir <- fdir[fdir$name == name,]
-    }
+  if(nrow(fdir_filtered) == 0){
+    stop("No raster files found with matching criteria.")
   }
 
-  pure_overlaps <- check_raster_overlaps(fdir,epsg = epsg)
+  pure_overlaps <- check_raster_overlaps(fdir_filtered,epsg = epsg)
 
   if(any(isTRUE(pure_overlaps))){
-    stop("Filtering automatically failed. Please filter yourself")
+    stop("Some rasters overlapping. Check data integrity")
+  }
 
-    # Maybe add the following code agein:
-    # if(action == "stop" & any(pure_intersection,na.rm = T)){
-    #   # This part just runs if some of the geometries intersect
-    #   pure_intersection %>%
-    #     which(arr.ind = T) %>%
-    #     as.data.frame() %>%
-    #     purrr::pmap_dfr(function(row,col){
-    #       row <- as.integer(row)
-    #       col <- as.integer(col)
-    #       data.frame(
-    #         file1 = fdir_filtered$filename[row],
-    #         file2 = fdir_filtered$filename[col],
-    #         stringsAsFactors = F
-    #       )
-    #     }) %>%
-    #     assign(x = "self_overlaps",value = .,envir = swissrastermapEnv)
-    #
-    #   fdir_filtered %>%
-    #     dplyr::group_by(maptype,scale,epsg,sheet) %>%
-    #     dplyr::summarise(years = paste(year,collapse = ",")) %>%
-    #     assign(x = "self_overlaps2",value = .,envir = swissrastermapEnv)
-    #
-    #   message(paste(
-    #     "Some of the selected rasters overlap. Run get_srm4r('self_overlaps')",
-    #     "to get a dataframe with all the overlapping objects.",
-    #     "Run get_srm4r('self_overlaps2') to get an overview of all rasters in the extent"
-    #   ))
-    #   stop()
-    # } else if(action == "correct" & any(pure_intersection,na.rm = T)){
-    #   unique(fdir_filtered$year)
-    # }
-    }
+  # if(any(isTRUE(pure_overlaps))){
+  #   message("Selected rasters overlap at least partially. Attempting filter further:")
+  #   years <- unique(fdir$year)
+  #   if(length(years)>1){
+  #     year = max(years,na.rm = T)
+  #     years <- paste(years,collapse = ",")
+  #     message(paste0("-- Multiple years found. Only using year: ",year, " (Available years: ",years,")"))
+  #     fdir <- fdir[fdir$year_start <= year &
+  #                    fdir$year_end >= year,]
+  #   }
+  #   names <- unique(fdir$name)
+  #   if(length(names)>1){
+  #     name <- names[1]
+  #     names <- paste(names,collapse = ",")
+  #     message(paste("-- Multiple names found. Only using name: ",name, " (Available names: ",names,")"))
+  #
+  #     fdir <- fdir[fdir$name == name,]
+  #   }
+  # }
+
+  # pure_overlaps <- check_raster_overlaps(fdir,epsg = epsg)
 
 
-  return(fdir)
+  return(fdir_filtered)
 }
 
 
@@ -223,7 +220,17 @@ raster_harmonize <- function(fdir_filtered,extent){
     round() %>%
     as.integer()
 
+  size_sum <- sum(fdir_filtered$size_mb)
+
+  message("Collective Size of Rasters to harmonize: ",size_sum," (mb)")
+
+  threshold <- 500
+  if(size>threshold){
+    stop("Size is larger than Limit. Aborting.") # todo: make this an option (like tm_option())
+  }
+
   rast <- fdir_filtered %>%
+    sf_remove_geom() %>%
     dplyr::select(file,res1,res2,epsg,nlayers) %>%
     purrr::pmap(function(file,res1,res2,name,epsg,nlayers){
       raster <- raster::brick(file)
@@ -232,10 +239,9 @@ raster_harmonize <- function(fdir_filtered,extent){
       res_rast <- as.integer(round(raster::res(raster)))
       if(res_rast[1] > res_min[1] | res_rast[2] > res_min[2]){
         warning(
-          paste(
             "Rasters in extent do not have matching resolutions.",
-            "Applying disaggregate on the following raster to enable merging:",
-            file))
+            "Applying disaggregate on the following raster to enable merging: ",
+            file)
         fac1 <- res_rast[1]/res_min[1]
         fac2 <- res_rast[2]/res_min[2]
         raster <- raster::disaggregate(raster,fact = c(fac1,fac2))

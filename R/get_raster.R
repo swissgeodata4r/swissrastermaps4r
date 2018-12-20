@@ -24,7 +24,6 @@
 #' @param method A character string specifying the method with which the extent should be calculated. \code{centroid} calculates the centroid of the object(s), \code{bbox} calculates the bounding box of the object.
 #' @param turn_greyscale Should the output rastermaps be turned into greyscale?
 #' @param name If muliple, different maps are available with overlapping extents, \code{name} can be used to differentiate between different maptypes. Default is an empty sting.
-#' @param fdir By default, the \code{fdir} is retrieved from the package Environment (named \code{swissrastermapEnv}). Override this with \code{fdir = }
 #' @param limit For testing puposes only: Limits the number of rasters returned per object. Defaults to \code{Inf}
 #'
 get_raster <- function(features,
@@ -34,7 +33,6 @@ get_raster <- function(features,
                        method = "bbox",
                        turn_greyscale = F,
                        name = "",
-                       fdir = NULL,
                        limit = Inf,
                        asp = NULL,
                        year = NULL,
@@ -42,13 +40,12 @@ get_raster <- function(features,
 ){
   stopifnot("sf" %in% class(features))
 
-  if(is.null(fdir)){
-    if(exists("fdir", envir = swissrastermapEnv)){
-      fdir <- get("fdir",envir = swissrastermapEnv)
-    } else{
-      stop("Please run init_fdir() first.")
-    }
+  if(exists("fdir", envir = swissrastermapEnv)){
+    fdir <- get("fdir",envir = swissrastermapEnv)
+  } else{
+    stop("Please run init_fdir() first.")
   }
+
 
   ex <- get_extent(features = features,
                    x_add = x_add,
@@ -58,7 +55,10 @@ get_raster <- function(features,
                    asp = asp
   )
 
-  scale_level <- guess_scale(extent = ex,available_scales = unique(fdir$scale),factor = scale_factor)
+  if(is.null(scale_level)){
+    scale_level <- guess_scale(extent = ex,available_scales = unique(fdir$scale),factor = scale_factor)
+  }
+
 
   fdir_filtered <- fdir_filter(fdir,
                                epsg = ex$epsg,
@@ -71,9 +71,7 @@ get_raster <- function(features,
                                name = name
   )
 
-  if(nrow(fdir_filtered) == 0){
-    stop("No raster files found with matching criteria.")
-  }
+
 
 
   rast <- raster_harmonize(fdir_filtered = fdir_filtered,

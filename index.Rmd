@@ -8,15 +8,6 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-<!-- Some things are easy, others are hard. -->
-
-<!-- - **Easy** ↔ **hard** -->
-<!-- - Vector data ↔ Raster data -->
-<!-- - Open data ↔ Custom data -->
-<!-- - single map ↔ map series -->
-<!-- - whole extent ↔ custom extent -->
-<!-- - single map tile ↔ multiple map tiles -->
-<!-- - single resolution ↔ multiple resolutions -->
 
 ## What is this package about?
 
@@ -31,3 +22,12 @@ Regrettably, no. This package does not give access to any raster maps, by swisst
 
 Currently, it's just [me](https://www.zhaw.ch/de/ueber-uns/person/rata/), but I'm very open to colaboration.
 
+<!-- Some things are easy, others are hard. -->
+
+<!-- - **Easy** ↔ **hard** -->
+<!-- - Vector data ↔ Raster data -->
+<!-- - Open data ↔ Custom data -->
+<!-- - single map ↔ map series -->
+<!-- - whole extent ↔ custom extent -->
+<!-- - single map tile ↔ multiple map tiles -->
+<!-- - single resolution ↔ multiple resolutions -->
