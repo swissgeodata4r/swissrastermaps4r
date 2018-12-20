@@ -73,34 +73,53 @@ fdir_init <- function(rootdir,
     })
 
   fdir <- fdir %>%
-    dplyr::group_by(epsg,sheet) %>%
-    dplyr::arrange(epsg,sheet,year) %>%
-    dplyr::mutate(
-      year_start = year - floor((year-dplyr::lag(year))/2),
-      year_start = ifelse(is.na(year_start),-Inf,year_start),
-      year_end = (year + ceiling((dplyr::lead(year)-year)/2))-1,
-      year_end = ifelse(is.na(year_end),Inf,year_end),
-    ) %>%
-    dplyr::ungroup()
+    group_by(epsg,maptype,scale,nlayers) %>%
+    nest() %>%
+    group_by(epsg,maptype,scale,nlayers) %>%
+    mutate(
+      data = map(data,~geom_from_boundary(.x,epsg))
+    )
 
 
-  epsgs <- unique(fdir$epsg)
-  epsgs <- epsgs[!is.na(epsgs)]
+  fdir <- fdir %>%
+    # dplyr::group_by(maptype,epsg,sheet_new) %>%
+    mutate(
+      data = map(data,function(x){
+        x %>%
+          dplyr::arrange(sheet,year) %>%
+          dplyr::mutate(
+            year_start = year - floor((year-dplyr::lag(year))/2),
+            year_start = ifelse(is.na(year_start),-Inf,year_start),
+            year_end = (year + ceiling((dplyr::lead(year)-year)/2))-1,
+            year_end = ifelse(is.na(year_end),Inf,year_end),
+          )
+      })
+    )
 
-  if(add_geometry){
-    if(length(epsgs) == 1){
-      fdir <- geom_from_boundary(fdir, epsgs, add = T)
-    } else if(length(epsgs) > 1){
-      warning("Multiple EPSG Codes found (",paste(epsgs,collapse = ","),").
-              Can only add geometry if fdir contains rasterfiles of a single CRS")
-    } else if(length(epsgs) == 0){
-      warning("No EPSG Codes found in fdir. Cannt add geometry")
-    }
-  }
+
+
+
+
+
+  # epsgs <- unique(fdir$epsg)
+  # epsgs <- epsgs[!is.na(epsgs)]
+
+  # if(add_geometry){
+  #   if(length(epsgs) == 1){
+  #     fdir <- geom_from_boundary(fdir, epsgs, add = T)
+  #   } else if(length(epsgs) > 1){
+  #     warning("Multiple EPSG Codes found (",paste(epsgs,collapse = ","),").
+  #             Can only add geometry if fdir contains rasterfiles of a single CRS")
+  #   } else if(length(epsgs) == 0){
+  #     warning("No EPSG Codes found in fdir. Cant add geometry")
+  #   }
+  # }
 
 
   assign("fdir",fdir,envir = swissrastermapEnv)
-  mb <- format(sum(fdir$size_mb),big.mark = "'")
+  mb <-map_dbl(fdir$data,~.x$size_mb %>% sum()) %>% sum() %>% format(big.mark = "'")
+  n_files <- map_int(fdir$data,nrow) %>% sum()
+
   duration <- difftime(Sys.time(),start)
   duration_units <- attr(duration,"units")
   duration <- duration%>%
@@ -108,7 +127,7 @@ fdir_init <- function(rootdir,
     round(2) %>%
     format(nsmall = 2)
 
-  message("Done. Scanned ",nrow(fdir), " Files", " (",mb," MB) in ",duration," (",duration_units,"). -> All metadata stored in fdir.")
+  message("Done. Scanned ",n_files, " Files", " (",mb," MB) in ",duration," (",duration_units,"). -> All metadata stored in fdir.")
 }
 
 
