@@ -4,13 +4,10 @@
 \alias{fdir_init}
 \title{Initialize a "File Directory" by scanning all raster files}
 \usage{
-fdir_init(rootdir, add_geometry = T, filter = c("PK", "SMR", "LK",
-  "TA"))
+fdir_init(rootdir, filter = c("PK", "SMR", "LK", "TA"))
 }
 \arguments{
 \item{rootdir}{Character string specifying the directory where the folders are stored}
-
-\item{add_geometry}{Should the bounding box of each file be added as a geometry to \code{fdir}?}
 
 \item{filter}{Names of the folders to look for. Only folders containing the character strings
 specified here are included in the search.}

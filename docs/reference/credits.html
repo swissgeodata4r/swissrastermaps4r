@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Get Metadata from filename — metainfo_from_filename • swissrastermaps4r</title>
+<title>Return String with credits — credits • swissrastermaps4r</title>
 
 <!-- jquery -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
@@ -30,9 +30,11 @@
 
 
 
-<meta property="og:title" content="Get Metadata from filename — metainfo_from_filename" />
+<meta property="og:title" content="Return String with credits — credits" />
 
-<meta property="og:description" content="Retrieves metadata from filename with the help of a predefined 'pattern'" />
+<meta property="og:description" content="Perticularly swisstopo wants to be credited with the special Copyright character (9)
+Since I need to credit the everytime I make a map, i've prepared a function returing
+that exact text." />
 <meta name="twitter:card" content="summary" />
 
 
@@ -117,36 +119,37 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Get Metadata from filename</h1>
+    <h1>Return String with credits</h1>
     <small class="dont-index">Source: <a href='https://github.com/swissgeodata4r/swissrastermaps4r/blob/master/R/fdir_helper.R'><code>R/fdir_helper.R</code></a></small>
-    <div class="hidden name"><code>metainfo_from_filename.Rd</code></div>
+    <div class="hidden name"><code>credits.Rd</code></div>
     </div>
 
     <div class="ref-description">
     
-    <p>Retrieves metadata from filename with the help of a predefined 'pattern'</p>
+    <p>Perticularly swisstopo wants to be credited with the special Copyright character (9)
+Since I need to credit the everytime I make a map, i've prepared a function returing
+that exact text.</p>
     
     </div>
 
-    <pre class="usage"><span class='fu'>metainfo_from_filename</span>(<span class='no'>filename</span>, <span class='no'>pattern</span>)</pre>
-        
-    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
-
-    <p>Takes a filename (character string) and retrieves metadata from the filename
-by consulting a predefined pattern. The whole process is somewhat similar to
-specifying a format of a datetime object (see <code>strftime</code>). The pattern is
-specified by placeholders (in the argument <code>pattern</code> ), which are in turn
-specified in a dataframe (in the argument <code>search_pattern_dict</code>). Run
-<code><a href='get_srm4r.html'>get_srm4r("search_pattern_dict")</a></code> to see what these argument currently are.</p>
+    <pre class="usage"><span class='fu'>credits</span>(<span class='kw'>who</span> <span class='kw'>=</span> <span class='st'>"swisstopo"</span>)</pre>
+    
+    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
+    <table class="ref-arguments">
+    <colgroup><col class="name" /><col class="desc" /></colgroup>
+    <tr>
+      <th>who</th>
+      <td><p>Character string specifying whom to credit. Currently only "swisstopo" is implemented.</p></td>
+    </tr>
+    </table>
     
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
     <ul class="nav nav-pills nav-stacked">
-      
-      <li><a href="#details">Details</a></li>
-          </ul>
+      <li><a href="#arguments">Arguments</a></li>
+                </ul>
 
   </div>
 </div>

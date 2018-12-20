@@ -96,16 +96,16 @@ fdir_filter <- function(fdir,epsg,scale_level,xmin,xmax,ymin,ymax,year = NULL,na
   }
 
   fdir_filtered <- fdir_filtered %>%
-    mutate(
-      data = map(data,function(x){x %>%   # this is only neccessary because
-          mutate(epsg = epsg,             # unnest does not work with sf()
+    dplyr::mutate(
+      data = purrr::map(data,function(x){x %>%   # this is only neccessary because
+          dplyr::mutate(epsg = epsg,             # unnest does not work with sf()
                  maptype = maptype,
                  scale = scale,
                  nlayers = nlayers
           )})
     ) %>%
-    arrange(year_end) %>%
-    pull(data) %>%
+    dplyr::arrange(year_end) %>%
+    dplyr::pull(data) %>%
     magrittr::extract2(1)
 
 

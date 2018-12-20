@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Get Metadata from filename — metainfo_from_filename • swissrastermaps4r</title>
+<title>Remove geometry from sf objects — sf_remove_geom • swissrastermaps4r</title>
 
 <!-- jquery -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
@@ -30,9 +30,12 @@
 
 
 
-<meta property="og:title" content="Get Metadata from filename — metainfo_from_filename" />
+<meta property="og:title" content="Remove geometry from sf objects — sf_remove_geom" />
 
-<meta property="og:description" content="Retrieves metadata from filename with the help of a predefined 'pattern'" />
+<meta property="og:description" content="Funtion to remove geometry, if the object is in fact an sf object. Simply
+Returns the input object if it isn't. This funtion is only necessary, because
+st_set_geometry(x,NULL) returns an error if the input is not sf, and
+data.frame(x) keep the geometry as a column." />
 <meta name="twitter:card" content="summary" />
 
 
@@ -117,35 +120,44 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Get Metadata from filename</h1>
+    <h1>Remove geometry from sf objects</h1>
     <small class="dont-index">Source: <a href='https://github.com/swissgeodata4r/swissrastermaps4r/blob/master/R/fdir_helper.R'><code>R/fdir_helper.R</code></a></small>
-    <div class="hidden name"><code>metainfo_from_filename.Rd</code></div>
+    <div class="hidden name"><code>sf_remove_geom.Rd</code></div>
     </div>
 
     <div class="ref-description">
     
-    <p>Retrieves metadata from filename with the help of a predefined 'pattern'</p>
+    <p>Funtion to remove geometry, if the object <em>is</em> in fact an sf object. Simply
+Returns the input object if it isn't. This funtion is only necessary, because
+<code>st_set_geometry(x,NULL)</code> returns an error if the input is not sf, and
+<code><a href='https://www.rdocumentation.org/packages/base/topics/data.frame'>data.frame(x)</a></code> keep the geometry as a column.</p>
     
     </div>
 
-    <pre class="usage"><span class='fu'>metainfo_from_filename</span>(<span class='no'>filename</span>, <span class='no'>pattern</span>)</pre>
-        
-    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
+    <pre class="usage"><span class='fu'>sf_remove_geom</span>(<span class='no'>sf</span>)</pre>
+    
+    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
+    <table class="ref-arguments">
+    <colgroup><col class="name" /><col class="desc" /></colgroup>
+    <tr>
+      <th>sf</th>
+      <td><p>Anything.</p></td>
+    </tr>
+    </table>
+    
+    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>Takes a filename (character string) and retrieves metadata from the filename
-by consulting a predefined pattern. The whole process is somewhat similar to
-specifying a format of a datetime object (see <code>strftime</code>). The pattern is
-specified by placeholders (in the argument <code>pattern</code> ), which are in turn
-specified in a dataframe (in the argument <code>search_pattern_dict</code>). Run
-<code><a href='get_srm4r.html'>get_srm4r("search_pattern_dict")</a></code> to see what these argument currently are.</p>
+    <p>The input, if it was <em>not</em> of class <code>sf</code>. A <code>data.frame</code>,
+if it <em>was</em></p>
     
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
     <ul class="nav nav-pills nav-stacked">
+      <li><a href="#arguments">Arguments</a></li>
       
-      <li><a href="#details">Details</a></li>
+      <li><a href="#value">Value</a></li>
           </ul>
 
   </div>

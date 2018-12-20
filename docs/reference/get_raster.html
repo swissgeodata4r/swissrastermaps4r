@@ -129,8 +129,8 @@
     </div>
 
     <pre class="usage"><span class='fu'>get_raster</span>(<span class='no'>features</span>, <span class='kw'>scale_level</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>x_add</span> <span class='kw'>=</span> <span class='fl'>0</span>, <span class='kw'>y_add</span> <span class='kw'>=</span> <span class='fl'>0</span>,
-  <span class='kw'>method</span> <span class='kw'>=</span> <span class='st'>"bbox"</span>, <span class='kw'>turn_greyscale</span> <span class='kw'>=</span> <span class='no'>F</span>, <span class='kw'>name</span> <span class='kw'>=</span> <span class='st'>""</span>, <span class='kw'>fdir</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>limit</span> <span class='kw'>=</span> <span class='fl'>Inf</span>, <span class='kw'>asp</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>year</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>scale_factor</span> <span class='kw'>=</span> <span class='fl'>1</span>)</pre>
+  <span class='kw'>method</span> <span class='kw'>=</span> <span class='st'>"bbox"</span>, <span class='kw'>turn_greyscale</span> <span class='kw'>=</span> <span class='no'>F</span>, <span class='kw'>name</span> <span class='kw'>=</span> <span class='st'>""</span>, <span class='kw'>limit</span> <span class='kw'>=</span> <span class='fl'>Inf</span>,
+  <span class='kw'>asp</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>year</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>scale_factor</span> <span class='kw'>=</span> <span class='fl'>1</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -158,10 +158,6 @@
     <tr>
       <th>name</th>
       <td><p>If muliple, different maps are available with overlapping extents, <code>name</code> can be used to differentiate between different maptypes. Default is an empty sting.</p></td>
-    </tr>
-    <tr>
-      <th>fdir</th>
-      <td><p>By default, the <code>fdir</code> is retrieved from the package Environment (named <code>swissrastermapEnv</code>). Override this with <code>fdir = </code></p></td>
     </tr>
     <tr>
       <th>limit</th>

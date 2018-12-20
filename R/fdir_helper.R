@@ -259,7 +259,7 @@ credits <- function(who = "swisstopo"){
 #' if it \emph{was}
 sf_remove_geom <- function(sf){
   if("sf" %in% class(sf)){
-    sf <- st_set_geometry(sf,NULL)
+    sf <- sf::st_set_geometry(sf,NULL)
   }
   sf
 }
