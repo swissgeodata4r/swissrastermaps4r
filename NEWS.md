@@ -1,3 +1,9 @@
+# swissrastermaps4r 0.1.3
+
+* allows multiple CRS with nested tibbles
+* solving the year problem
+* included failsafe for when large amounts of raster data is harmonized
+
 
 # swissrastermaps4r 0.1.2
 
