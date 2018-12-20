@@ -62,6 +62,9 @@ Create an cookiecutter shape for each feature.
 exts <- sample_polygons %>%
   get_extent(.,x_add = 0,y_add = 0,method = "bbox",per_feature = T,asp = 1)
 
+exts_large <- sample_polygons %>%
+  get_extent(.,x_add = 1000,y_add = 1000,method = "bbox",per_feature = T,asp = 1)
+
 ext_inv <- exts %>%
   st_geometry() %>%
   map2(st_geometry(sample_polygons),~st_difference(.x,.y)) %>%
@@ -94,8 +97,8 @@ data("switzerland")
 for(i in 1:nrow(sample_polygons)){
   extent_indicator <- tm_shape(switzerland) +
     tm_polygons() +
-    # tm_shape(get_extent(exts[i,],x_add = 1000,y_add = 1000)) +
-    # tm_polygons(col = "red", alpha = 0.5) +
+    tm_shape(exts_large[i,]) +
+    tm_polygons(col = "red", alpha = 0.5) +
     tm_layout(frame = F) +
     tm_view(alpha = 0)
   mainmap <- tm_shape(get_raster(exts[i,],100)) +

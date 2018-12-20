@@ -63,18 +63,11 @@ library(swissrastermaps4r)
 
 Next, run the command `fdir_init()` pointing to the location (parent folder) of these maps. This command creates a "File Directory" in the package environment by scanning all folders recursively and analysing the content. All files ending with "tif" are checked for extent, number of layers and resolution. All the mentioned attributes of each raster file, along with the file path and the extent as a geometry, are stored in the variable `fdir` of the package environment.
 
-```{r, eval=F,include=F}
-# fdir_init("C:/Users/rata/Geodata/01_Switzerland/01_Maps")
-# fdir_export("C:/Users/rata/Geodata/01_Switzerland/01_Maps/fdir.Rda")
-```
 
-```{r, eval = F}
+```{r}
 fdir_init("C:/Users/rata/Geodata/01_Switzerland/01_Maps")
 ```
 
-```{r, include=F}
-fdir_import("C:/Users/rata/Geodata/01_Switzerland/01_Maps/fdir.Rda")
-```
 
 `fdir_init()` stored an `sf` object in the package's own environment (called `packageEnv`). It's a list of all raster files, stored with their extent, scale, resolution and other information (see `fdir_init()`).
 

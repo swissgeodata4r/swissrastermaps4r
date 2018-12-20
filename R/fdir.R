@@ -30,7 +30,7 @@ fdir_init <- function(rootdir,
 
   start <- Sys.time()
 
-  if(is.null(year)){year <- as.integer(strftime(Sys.Date(),"%Y"))}
+  year <- as.integer(strftime(Sys.Date(),"%Y"))
 
 
 
@@ -74,19 +74,19 @@ fdir_init <- function(rootdir,
     })
 
   fdir <-  fdir %>%
-    group_by(epsg,maptype,scale,nlayers) %>%
-    nest() %>%
-    group_by(epsg,maptype,scale,nlayers) %>%
-    mutate(
+    dplyr::group_by(epsg,maptype,scale,nlayers) %>%
+    tidyr::nest() %>%
+    dplyr::group_by(epsg,maptype,scale,nlayers) %>%
+    dplyr::mutate(
       data = map(data,~geom_from_boundary(.x,epsg)),
-      year_start = map_int(data,~min(.x$year)),
-      year_end = map_int(data,~max(.x$year))
+      year_start = purrr::map_int(data,~min(.x$year)),
+      year_end = purrr::map_int(data,~max(.x$year))
     )
 
 
   fdir <- fdir %>%
     mutate(
-      data = map(data,function(x){
+      data = purrr::map(data,function(x){
         x %>%
           dplyr::arrange(sheet,year) %>%
           dplyr::mutate(
