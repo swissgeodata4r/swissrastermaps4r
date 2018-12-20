@@ -21,12 +21,10 @@
 #'   \item{\code{index}}{Optional}
 #' }
 #' @param rootdir Character string specifying the directory where the folders are stored
-#' @param add_geometry Should the bounding box of each file be added as a geometry to \code{fdir}?
 #' @param filter Names of the folders to look for. Only folders containing the character strings
 #' specified here are included in the search.
 
 fdir_init <- function(rootdir,
-                      add_geometry = T,
                       filter = c("PK","SMR","LK","TA")
 ){
 

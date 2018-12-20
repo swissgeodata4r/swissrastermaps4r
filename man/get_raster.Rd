@@ -5,8 +5,8 @@
 \title{Get corresponding raster maps to feature}
 \usage{
 get_raster(features, scale_level = NULL, x_add = 0, y_add = 0,
-  method = "bbox", turn_greyscale = F, name = "", fdir = NULL,
-  limit = Inf, asp = NULL, year = NULL, scale_factor = 1)
+  method = "bbox", turn_greyscale = F, name = "", limit = Inf,
+  asp = NULL, year = NULL, scale_factor = 1)
 }
 \arguments{
 \item{features}{The \pkg{sf}  object to derive the raster data from}
@@ -20,8 +20,6 @@ get_raster(features, scale_level = NULL, x_add = 0, y_add = 0,
 \item{turn_greyscale}{Should the output rastermaps be turned into greyscale?}
 
 \item{name}{If muliple, different maps are available with overlapping extents, \code{name} can be used to differentiate between different maptypes. Default is an empty sting.}
-
-\item{fdir}{By default, the \code{fdir} is retrieved from the package Environment (named \code{swissrastermapEnv}). Override this with \code{fdir = }}
 
 \item{limit}{For testing puposes only: Limits the number of rasters returned per object. Defaults to \code{Inf}}
 

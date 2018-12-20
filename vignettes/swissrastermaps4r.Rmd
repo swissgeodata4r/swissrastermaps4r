@@ -125,7 +125,7 @@ This package automates steps 2 - 7 with the function `get_raster()`. The functio
 
 ```{r}
 
-rastermap <- get_raster(switzerland)
+rastermap <- get_raster(features = switzerland,name = "relief")
 
 tm_shape(rastermap) + 
   tm_rgb() + 

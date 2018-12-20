@@ -120,7 +120,7 @@ fdir_filter <- function(fdir,epsg,scale_level,xmin,xmax,ymin,ymax,year = NULL,na
   }
 
   if(name != ""){
-    fdir <- fdir[fdir$name == name,]
+    fdir_filtered <- fdir_filtered[fdir_filtered$name == name,]
   }
 
   if(nrow(fdir_filtered) == 0){
@@ -225,7 +225,7 @@ raster_harmonize <- function(fdir_filtered,extent){
   message("Collective Size of Rasters to harmonize: ",size_sum," (mb)")
 
   threshold <- 500
-  if(size>threshold){
+  if(size_sum>threshold){
     stop("Size is larger than Limit. Aborting.") # todo: make this an option (like tm_option())
   }
 
