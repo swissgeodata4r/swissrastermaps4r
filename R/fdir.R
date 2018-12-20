@@ -119,8 +119,8 @@ fdir_init <- function(rootdir,
 
 
   assign("fdir",fdir,envir = swissrastermapEnv)
-  mb <-map_dbl(fdir$data,~.x$size_mb %>% sum()) %>% sum() %>% format(big.mark = "'")
-  n_files <- map_int(fdir$data,nrow) %>% sum()
+  mb <- purrr::map_dbl(fdir$data,~.x$size_mb %>% sum()) %>% sum() %>% format(big.mark = "'")
+  n_files <- purrr::map_int(fdir$data,nrow) %>% sum()
 
   duration <- difftime(Sys.time(),start)
   duration_units <- attr(duration,"units")
