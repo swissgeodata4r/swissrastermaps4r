@@ -79,8 +79,7 @@ fdir_init <- function(rootdir,
     dplyr::group_by(epsg,maptype,scale,nlayers) %>%
     dplyr::mutate(
       data = purrr::map(data,~geom_from_boundary(.x,epsg)),
-      year_start = purrr::map_int(data,~min(.x$year)),
-      year_end = purrr::map_int(data,~max(.x$year))
+      year_median = purrr::map_dbl(data,~median(.x$year))
     )
 
 
@@ -88,34 +87,17 @@ fdir_init <- function(rootdir,
     dplyr::mutate(
       data = purrr::map(data,function(x){
         x %>%
+          dplyr::group_by(sheet) %>%
           dplyr::arrange(sheet,year) %>%
           dplyr::mutate(
             year_start = year - floor((year-dplyr::lag(year))/2),
             year_start = ifelse(is.na(year_start),-Inf,year_start),
             year_end = (year + ceiling((dplyr::lead(year)-year)/2))-1,
             year_end = ifelse(is.na(year_end),Inf,year_end),
-          )
+          ) %>%
+          ungroup()
       })
     )
-
-
-
-
-
-
-  # epsgs <- unique(fdir$epsg)
-  # epsgs <- epsgs[!is.na(epsgs)]
-
-  # if(add_geometry){
-  #   if(length(epsgs) == 1){
-  #     fdir <- geom_from_boundary(fdir, epsgs, add = T)
-  #   } else if(length(epsgs) > 1){
-  #     warning("Multiple EPSG Codes found (",paste(epsgs,collapse = ","),").
-  #             Can only add geometry if fdir contains rasterfiles of a single CRS")
-  #   } else if(length(epsgs) == 0){
-  #     warning("No EPSG Codes found in fdir. Cant add geometry")
-  #   }
-  # }
 
 
   assign("fdir",fdir,envir = swissrastermapEnv)

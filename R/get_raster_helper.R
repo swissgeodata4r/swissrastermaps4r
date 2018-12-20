@@ -84,10 +84,6 @@ fdir_filter <- function(fdir,epsg,scale_level,xmin,xmax,ymin,ymax,year = NULL,na
   fdir_filtered <- fdir[fdir$epsg == epsg &
          fdir$scale == scale_level,]
 
-  if(!is.null(year)){
-    fdir_filtered <- fdir_filtered[fdir_filtered$year_start <= year &
-                                     fdir_filtered$year_end >= year,]
-  }
 
   if(nrow(fdir_filtered) < 1){
     stop("No dataset matching this criteria")
@@ -104,7 +100,7 @@ fdir_filter <- function(fdir,epsg,scale_level,xmin,xmax,ymin,ymax,year = NULL,na
                  nlayers = nlayers
           )})
     ) %>%
-    dplyr::arrange(year_end) %>%
+    dplyr::arrange(year_median) %>%
     dplyr::pull(data) %>%
     magrittr::extract2(1)
 
@@ -231,8 +227,8 @@ raster_harmonize <- function(fdir_filtered,extent){
 
   rast <- fdir_filtered %>%
     sf_remove_geom() %>%
-    dplyr::select(file,res1,res2,epsg,nlayers) %>%
-    purrr::pmap(function(file,res1,res2,name,epsg,nlayers){
+    dplyr::select(sheet,file,res1,res2,epsg,nlayers) %>%
+    purrr::pmap(function(sheet,file,res1,res2,name,epsg,nlayers){
       raster <- raster::brick(file)
       raster::crs(raster) <- sp::CRS(paste0("+init=EPSG:",epsg))
       raster <- raster::crop(raster,extent)

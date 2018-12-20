@@ -61,7 +61,7 @@ metainfo_from_filename <- function(filename,pattern){
     dplyr::select(-filename) %>%
     dplyr::mutate(
       year = as.integer(year),
-      year = ifelse(is.na(year),this_year,year),
+      year = ifelse(is.na(year),NA,year),
       sheet = ifelse(sheet == "","0",sheet)
     )
 }
