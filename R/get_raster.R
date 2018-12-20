@@ -9,18 +9,9 @@
 #'  centroid of the \pkg{sf}  object. Both methods accept \code{x_add}/\code{y_add} with which the
 #'  extent window is enlarged. Method \code{centroid} _requires_ \code{x_add}/\code{y_add}, since
 #'  the extent windows would have \eqn{\Delta x,\ \Delta y} of Zero.
-#'  Todo
-#' \enumerate{
-#'   \item warning if nlayers != 3 and turn greyscale = T
-#'   \item Add colortable options
-#'   \item "x/y_add" should have a nicer name.. something with distance maybe?
-#'   \item add failsafes: e.g check if "features" is really an \pkg{sf}  object
-#'   \item make this a lazy function: at the moment, all raster files are downloaded into memory.
-#' }
 #' @param features The \pkg{sf}  object to derive the raster data from
 #' @param scale_level The scale at which to get raster data (x in 1:1'000x). Usually one of the following values (depending on the available rasters): 10,25,100,500,1000
-#' @param x_add,y_add Depending on method, x and y will be added to the centeroid or to the bounding box
-#' @param per_feature A TRUE/FALSE value specifying if one raster map should be returend for the entire \pkg{sf}  object or if one map should be returned per feature
+#' @param add Depending on method, add will be added to the centeroid or to the bounding box. A numeric value of length 2 (A single value will be recycled)
 #' @param method A character string specifying the method with which the extent should be calculated. \code{centroid} calculates the centroid of the object(s), \code{bbox} calculates the bounding box of the object.
 #' @param turn_greyscale Should the output rastermaps be turned into greyscale?
 #' @param name If muliple, different maps are available with overlapping extents, \code{name} can be used to differentiate between different maptypes. Default is an empty sting.
@@ -28,8 +19,7 @@
 #'
 get_raster <- function(features,
                        scale_level = NULL,
-                       x_add = 0,
-                       y_add = 0,
+                       extent_add = c(0,0),
                        method = "bbox",
                        turn_greyscale = F,
                        name = "",
@@ -45,6 +35,9 @@ get_raster <- function(features,
   } else{
     stop("Please run init_fdir() first.")
   }
+
+  x_add <- add[1]
+  y_add <- ifelse(length(add) > 1,add[2],add[1])
 
 
   ex <- get_extent(features = features,
