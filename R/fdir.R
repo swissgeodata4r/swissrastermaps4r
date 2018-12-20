@@ -85,7 +85,7 @@ fdir_init <- function(rootdir,
 
 
   fdir <- fdir %>%
-    mutate(
+    dplyr::mutate(
       data = purrr::map(data,function(x){
         x %>%
           dplyr::arrange(sheet,year) %>%
