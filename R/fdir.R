@@ -94,8 +94,7 @@ fdir_init <- function(rootdir,
             year_start = ifelse(is.na(year_start),-Inf,year_start),
             year_end = (year + ceiling((dplyr::lead(year)-year)/2))-1,
             year_end = ifelse(is.na(year_end),Inf,year_end),
-          ) %>%
-          ungroup()
+          ) #%>% dplyr::ungroup()
       })
     )
 

@@ -36,8 +36,8 @@ get_raster <- function(features,
     stop("Please run init_fdir() first.")
   }
 
-  x_add <- add[1]
-  y_add <- ifelse(length(add) > 1,add[2],add[1])
+  x_add <- extent_add[1]
+  y_add <- ifelse(length(extent_add) > 1,extent_add[2],extent_add[1])
 
 
   ex <- get_extent(features = features,
